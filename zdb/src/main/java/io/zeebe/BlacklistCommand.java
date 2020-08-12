@@ -6,6 +6,7 @@ import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
@@ -38,11 +39,10 @@ public class BlacklistCommand implements Callable<Integer> {
 
   @Command(name = "entity", description = "Show details about blacklisted workflow instance")
   public int entity(
-      @Option(
-              names = {"-k", "--key"},
+      @Parameters(
               paramLabel = "KEY",
               description = "The key of the blacklisted workflow instance",
-              required = true)
+              arity = "1")
           final long key) {
     final var partitionState = PartitionState.of(partitionPath);
     final var output = new BlacklistInspection().entity(partitionState, key);
