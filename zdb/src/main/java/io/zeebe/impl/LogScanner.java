@@ -2,216 +2,205 @@ package io.zeebe.impl;
 
 import io.atomix.raft.partition.impl.RaftNamespaces;
 import io.atomix.raft.storage.log.RaftLog;
-import io.atomix.raft.zeebe.ZeebeLogAppender;
+import io.atomix.raft.storage.log.entry.InitializeEntry;
+import io.atomix.raft.zeebe.ZeebeEntry;
 import io.atomix.storage.StorageLevel;
-import io.atomix.storage.journal.JournalReader.Mode;
-import io.zeebe.logstreams.impl.log.LogStreamBuilderImpl;
-import io.zeebe.logstreams.log.LogStream;
-import io.zeebe.logstreams.log.LogStreamReader;
-import io.zeebe.logstreams.storage.atomix.AtomixLogStorage;
+import io.atomix.storage.journal.Indexed;
+import io.atomix.storage.journal.index.JournalIndex;
+import io.atomix.storage.journal.index.Position;
 import io.zeebe.logstreams.storage.atomix.ZeebeIndexAdapter;
-import io.zeebe.util.sched.Actor;
-import io.zeebe.util.sched.ActorScheduler;
-import io.zeebe.util.sched.ActorScheduler.ActorSchedulerBuilder;
-import io.zeebe.util.sched.future.ActorFuture;
-import io.zeebe.util.sched.future.CompletableActorFuture;
-import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.util.Optional;
 
 public final class LogScanner {
 
-  public String scan(Path pathToLog) {
-    // setup
-    final var actorScheduler = new ActorSchedulerBuilder().build();
-    actorScheduler.start();
+  private static final String ANSI_RESET = "\u001B[0m";
+  private static final String ANSI_GREEN = "\u001B[32m";
+  private static final String ANSI_RED = "\u001B[31m";
+  private static final String PARTITION_NAME_FORMAT = "raft-partition-partition-%d";
 
-    final var logScanActor = new LogScanActor(actorScheduler, pathToLog);
-    actorScheduler.submitActor(logScanActor).join();
+  public String scan(Path path) {
+    final int partitionId;
+    final String partitionName;
 
-    return logScanActor.scan().join();
+    try {
+      partitionId = Integer.parseInt(path.getFileName().toString());
+      partitionName = String.format(PARTITION_NAME_FORMAT, partitionId);
+    } catch (NumberFormatException nfe) {
+      final var errorMsg =
+          String.format(
+              "Expected to extract partition as integer from path, but path was '%s'.", path);
+      throw new IllegalArgumentException(errorMsg, nfe);
+    }
+
+    final var resourceDir = path.toFile();
+
+    final var startTime = System.currentTimeMillis();
+    final var report = new StringBuilder("Scan log...").append(System.lineSeparator());
+    final var scanner = new Scanner(report);
+
+    // internally it scans the log
+    RaftLog.builder()
+        .withDirectory(resourceDir)
+        .withName(partitionName)
+        .withNamespace(RaftNamespaces.RAFT_STORAGE)
+        .withMaxEntrySize(4 * 1024 * 1024)
+        .withMaxSegmentSize(512 * 1024 * 1024)
+        .withStorageLevel(StorageLevel.DISK)
+        .withJournalIndexFactory(() -> scanner)
+        .build();
+
+    final var endTime = System.currentTimeMillis();
+    report.append("Log scanned in ").append(endTime - startTime).append(" ms").append(System.lineSeparator());
+
+    return scanner.getReport();
   }
 
-  private static class LogScanActor extends Actor {
+  private static class Scanner implements JournalIndex {
 
-    private static final String ANSI_RESET = "\u001B[0m";
-    private static final String ANSI_GREEN = "\u001B[32m";
-    private static final String ANSI_RED = "\u001B[31m";
-    private static final String PARTITION_NAME_FORMAT = "raft-partition-partition-%d";
+    private final ZeebeIndexAdapter zeebeIndexAdapter;
 
-    private final Path path;
-    private final int partitionId;
-    private final String partitionName;
-    private final ActorScheduler actorScheduler;
-    private ActorFuture<LogStream> logStreamFuture;
+    private final StringBuilder report;
+    private long lastIndex;
+    private long lastRecordPosition = Long.MIN_VALUE;
+    private long lowestRecordPosition = Long.MAX_VALUE;
+    private String lastInitEntry = "none";
+    private boolean inconsistentLog = false;
+    private double avgEntrySize = 0.0f;
+    private double maxEntrySize = 0.0f;
+    private int scannedEntries = 0;
 
-    LogScanActor(final ActorScheduler actorScheduler, final Path path) {
-      this.actorScheduler = actorScheduler;
-      this.path = path;
-
-      try {
-        this.partitionId = Integer.parseInt(path.getFileName().toString());
-        this.partitionName = String.format(PARTITION_NAME_FORMAT, partitionId);
-      } catch (NumberFormatException nfe) {
-        final var errorMsg =
-            String.format(
-                "Expected to extract partition as integer from path, but path was '%s'.", path);
-        throw new IllegalArgumentException(errorMsg, nfe);
-      }
+    Scanner(StringBuilder report) {
+      this.zeebeIndexAdapter = ZeebeIndexAdapter.ofDensity(1);
+      this.report = report;
     }
 
     @Override
-    protected void onActorStarting() {
-      final var resourceDir = path.toFile();
+    public void index(final Indexed indexedEntry, final int position) {
 
-      final var startTime = System.currentTimeMillis();
-      final var raftLog =
-          RaftLog.builder()
-              .withDirectory(resourceDir)
-              .withName(partitionName)
-              .withNamespace(RaftNamespaces.RAFT_STORAGE)
-              .withMaxEntrySize(4 * 1024 * 1024)
-              .withMaxSegmentSize(512 * 1024 * 1024)
-              .withStorageLevel(StorageLevel.DISK)
-              .build();
+      // check index
+      final var currentIndex = indexedEntry.index();
+      processIndex(currentIndex);
 
-      final var endtime = System.currentTimeMillis();
-      System.out.println("Log opened in " + (endtime - startTime) + " ms");
+      // entry size
+      processEntrySize(indexedEntry);
 
-      final var atomixLogStorage =
-          new AtomixLogStorage(
-              ZeebeIndexAdapter.ofDensity(1),
-              (idx, mode) -> raftLog.openReader(idx, Mode.ALL),
-              () -> Optional.of(new NoopAppender()));
-
-      logStreamFuture =
-          new LogStreamBuilderImpl()
-              .withActorScheduler(actorScheduler)
-              .withLogStorage(atomixLogStorage)
-              .withLogName(partitionName)
-              .withPartitionId(partitionId)
-              .buildAsync();
-    }
-
-    CompletableActorFuture<String> scan() {
-      final var future = new CompletableActorFuture<String>();
-
-      actor.call(
-          () ->
-              logStreamFuture.onComplete(
-                  (logStream, t) -> {
-                    if (t == null) {
-                      logStream
-                          .newLogStreamReader()
-                          .onComplete(
-                              (reader, t2) -> {
-                                if (t2 == null) {
-                                  future.complete(scanLog(reader));
-                                } else {
-                                  future.completeExceptionally(t2);
-                                }
-                              });
-                    } else {
-                      future.completeExceptionally(t);
-                    }
-                  }));
-      return future;
-    }
-
-    private String scanLog(LogStreamReader reader) {
-      System.out.println("Scan log...");
-      reader.seekToFirstEvent();
-
-      final var validationContext = new ValidationContext();
-
-      while (reader.hasNext()) {
-        final var next = reader.next();
-        final var position = next.getPosition();
-
-        validationContext.onNextPosition(position);
+      if (indexedEntry.type() == InitializeEntry.class) {
+        processInitialEntry(indexedEntry);
+      } else if (indexedEntry.type() == ZeebeEntry.class) {
+        processZeebeEntry(indexedEntry, currentIndex);
       }
 
-      System.out.println("Scan finished");
-
-      return validationContext.finishValidation();
+      // delegate
+      zeebeIndexAdapter.index(indexedEntry, position);
     }
 
-    private static class ValidationContext {
-
-      long low = Long.MAX_VALUE;
-      long high = Long.MIN_VALUE;
-      long lastPosition = 0;
-      int eventCount = 0;
-      boolean inconsistentLog = false;
-      final StringBuilder stringBuilder = new StringBuilder();
-
-      void onNextPosition(long position) {
-
-        if (lastPosition > position) {
-          inconsistentLog = true;
-          onInconsistentLog(low, high, lastPosition, eventCount, position);
-        }
-
-        if (position < low) {
-          low = position;
-        } else if (position > high) {
-          high = position;
-        }
-
-        lastPosition = position;
-        eventCount++;
-      }
-
-      String finishValidation() {
-        if (inconsistentLog) {
-          stringBuilder.append(ANSI_RED + "LOG IS INCONSISTENT!" + ANSI_RESET).append(System.lineSeparator());
-        } else {
-          stringBuilder.append(ANSI_GREEN + "LOG IS CONSISTENT." + ANSI_RESET).append(System.lineSeparator());
-        }
-
-        stringBuilder.append("Last position: ").append(lastPosition).append(System.lineSeparator());
-        stringBuilder.append("Lowest position: ").append(low).append(System.lineSeparator());
-        stringBuilder.append("Highest position: ").append(high).append(System.lineSeparator());
-        stringBuilder.append("Event count: ").append(eventCount).append(System.lineSeparator());
-
-        return stringBuilder.toString();
-      }
-
-      private void onInconsistentLog(
-          long low, long high, long lastPosition, int eventCount, long position) {
-        stringBuilder.append("===============").append(System.lineSeparator());
-        stringBuilder.append("At idx ").append(eventCount).append(System.lineSeparator());
-        stringBuilder.append("Current position ").append(position).append(System.lineSeparator());
-        stringBuilder
-            .append(" (Segment id ")
-            .append(position >> 32)
-            .append(" segment offset ")
-            .append((int) position)
-            .append(')')
-            .append(System.lineSeparator());
-        stringBuilder
-            .append("Is smaller then this last position ")
-            .append(lastPosition)
-            .append(" (Segment id ")
-            .append(lastPosition >> 32)
-            .append(" segment offset ")
-            .append((int) lastPosition)
-            .append(')')
-            .append(System.lineSeparator());
-        stringBuilder
-            .append("Current lowest ")
-            .append(low)
-            .append(" current highest ")
-            .append(high)
-            .append(System.lineSeparator());
-        stringBuilder.append("===============").append(System.lineSeparator());
-      }
-    }
-  }
-
-  private static class NoopAppender implements ZeebeLogAppender {
     @Override
-    public void appendEntry(
-        long l, long l1, ByteBuffer byteBuffer, AppendListener appendListener) {}
+    public Position lookup(final long index) {
+      return zeebeIndexAdapter.lookup(index);
+    }
+
+    @Override
+    public void truncate(final long index) {
+      zeebeIndexAdapter.truncate(index);
+    }
+
+    @Override
+    public void compact(final long index) {
+      zeebeIndexAdapter.compact(index);
+    }
+
+    private void processZeebeEntry(final Indexed indexedEntry, final long currentIndex) {
+      final var zeebeEntry = (ZeebeEntry) indexedEntry.entry();
+
+      final var highestPosition = zeebeEntry.highestPosition();
+      final var lowestPosition = zeebeEntry.lowestPosition();
+
+      if (lowestPosition > highestPosition) {
+        report
+            .append("Inconsistent ZeebeEntry lowestPosition")
+            .append(lowestPosition)
+            .append(" is higher than highestPosition ")
+            .append(highestPosition)
+            .append(" at index")
+            .append(currentIndex)
+            .append(System.lineSeparator());
+      }
+
+      if (lastRecordPosition > lowestPosition) {
+        report
+            .append("Inconsistent log lastRecordPosition")
+            .append(lastRecordPosition)
+            .append(" is higher than next lowestRecordPosition ")
+            .append(lowestPosition)
+            .append(" at index")
+            .append(currentIndex)
+            .append(System.lineSeparator());
+      }
+
+      lastRecordPosition = highestPosition;
+      if (lowestRecordPosition > lowestPosition) {
+        lowestRecordPosition = lowestPosition;
+      }
+    }
+
+    private void processInitialEntry(final Indexed indexedEntry) {
+      final var entry = (InitializeEntry) indexedEntry.entry();
+      lastInitEntry = entry.toString();
+    }
+
+    private void processEntrySize(final Indexed indexedEntry) {
+      final var currentSize = indexedEntry.size();
+      if (currentSize > maxEntrySize) {
+        maxEntrySize = currentSize;
+      }
+      avgEntrySize += currentSize;
+      scannedEntries++;
+    }
+
+    private void processIndex(final long currentIndex) {
+      if (lastIndex > currentIndex || (lastIndex + 1 != currentIndex)) {
+        inconsistentLog = true;
+        report
+            .append("Log is inconsistent at index ")
+            .append(currentIndex)
+            .append(" last index was ")
+            .append(lastIndex)
+            .append(System.lineSeparator());
+      } else {
+        lastIndex = currentIndex;
+      }
+    }
+
+    public String getReport() {
+      report
+          .append(
+              inconsistentLog
+                  ? ANSI_RED + "LOG IS INCONSISTENT!" + ANSI_RESET
+                  : ANSI_GREEN + "LOG IS CONSISTENT." + ANSI_RESET)
+          .append(System.lineSeparator())
+          .append("Scanned entries: ")
+          .append(scannedEntries)
+          .append(System.lineSeparator())
+          .append("Maximum entry size: ")
+          .append(maxEntrySize)
+          .append(System.lineSeparator())
+          .append("Avg entry size: ")
+          .append(avgEntrySize / (double) scannedEntries)
+          .append(System.lineSeparator())
+          .append("LowestRecordPosition: ")
+          .append(lowestRecordPosition)
+          .append(System.lineSeparator())
+          .append("LastRecordPosition: ")
+          .append(lastRecordPosition)
+          .append(System.lineSeparator())
+          .append("LastIndex: ")
+          .append(lastIndex)
+          .append(System.lineSeparator())
+          .append("LastInitialEntry: ")
+          .append(lastInitEntry)
+          .append(System.lineSeparator());
+
+      return report.toString();
+    }
   }
 }
