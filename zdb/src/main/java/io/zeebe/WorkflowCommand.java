@@ -36,8 +36,8 @@ public class WorkflowCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "entry", description = "Show details about a workflow")
-  public int entry(
+  @Command(name = "entity", description = "Show details about a workflow")
+  public int entity(
       @Option(
               names = {"-k", "--key"},
               paramLabel = "KEY",

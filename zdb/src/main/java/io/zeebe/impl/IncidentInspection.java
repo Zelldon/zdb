@@ -72,7 +72,8 @@ public class IncidentInspection implements EntityInspection {
               .getElementInstanceState()
               .getVariablesState()
               .getVariablesAsDocument(incidentRecord.getVariableScopeKey());
-      return String.format("Variables: %s ", MsgPackConverter.convertToJson(bufferAsArray(variables)));
+      return String.format(
+          "Variables: %s ", MsgPackConverter.convertToJson(bufferAsArray(variables)));
     }
 
     return "";

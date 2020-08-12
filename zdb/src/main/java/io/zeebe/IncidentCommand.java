@@ -36,8 +36,8 @@ public class IncidentCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "entry", description = "Show details about an incident")
-  public int entry(
+  @Command(name = "entity", description = "Show details about an incident")
+  public int entity(
       @Option(
               names = {"-k", "--key"},
               paramLabel = "KEY",

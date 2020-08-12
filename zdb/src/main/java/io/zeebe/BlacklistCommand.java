@@ -36,8 +36,8 @@ public class BlacklistCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "entry", description = "Show details about blacklisted workflow instance")
-  public int entry(
+  @Command(name = "entity", description = "Show details about blacklisted workflow instance")
+  public int entity(
       @Option(
               names = {"-k", "--key"},
               paramLabel = "KEY",
