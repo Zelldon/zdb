@@ -1,13 +1,25 @@
 package io.zeebe;
 
-/**
- * Hello world!
- *
- */
+import io.zeebe.impl.ZeebeStatusImpl;
+import java.nio.file.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ZeebeDebugerMain
 {
-    public static void main( String[] args )
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZeebeDebugerMain.class);
+
+    public static void main(String[] args) throws Exception
     {
-        System.out.println( "Hello World!" );
+       LOGGER.info("Zeebe Debug and inspection tool");
+
+       // parse given parameters - exit with error code if necessary
+        final var partitionPath = Path.of(args[0]);
+
+        // call corresponding command
+        final var result = new ZeebeStatusImpl().status(partitionPath);
+
+        // print result
+        LOGGER.info(result);
     }
 }
