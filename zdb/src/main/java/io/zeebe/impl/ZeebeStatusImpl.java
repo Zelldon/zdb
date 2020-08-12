@@ -2,35 +2,47 @@ package io.zeebe.impl;
 
 import io.zeebe.PartitionState;
 import io.zeebe.ZeebeStatus;
-import java.util.HashMap;
-import java.util.Map;
+import io.zeebe.broker.exporter.stream.ExportersState;
 
 public class ZeebeStatusImpl implements ZeebeStatus {
 
-  private static Map<String, String> statuses = new HashMap<>();
+  private final StringBuilder statusBuilder = new StringBuilder();
 
   @Override
   public String status(final PartitionState partitionState) {
     lastProcessedPosition(partitionState);
-    lastExportedPosition(partitionState);
-    return getStatusString();
+    lowestExportedPosition(partitionState);
+    return statusBuilder.toString();
+  }
+
+  private void addToStatus(String key, String value) {
+    statusBuilder.append(String.format("%n%s: %s", key, value));
+  }
+
+  private void addToStatus(String status) {
+    statusBuilder.append(String.format("%n%s", status));
   }
 
   private void lastProcessedPosition(PartitionState partitionState) {
-    statuses.put(
-        "last processed position",
+    addToStatus(
+        "Last processed position",
         String.valueOf(partitionState.getZeebeState().getLastSuccessfulProcessedRecordPosition()));
   }
 
-  private void lastExportedPosition(PartitionState partitionState) {
-    statuses.put(
-        "lowest exported position",
-        String.valueOf(partitionState.getExporterState().getLowestPosition()));
+  private void lowestExportedPosition(PartitionState partitionState) {
+    final var exporterState = partitionState.getExporterState();
+    final String positionString;
+    if (exporterState.hasExporters()) {
+      positionString = String.valueOf(exporterState.getLowestPosition());
+    } else {
+      positionString = "No exporters";
+    }
+    addToStatus("Lowest exported position", positionString);
   }
 
-  private String getStatusString() {
-    final var stringBuilder = new StringBuilder();
-    statuses.forEach((k, v) -> stringBuilder.append(String.format("%n%s: %s", k, v)));
-    return stringBuilder.toString();
+  private void listExporterPositions(ExportersState exportersState) {
+    exportersState.visitPositions(
+        (id, position) ->
+            addToStatus(String.format("Exporter [id: %s position: %s]", id, position)));
   }
 }
