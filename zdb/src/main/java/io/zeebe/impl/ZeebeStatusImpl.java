@@ -1,5 +1,6 @@
 package io.zeebe.impl;
 
+import io.zeebe.PartitionState;
 import io.zeebe.ZeebeStatus;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -10,8 +11,7 @@ public class ZeebeStatusImpl implements ZeebeStatus {
   private static Map<String, String> statuses = new HashMap<>();
 
   @Override
-  public String status(final Path path) {
-    final PartitionState partitionState = new PartitionState(path);
+  public String status(final PartitionState partitionState) {
     lastProcessedPosition(partitionState);
     lastExportedPosition(partitionState);
     return getStatusString();

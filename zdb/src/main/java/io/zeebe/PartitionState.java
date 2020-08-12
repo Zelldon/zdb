@@ -1,4 +1,4 @@
-package io.zeebe.impl;
+package io.zeebe;
 
 import io.zeebe.broker.exporter.stream.ExportersState;
 import io.zeebe.db.DbContext;
@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PartitionState {
+public final class PartitionState {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PartitionState.class);
   private final ZeebeDb<ZbColumnFamilies> zeebeDb;
@@ -18,7 +18,11 @@ public class PartitionState {
   private final ZeebeState zeebeState;
   private final ExportersState exporterState;
 
-  public PartitionState(Path path) {
+  public static PartitionState of(Path path) {
+    return new PartitionState(path);
+  }
+
+  private PartitionState(Path path) {
     this.zeebeDb = openZeebeDb(path);
     this.dbContext = zeebeDb.createContext();
     this.zeebeState = new ZeebeState(1, zeebeDb, dbContext);
