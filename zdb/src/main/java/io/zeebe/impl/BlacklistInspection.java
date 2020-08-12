@@ -88,7 +88,8 @@ public class BlacklistInspection implements EntityInspection {
         .append("\nBpmnElementType: ")
         .append(workflowInstanceValue.getBpmnElementType())
         .append("\nParentWorkflowInstanceKey: ")
-        .append(workflowInstanceValue.getParentWorkflowInstanceKey());
+        .append(workflowInstanceValue.getParentWorkflowInstanceKey())
+        .append('\n');
 
     return addChildrenRecursive(stringBuilder, 1, elementInstanceState, workflowInstance)
         .toString();
@@ -105,13 +106,14 @@ public class BlacklistInspection implements EntityInspection {
 
     final var children = elementInstanceState.getChildren(elementInstance.getKey());
     if (children == null || children.isEmpty()) {
-      return stringBuilder;
+      return stringBuilder.append("\n");
     }
 
-    stringBuilder.append('\n').append("\t".repeat(intend)).append("Childs:\n");
+    stringBuilder.append(getIntend(intend)).append("\\\n");
     for (var child : children) {
-      addChildrenRecursive(stringBuilder, intend + 1, elementInstanceState, child).append("\n");
+      addChildrenRecursive(stringBuilder, intend + 1, elementInstanceState, child);
     }
+
 
     return stringBuilder;
   }
@@ -119,40 +121,32 @@ public class BlacklistInspection implements EntityInspection {
   private static void addElemtentInstance(
       StringBuilder stringBuilder, int intend, ElementInstance childElementInstance) {
     final var childElementInstanceValue = childElementInstance.getValue();
-    stringBuilder
-        .append('\n')
-        .append("\t".repeat(intend))
-        .append("Key: ")
-        .append(childElementInstance.getKey())
-        .append('\n')
-        .append("\t".repeat(intend))
-        .append("WorkflowInstanceKey: ")
-        .append(childElementInstanceValue.getWorkflowInstanceKey())
-        .append('\n')
-        .append("\t".repeat(intend))
-        .append("ElementId: ")
-        .append(childElementInstanceValue.getElementId())
-        .append('\n')
-        .append("\t".repeat(intend))
-        .append("BpmnElementType: ")
-        .append(childElementInstanceValue.getBpmnElementType())
-        .append('\n')
-        .append("\t".repeat(intend))
-        .append("ParentElementInstanceKey: ")
-        .append(childElementInstanceValue.getParentElementInstanceKey())
-        .append('\n')
-        .append("\t".repeat(intend))
-        .append("ParentWorkflowInstanceKey: ")
-        .append(childElementInstanceValue.getParentWorkflowInstanceKey())
-        .append('\n')
-        .append("\t".repeat(intend))
-        .append("FlowScopeKey: ")
-        .append(childElementInstanceValue.getFlowScopeKey());
+
+    addChildProperty(stringBuilder, intend, "Key", childElementInstance.getKey());
+    addChildProperty(stringBuilder, intend, "ElementId", childElementInstanceValue.getElementId());
+    addChildProperty(stringBuilder, intend, "BpmnElementType", childElementInstanceValue.getBpmnElementType());
+  }
+
+  private static void addChildProperty(StringBuilder builder, int intend, String propertyName, Object value) {
+    builder
+        .append(getIntend(intend)).append('|').append('-')
+        .append(propertyName)
+        .append(": ")
+        .append(value)
+        .append('\n');
+  }
+
+  private static String getIntend(final int intend) {
+    return " ".repeat(calculateIntend(intend));
   }
 
   private static String toString(final long workflowInstanceKey, final String bpmnProcessId) {
     return String.format(
         "Blacklisted Instance [workflow-instance-key: %d, BPMN-process-id: \"%s\"]",
         workflowInstanceKey, bpmnProcessId);
+  }
+
+  private static int calculateIntend(int intend) {
+    return intend * 1;
   }
 }
