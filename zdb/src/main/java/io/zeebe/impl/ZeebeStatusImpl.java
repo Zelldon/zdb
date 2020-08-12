@@ -2,7 +2,10 @@ package io.zeebe.impl;
 
 import io.zeebe.PartitionState;
 import io.zeebe.ZeebeStatus;
-import io.zeebe.broker.exporter.stream.ExportersState;
+import io.zeebe.db.impl.DbLong;
+import io.zeebe.db.impl.DbNil;
+import io.zeebe.engine.state.ZbColumnFamilies;
+import io.zeebe.engine.state.instance.Incident;
 
 public class ZeebeStatusImpl implements ZeebeStatus {
 
@@ -12,15 +15,38 @@ public class ZeebeStatusImpl implements ZeebeStatus {
   public String status(final PartitionState partitionState) {
     lastProcessedPosition(partitionState);
     lowestExportedPosition(partitionState);
+    hasBlacklistedInstances(partitionState);
+    hasIncidents(partitionState);
     return statusBuilder.toString();
+  }
+
+  private void hasIncidents(final PartitionState partitionState) {
+    final var incidentColumnFamily =
+        partitionState
+            .getZeebeDb()
+            .createColumnFamily(
+                ZbColumnFamilies.INCIDENTS,
+                partitionState.getDbContext(),
+                new DbLong(),
+                new Incident());
+
+    addToStatus("Incidents", incidentColumnFamily.isEmpty() ? "No" : "Yes");
+  }
+
+  private void hasBlacklistedInstances(final PartitionState partitionState) {
+    final var blacklistColumnFamily =
+        partitionState
+            .getZeebeDb()
+            .createColumnFamily(
+                ZbColumnFamilies.BLACKLIST,
+                partitionState.getDbContext(),
+                new DbLong(),
+                DbNil.INSTANCE);
+    addToStatus("Blacklisted instances", blacklistColumnFamily.isEmpty()? "No" : "Yes");
   }
 
   private void addToStatus(String key, String value) {
     statusBuilder.append(String.format("%n%s: %s", key, value));
-  }
-
-  private void addToStatus(String status) {
-    statusBuilder.append(String.format("%n%s", status));
   }
 
   private void lastProcessedPosition(PartitionState partitionState) {
@@ -38,11 +64,5 @@ public class ZeebeStatusImpl implements ZeebeStatus {
       positionString = "No exporters";
     }
     addToStatus("Lowest exported position", positionString);
-  }
-
-  private void listExporterPositions(ExportersState exportersState) {
-    exportersState.visitPositions(
-        (id, position) ->
-            addToStatus(String.format("Exporter [id: %s position: %s]", id, position)));
   }
 }
