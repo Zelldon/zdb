@@ -164,9 +164,9 @@ public final class LogScanner {
 
       String finishValidation() {
         if (inconsistentLog) {
-          stringBuilder.append(ANSI_RED + "LOG IS INCONSISTENT!" + ANSI_RESET);
+          stringBuilder.append(ANSI_RED + "LOG IS INCONSISTENT!" + ANSI_RESET).append(System.lineSeparator());
         } else {
-          stringBuilder.append(ANSI_GREEN + "LOG IS CONSISTENT." + ANSI_RESET);
+          stringBuilder.append(ANSI_GREEN + "LOG IS CONSISTENT." + ANSI_RESET).append(System.lineSeparator());
         }
 
         stringBuilder.append("Last position: ").append(lastPosition).append(System.lineSeparator());
