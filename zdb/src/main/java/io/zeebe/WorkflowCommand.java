@@ -1,6 +1,6 @@
 package io.zeebe;
 
-import io.zeebe.impl.IncidentInspection;
+import io.zeebe.impl.WorkflowInspection;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -9,8 +9,8 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
-@Command(name = "incident", mixinStandardHelpOptions = true)
-public class IncidentCommand implements Callable<Integer> {
+@Command(name = "workflow", mixinStandardHelpOptions = true)
+public class WorkflowCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -28,24 +28,24 @@ public class IncidentCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "list", description = "List all incidents")
+  @Command(name = "list", description = "List all workflows")
   public int list() {
     final var partitionState = PartitionState.of(partitionPath);
-    final var outputLines = new IncidentInspection().list(partitionState);
+    final var outputLines = new WorkflowInspection().list(partitionState);
     outputLines.forEach(System.out::println);
     return 0;
   }
 
-  @Command(name = "entry", description = "Show details about an incident")
+  @Command(name = "entry", description = "Show details about a workflow")
   public int entry(
       @Option(
               names = {"-k", "--key"},
               paramLabel = "KEY",
-              description = "The key of the incident",
+              description = "The key of the workflow",
               required = true)
           final long key) {
     final var partitionState = PartitionState.of(partitionPath);
-    final var output = new IncidentInspection().entity(partitionState, key);
+    final var output = new WorkflowInspection().entity(partitionState, key);
     System.out.println(output);
     return 0;
   }

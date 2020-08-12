@@ -4,11 +4,15 @@ import io.zeebe.impl.BlacklistInspection;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
+import picocli.CommandLine.Spec;
 
 @Command(name = "blacklist", mixinStandardHelpOptions = true)
-public class BlackListCommand implements Callable<Integer> {
+public class BlacklistCommand implements Callable<Integer> {
+
+  @Spec private CommandSpec spec;
 
   @Option(
       names = {"-p", "--path"},
@@ -20,7 +24,7 @@ public class BlackListCommand implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    ZeebeDebugger.printUsage("blacklist");
+    spec.commandLine().usage(System.out);
     return 0;
   }
 
@@ -32,7 +36,7 @@ public class BlackListCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "entry", description = "Shows details about blacklisted workflow instance")
+  @Command(name = "entry", description = "Show details about blacklisted workflow instance")
   public int entry(
       @Option(
               names = {"-k", "--key"},
