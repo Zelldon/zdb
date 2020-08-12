@@ -42,7 +42,7 @@ public class ZeebeStatusImpl implements ZeebeStatus {
                 partitionState.getDbContext(),
                 new DbLong(),
                 DbNil.INSTANCE);
-    addToStatus("Blacklisted instances", blacklistColumnFamily.isEmpty()? "No" : "Yes");
+    addToStatus("Blacklisted instances", blacklistColumnFamily.isEmpty() ? "No" : "Yes");
   }
 
   private void addToStatus(String key, String value) {

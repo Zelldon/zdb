@@ -7,12 +7,9 @@ import io.zeebe.engine.state.DefaultZeebeDbFactory;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.ZeebeState;
 import java.nio.file.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class PartitionState {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PartitionState.class);
   private final ZeebeDb<ZbColumnFamilies> zeebeDb;
   private final DbContext dbContext;
   private final ZeebeState zeebeState;
@@ -46,7 +43,6 @@ public final class PartitionState {
   }
 
   private static ZeebeDb<ZbColumnFamilies> openZeebeDb(Path directory) {
-    LOGGER.info("Opening database: {}", directory.toAbsolutePath());
     return DefaultZeebeDbFactory.DEFAULT_DB_FACTORY.createDb(directory.toFile());
   }
 }
