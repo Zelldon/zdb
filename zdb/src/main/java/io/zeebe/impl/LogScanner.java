@@ -143,6 +143,7 @@ public final class LogScanner {
       long lastPosition = 0;
       int eventCount = 0;
       boolean inconsistentLog = false;
+      final StringBuilder stringBuilder = new StringBuilder();
 
       void onNextPosition(long position) {
 
@@ -162,7 +163,6 @@ public final class LogScanner {
       }
 
       String finishValidation() {
-        final var stringBuilder = new StringBuilder();
         if (inconsistentLog) {
           stringBuilder.append(ANSI_RED + "LOG IS INCONSISTENT!" + ANSI_RESET);
         } else {
@@ -176,22 +176,21 @@ public final class LogScanner {
 
         return stringBuilder.toString();
       }
-//
-//      private static void onInconsistentLog(
-//          long low, long high, long lastPosition, int eventCount, long position) {
-//        System.out.println("===============");
-//        System.out.println("At idx " + eventCount);
-//        System.out.print("Current position " + position);
-//        System.out.print(
-//            " (Segment id " + (position >> 32) + " segment offset " + (int) position + ')');
-//        System.out.println();
-//        System.out.print("Is smaller then this last position " + lastPosition);
-//        System.out.print(
-//            " (Segment id " + (lastPosition >> 32) + " segment offset " + (int) lastPosition + ')');
-//        System.out.println();
-//        System.out.println("Current lowest " + low + " current highest " + high);
-//        System.out.println("===============");
-//      }
+
+      private void onInconsistentLog(
+          long low, long high, long lastPosition, int eventCount, long position) {
+        stringBuilder.append("===============").append(System.lineSeparator());
+        stringBuilder.append("At idx ").append(eventCount).append(System.lineSeparator());
+        stringBuilder.append("Current position ").append(position).append(System.lineSeparator());
+        stringBuilder.append(" (Segment id ").append(position >> 32).append(" segment offset ")
+            .append((int) position).append(')').append(System.lineSeparator());
+        stringBuilder.append("Is smaller then this last position ").append(lastPosition)
+                     .append(" (Segment id ").append(lastPosition >> 32).append(" segment offset ")
+            .append((int) lastPosition).append(')').append(System.lineSeparator());
+        stringBuilder.append("Current lowest ").append(low).append(" current highest ")
+            .append(high).append(System.lineSeparator());
+        stringBuilder.append("===============").append(System.lineSeparator());
+      }
     }
   }
 
