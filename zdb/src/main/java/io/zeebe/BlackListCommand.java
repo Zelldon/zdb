@@ -17,7 +17,6 @@ public class BlackListCommand implements Callable<Integer> {
 
   @Command(
       name = "list",
-      mixinStandardHelpOptions = true,
       description = "List all blacklisted workflow instances")
   public int list(
       @Option(
@@ -30,6 +29,26 @@ public class BlackListCommand implements Callable<Integer> {
     final var partitionState = PartitionState.of(partitionPath);
     final var outputLines = new BlacklistInspection().list(partitionState);
     outputLines.forEach(System.out::println);
+    return 0;
+  }
+
+  @Command(name = "entry", description = "Shows details about blacklisted workflow instance")
+  public int entry(
+      @Option(
+              names = {"-p", "--path"},
+              paramLabel = "PARTITION_PATH",
+              description =
+                  "The path to the partition data (either runtime or snapshot in partition dir)",
+              required = true)
+          Path partitionPath,
+      @Option(
+              names = {"-k", "--key"},
+              description = "The key of the blacklisted workflow instance",
+              required = true)
+          final long key) {
+    final var partitionState = PartitionState.of(partitionPath);
+    final var output = new BlacklistInspection().entity(partitionState, key);
+    System.out.println(output);
     return 0;
   }
 }
