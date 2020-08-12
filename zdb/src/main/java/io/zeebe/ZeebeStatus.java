@@ -1,6 +1,5 @@
 package io.zeebe;
 
-
 public interface ZeebeStatus {
 
   /**
