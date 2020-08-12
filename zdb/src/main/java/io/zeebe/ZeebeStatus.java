@@ -1,6 +1,5 @@
 package io.zeebe;
 
-import java.nio.file.Path;
 
 public interface ZeebeStatus {
 
@@ -9,9 +8,10 @@ public interface ZeebeStatus {
    * in the given partition state for the necessary information.
    *
    * <p>Returned information's are:
+   *
    * <ul>
-   *   <li>lastExportedPosition</li>
-   *   <li>lastProcessedPosition</li>
+   *   <li>lastExportedPosition
+   *   <li>lastProcessedPosition
    * </ul>
    *
    * @param partitionState the state of the partition

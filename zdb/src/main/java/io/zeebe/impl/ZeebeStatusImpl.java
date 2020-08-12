@@ -2,7 +2,6 @@ package io.zeebe.impl;
 
 import io.zeebe.PartitionState;
 import io.zeebe.ZeebeStatus;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 

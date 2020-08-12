@@ -18,15 +18,15 @@ public final class PartitionState {
   private final ZeebeState zeebeState;
   private final ExportersState exporterState;
 
-  public static PartitionState of(Path path) {
-    return new PartitionState(path);
-  }
-
   private PartitionState(Path path) {
     this.zeebeDb = openZeebeDb(path);
     this.dbContext = zeebeDb.createContext();
     this.zeebeState = new ZeebeState(1, zeebeDb, dbContext);
     this.exporterState = new ExportersState(zeebeDb, dbContext);
+  }
+
+  static PartitionState of(Path path) {
+    return new PartitionState(path);
   }
 
   public ZeebeDb<ZbColumnFamilies> getZeebeDb() {

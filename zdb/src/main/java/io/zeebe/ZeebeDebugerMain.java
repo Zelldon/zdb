@@ -14,10 +14,15 @@ public class ZeebeDebugerMain {
   private static final Logger LOGGER = LoggerFactory.getLogger(ZeebeDebugerMain.class);
 
   private static final Map<String, EntityInspection> COMMAND_MAP =
-      Map.of("blacklist", new BlacklistInspection(),
-          "incident", new IncidentInspection(),
-          "exporter", new ExporterInspection(),
-          "workflow", new WorkflowInspection());
+      Map.of(
+          "blacklist",
+          new BlacklistInspection(),
+          "incident",
+          new IncidentInspection(),
+          "exporter",
+          new ExporterInspection(),
+          "workflow",
+          new WorkflowInspection());
 
   public static void main(String[] args) throws Exception {
     LOGGER.info("Zeebe Debug and inspection tool");
