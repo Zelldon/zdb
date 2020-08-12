@@ -8,10 +8,17 @@ import picocli.CommandLine.RunLast;
 @Command(
     name = "zdb",
     mixinStandardHelpOptions = true,
-    version = "zdb 0.1",
+    version = ZeebeDebugger.ZDB_VERSION,
     description = "Zeebe debug and inspection tool",
-    subcommands = StatusCommand.class)
+    subcommands = {
+      StatusCommand.class,
+      BlacklistCommand.class,
+      IncidentCommand.class,
+      WorkflowCommand.class
+    })
 public class ZeebeDebugger implements Callable<Integer> {
+
+  protected static final String ZDB_VERSION = "zdb 0.1";
 
   private static CommandLine cli;
 

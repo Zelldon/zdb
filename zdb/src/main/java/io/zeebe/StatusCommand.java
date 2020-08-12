@@ -12,7 +12,7 @@ public class StatusCommand implements Callable<Integer> {
   @Option(
       names = {"-p", "--path"},
       paramLabel = "PARTITION_PATH",
-      description = "the path to the partition data (either runtime or snapshot in partition dir)",
+      description = "The path to the partition data (either runtime or snapshot in partition dir)",
       required = true)
   private Path partitionPath;
 
