@@ -114,7 +114,6 @@ public class BlacklistInspection implements EntityInspection {
       addChildrenRecursive(stringBuilder, intend + 1, elementInstanceState, child);
     }
 
-
     return stringBuilder;
   }
 
@@ -124,12 +123,16 @@ public class BlacklistInspection implements EntityInspection {
 
     addChildProperty(stringBuilder, intend, "Key", childElementInstance.getKey());
     addChildProperty(stringBuilder, intend, "ElementId", childElementInstanceValue.getElementId());
-    addChildProperty(stringBuilder, intend, "BpmnElementType", childElementInstanceValue.getBpmnElementType());
+    addChildProperty(
+        stringBuilder, intend, "BpmnElementType", childElementInstanceValue.getBpmnElementType());
   }
 
-  private static void addChildProperty(StringBuilder builder, int intend, String propertyName, Object value) {
+  private static void addChildProperty(
+      StringBuilder builder, int intend, String propertyName, Object value) {
     builder
-        .append(getIntend(intend)).append('|').append('-')
+        .append(getIntend(intend))
+        .append('|')
+        .append('-')
         .append(propertyName)
         .append(": ")
         .append(value)
