@@ -10,7 +10,7 @@ import picocli.CommandLine.RunLast;
     mixinStandardHelpOptions = true,
     version = "zdb 0.1",
     description = "Zeebe debug and inspection tool",
-    subcommands = StatusCommand.class)
+    subcommands = {StatusCommand.class, BlackListCommand.class})
 public class ZeebeDebugger implements Callable<Integer> {
 
   private static CommandLine cli;
@@ -21,9 +21,17 @@ public class ZeebeDebugger implements Callable<Integer> {
     System.exit(exitcode);
   }
 
+  public static void printUsage(final String subcommand) {
+    if (subcommand == null) {
+      cli.usage(System.out);
+    } else {
+      cli.getSubcommands().get(subcommand).usage(System.out);
+    }
+  }
+
   @Override
   public Integer call() {
-    cli.usage(System.out);
+    printUsage(null);
     return 0;
   }
 }
