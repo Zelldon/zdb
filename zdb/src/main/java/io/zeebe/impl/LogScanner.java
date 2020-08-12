@@ -182,13 +182,28 @@ public final class LogScanner {
         stringBuilder.append("===============").append(System.lineSeparator());
         stringBuilder.append("At idx ").append(eventCount).append(System.lineSeparator());
         stringBuilder.append("Current position ").append(position).append(System.lineSeparator());
-        stringBuilder.append(" (Segment id ").append(position >> 32).append(" segment offset ")
-            .append((int) position).append(')').append(System.lineSeparator());
-        stringBuilder.append("Is smaller then this last position ").append(lastPosition)
-                     .append(" (Segment id ").append(lastPosition >> 32).append(" segment offset ")
-            .append((int) lastPosition).append(')').append(System.lineSeparator());
-        stringBuilder.append("Current lowest ").append(low).append(" current highest ")
-            .append(high).append(System.lineSeparator());
+        stringBuilder
+            .append(" (Segment id ")
+            .append(position >> 32)
+            .append(" segment offset ")
+            .append((int) position)
+            .append(')')
+            .append(System.lineSeparator());
+        stringBuilder
+            .append("Is smaller then this last position ")
+            .append(lastPosition)
+            .append(" (Segment id ")
+            .append(lastPosition >> 32)
+            .append(" segment offset ")
+            .append((int) lastPosition)
+            .append(')')
+            .append(System.lineSeparator());
+        stringBuilder
+            .append("Current lowest ")
+            .append(low)
+            .append(" current highest ")
+            .append(high)
+            .append(System.lineSeparator());
         stringBuilder.append("===============").append(System.lineSeparator());
       }
     }

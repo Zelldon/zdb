@@ -39,10 +39,7 @@ public class IncidentCommand implements Callable<Integer> {
 
   @Command(name = "entity", description = "Show details about an incident")
   public int entity(
-      @Parameters(
-              paramLabel = "KEY",
-              description = "The key of the incident",
-              arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the incident", arity = "1")
           final long key) {
     final var partitionState = PartitionState.of(partitionPath);
     final var output = new IncidentInspection().entity(partitionState, key);

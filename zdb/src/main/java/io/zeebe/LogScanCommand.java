@@ -1,13 +1,11 @@
 package io.zeebe;
 
 import io.zeebe.impl.LogScanner;
-import io.zeebe.impl.WorkflowInspection;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 

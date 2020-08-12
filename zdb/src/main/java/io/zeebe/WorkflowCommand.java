@@ -39,10 +39,7 @@ public class WorkflowCommand implements Callable<Integer> {
 
   @Command(name = "entity", description = "Show details about a workflow")
   public int entity(
-      @Parameters(
-              paramLabel = "KEY",
-              description = "The key of the workflow",
-              arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
           final long key) {
     final var partitionState = PartitionState.of(partitionPath);
     final var output = new WorkflowInspection().entity(partitionState, key);
