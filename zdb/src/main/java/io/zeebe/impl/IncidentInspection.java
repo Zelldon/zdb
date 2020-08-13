@@ -50,7 +50,7 @@ public class IncidentInspection implements EntityInspection {
 
     final var incidentState = partitionState.getZeebeState().getIncidentState();
 
-    final var stringBuilder = new StringBuilder("Incident:");
+    final var stringBuilder = new StringBuilder();
     return Optional.ofNullable(incidentState.getIncidentRecord(key))
         .map(
             incidentRecord -> {
@@ -63,6 +63,8 @@ public class IncidentInspection implements EntityInspection {
               return stringBuilder
                   .append("\nIncidentKey: ")
                   .append(key)
+                  .append("\nWorkflowKey:")
+                  .append(incidentRecord.getWorkflowKey())
                   .append("\nWorkflowInstanceKey: ")
                   .append(incidentRecord.getWorkflowInstanceKey())
                   .append("\nBpmnProcessId: ")
@@ -76,9 +78,15 @@ public class IncidentInspection implements EntityInspection {
                   .append("\nElementId: ")
                   .append(incidentRecord.getElementId())
                   .append("\nBpmnElementType: ")
-                  .append(elementInstance.getValue().getBpmnElementType())
-                  .append("\nState")
-                  .append(elementInstance.getState())
+                  .append(
+                      elementInstance == null
+                          ? "Cannot find element instance"
+                          : elementInstance.getValue().getBpmnElementType())
+                  .append("\nState: ")
+                  .append(
+                      elementInstance == null
+                          ? "Cannot find element instance"
+                          : elementInstance.getState())
                   .append(getIncidentDetails(incidentRecord, partitionState.getZeebeState()))
                   .toString();
             })
@@ -99,8 +107,9 @@ public class IncidentInspection implements EntityInspection {
       case JOB_NO_RETRIES:
         final var jobKey = incidentRecord.getJobKey();
         return "\nJobKey: " + jobKey + "\nJobType: " + state.getJobState().getJob(jobKey).getType();
-      case CALLED_ELEMENT_ERROR:
+
       case UNHANDLED_ERROR_EVENT:
+      case CALLED_ELEMENT_ERROR:
       case EXTRACT_VALUE_ERROR:
       case UNKNOWN:
       default:
