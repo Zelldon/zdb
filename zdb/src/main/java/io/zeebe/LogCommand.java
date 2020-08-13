@@ -1,5 +1,6 @@
 package io.zeebe;
 
+import io.zeebe.impl.BlacklistInspection;
 import io.zeebe.impl.LogScanner;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -9,8 +10,8 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
-@Command(name = "scan", mixinStandardHelpOptions = true)
-public class LogScanCommand implements Callable<Integer> {
+@Command(name = "log", mixinStandardHelpOptions = true)
+public class LogCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -22,10 +23,16 @@ public class LogScanCommand implements Callable<Integer> {
       scope = ScopeType.INHERIT)
   private Path partitionPath;
 
-  @Override
-  public Integer call() {
+  @Command(name = "status", description = "Print's the status of the log")
+  public int status() {
     final var output = new LogScanner().scan(partitionPath);
     System.out.println(output);
+    return 0;
+  }
+
+  @Override
+  public Integer call() {
+    spec.commandLine().usage(System.out);
     return 0;
   }
 }

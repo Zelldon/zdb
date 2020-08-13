@@ -15,7 +15,7 @@ import picocli.CommandLine.RunLast;
       BlacklistCommand.class,
       IncidentCommand.class,
       WorkflowCommand.class,
-      LogScanCommand.class
+      LogCommand.class
     })
 public class ZeebeDebugger implements Callable<Integer> {
 
