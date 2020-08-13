@@ -1,7 +1,7 @@
 package io.zeebe;
 
-import io.zeebe.impl.BlacklistInspection;
-import io.zeebe.impl.LogScanner;
+import io.zeebe.impl.LogConsistencyCheck;
+import io.zeebe.impl.LogStatus;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -25,7 +25,14 @@ public class LogCommand implements Callable<Integer> {
 
   @Command(name = "status", description = "Print's the status of the log")
   public int status() {
-    final var output = new LogScanner().scan(partitionPath);
+    final var output = new LogStatus().scan(partitionPath);
+    System.out.println(output);
+    return 0;
+  }
+
+  @Command(name = "consistency", description = "Checks the given log for consistency")
+  public int consistency() {
+    final var output = new LogConsistencyCheck().consistencyCheck(partitionPath);
     System.out.println(output);
     return 0;
   }
