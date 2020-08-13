@@ -26,7 +26,6 @@ import org.agrona.collections.Long2ObjectHashMap;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.DBOptions;
-import org.rocksdb.OptimisticTransactionDB;
 import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -79,7 +78,7 @@ public class ZeebeReadOnlyDB<ColumnFamilyNames extends Enum<ColumnFamilyNames>>
 
     final List<ColumnFamilyHandle> handles = new ArrayList<>();
     final RocksDB optimisticTransactionDB =
-        OptimisticTransactionDB.openReadOnly(options, path, columnFamilyDescriptors, handles);
+        RocksDB.openReadOnly(options, path, columnFamilyDescriptors, handles);
     closables.add(optimisticTransactionDB);
 
     final ColumnFamilyNames[] enumConstants = columnFamilyTypeClass.getEnumConstants();
