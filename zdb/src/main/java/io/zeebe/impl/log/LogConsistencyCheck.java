@@ -1,10 +1,7 @@
-package io.zeebe.impl;
+package io.zeebe.impl.log;
 
-import io.atomix.raft.partition.impl.RaftNamespaces;
-import io.atomix.raft.storage.log.RaftLog;
 import io.atomix.raft.storage.log.RaftLogReader;
 import io.atomix.raft.zeebe.ZeebeEntry;
-import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.JournalReader.Mode;
 import java.nio.file.Path;
 
@@ -13,38 +10,16 @@ public final class LogConsistencyCheck {
   private static final String ANSI_RESET = "\u001B[0m";
   private static final String ANSI_GREEN = "\u001B[32m";
   private static final String ANSI_RED = "\u001B[31m";
-  private static final String PARTITION_NAME_FORMAT = "raft-partition-partition-%d";
 
   public String consistencyCheck(Path path) {
-    final int partitionId;
-    final String partitionName;
-
-    try {
-      partitionId = Integer.parseInt(path.getFileName().toString());
-      partitionName = String.format(PARTITION_NAME_FORMAT, partitionId);
-    } catch (NumberFormatException nfe) {
-      final var errorMsg =
-          String.format(
-              "Expected to extract partition as integer from path, but path was '%s'.", path);
-      throw new IllegalArgumentException(errorMsg, nfe);
-    }
-
+    final var zeebeLog = ZeebeLog.ofPath(path);
     final var resourceDir = path.toFile();
 
     final var report =
         new StringBuilder("Opening log ").append(resourceDir).append(System.lineSeparator());
 
     // internally it scans the log
-    final var raftLog =
-        RaftLog.builder()
-            .withDirectory(resourceDir)
-            .withName(partitionName)
-            .withNamespace(RaftNamespaces.RAFT_STORAGE)
-            .withMaxEntrySize(4 * 1024 * 1024)
-            .withMaxSegmentSize(512 * 1024 * 1024)
-            .withStorageLevel(StorageLevel.DISK)
-            .build();
-
+    final var raftLog = zeebeLog.openLog();
     final var raftLogReader = raftLog.openReader(-1, Mode.ALL);
 
     final var startTime = System.currentTimeMillis();
