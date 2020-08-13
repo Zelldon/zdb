@@ -10,7 +10,10 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
-@Command(name = "incident", mixinStandardHelpOptions = true)
+@Command(
+    name = "incident",
+    mixinStandardHelpOptions = true,
+    description = "Print's information about created incident's")
 public class IncidentCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;

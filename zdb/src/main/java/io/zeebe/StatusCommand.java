@@ -6,7 +6,10 @@ import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-@Command(name = "status", mixinStandardHelpOptions = true)
+@Command(
+    name = "status",
+    mixinStandardHelpOptions = true,
+    description = "Prints general information of the internal state")
 public class StatusCommand implements Callable<Integer> {
 
   @Option(

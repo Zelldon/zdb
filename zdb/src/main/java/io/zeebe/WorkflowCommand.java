@@ -10,7 +10,10 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
-@Command(name = "workflow", mixinStandardHelpOptions = true)
+@Command(
+    name = "workflow",
+    mixinStandardHelpOptions = true,
+    description = "Print's information about deployed workflow's")
 public class WorkflowCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;

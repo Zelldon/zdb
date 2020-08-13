@@ -10,7 +10,10 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
-@Command(name = "blacklist", mixinStandardHelpOptions = true)
+@Command(
+    name = "blacklist",
+    mixinStandardHelpOptions = true,
+    description = "Print's information about blacklisted workflow instances")
 public class BlacklistCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
