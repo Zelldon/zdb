@@ -1,7 +1,7 @@
 package io.zeebe;
 
-import io.zeebe.impl.LogConsistencyCheck;
-import io.zeebe.impl.LogStatus;
+import io.zeebe.impl.log.LogConsistencyCheck;
+import io.zeebe.impl.log.LogStatus;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;

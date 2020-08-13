@@ -1,10 +1,7 @@
-package io.zeebe.impl;
+package io.zeebe.impl.log;
 
-import io.atomix.raft.partition.impl.RaftNamespaces;
-import io.atomix.raft.storage.log.RaftLog;
 import io.atomix.raft.storage.log.entry.InitializeEntry;
 import io.atomix.raft.zeebe.ZeebeEntry;
-import io.atomix.storage.StorageLevel;
 import io.atomix.storage.journal.Indexed;
 import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
@@ -16,38 +13,15 @@ import java.util.List;
 
 public final class LogStatus {
 
-  private static final String PARTITION_NAME_FORMAT = "raft-partition-partition-%d";
-
   public String scan(Path path) {
-    final int partitionId;
-    final String partitionName;
-
-    try {
-      partitionId = Integer.parseInt(path.getFileName().toString());
-      partitionName = String.format(PARTITION_NAME_FORMAT, partitionId);
-    } catch (NumberFormatException nfe) {
-      final var errorMsg =
-          String.format(
-              "Expected to extract partition as integer from path, but path was '%s'.", path);
-      throw new IllegalArgumentException(errorMsg, nfe);
-    }
-
-    final var resourceDir = path.toFile();
+    final var zeebeLog = ZeebeLog.ofPath(path);
 
     final var startTime = System.currentTimeMillis();
     final var report = new StringBuilder("Scan log...").append(System.lineSeparator());
     final var scanner = new Scanner(report);
 
     // internally it scans the log
-    RaftLog.builder()
-        .withDirectory(resourceDir)
-        .withName(partitionName)
-        .withNamespace(RaftNamespaces.RAFT_STORAGE)
-        .withMaxEntrySize(4 * 1024 * 1024)
-        .withMaxSegmentSize(512 * 1024 * 1024)
-        .withStorageLevel(StorageLevel.DISK)
-        .withJournalIndexFactory(() -> scanner)
-        .build();
+    zeebeLog.openLog(builder -> builder.withJournalIndexFactory(() -> scanner));
 
     final var endTime = System.currentTimeMillis();
     report
