@@ -6,20 +6,29 @@
 
   <groupId>io.zeebe</groupId>
   <artifactId>zdb</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
+  <inceptionYear>2020</inceptionYear>
   <name>zdb</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>https://github.com/Zelldon/zdb</url>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>11</maven.compiler.release>
+    <license.header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</license.header>
 
     <version.zeebe>0.24.1</version.zeebe>
     <version.log4j>2.13.3</version.log4j>
     <version.picocli>4.5.0</version.picocli>
     <plugin.version.checkstyle>3.1.1</plugin.version.checkstyle>
     <plugin.version.fmt>2.9</plugin.version.fmt>
+    <plugin.version.license>3.0</plugin.version.license>
   </properties>
 
   <dependencyManagement>
@@ -212,6 +221,41 @@
           </execution>
         </executions>
       </plugin>
+
+
+      <!-- LICENSE PLUGIN -->
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>${plugin.version.license}</version>
+        <configuration>
+          <header>${license.header}</header>
+          <properties>
+            <owner>camunda services GmbH</owner>
+            <email>info@camunda.com</email>
+          </properties>
+          <includes>
+            <include>**/*.java</include>
+            <include>**/*.scala</include>
+          </includes>
+          <excludes>
+            <exclude>benchmarks/project/**/*</exclude>
+          </excludes>
+          <mapping>
+            <java>SLASHSTAR_STYLE</java>
+          </mapping>
+        </configuration>
+        <executions>
+          <execution>
+            <id>add-license</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>format</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 </project>
