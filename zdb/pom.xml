@@ -13,15 +13,16 @@
 
   <licenses>
     <license>
-      <name>Apache License, Version 2.0</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <name>Zeebe Community License v1.0</name>
+      <url>https://zeebe.io/legal/zeebe-community-license-1.0</url>
     </license>
   </licenses>
+
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>11</maven.compiler.release>
-    <license.header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</license.header>
+    <license.header>https://raw.githubusercontent.com/zeebe-io/zeebe/develop/parent/COPYING-HEADER.txt</license.header>
 
     <version.zeebe>0.24.1</version.zeebe>
     <version.log4j>2.13.3</version.log4j>
