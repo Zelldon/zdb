@@ -2,8 +2,8 @@ package io.zeebe;
 
 import io.zeebe.broker.exporter.stream.ExportersState;
 import io.zeebe.db.DbContext;
+import io.zeebe.db.ReadOnlyDbFactory;
 import io.zeebe.db.ZeebeDb;
-import io.zeebe.engine.state.DefaultZeebeDbFactory;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.ZeebeState;
 import java.nio.file.Path;
@@ -43,6 +43,6 @@ public final class PartitionState {
   }
 
   private static ZeebeDb<ZbColumnFamilies> openZeebeDb(Path directory) {
-    return DefaultZeebeDbFactory.DEFAULT_DB_FACTORY.createDb(directory.toFile());
+    return new ReadOnlyDbFactory(ZbColumnFamilies.class).createDb(directory.toFile());
   }
 }
