@@ -9,7 +9,10 @@ import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-@Command(name = "search", mixinStandardHelpOptions = true)
+@Command(
+    name = "search",
+    mixinStandardHelpOptions = true,
+    description = "Search's in the log for a given position or index")
 public class LogSearchCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
