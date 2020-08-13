@@ -1,6 +1,7 @@
 package io.zeebe;
 
 import java.util.concurrent.Callable;
+import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.RunLast;
@@ -11,6 +12,7 @@ import picocli.CommandLine.RunLast;
     version = ZeebeDebugger.ZDB_VERSION,
     description = "Zeebe debug and inspection tool",
     subcommands = {
+      GenerateCompletion.class, // to generate auto completion
       StatusCommand.class,
       BlacklistCommand.class,
       IncidentCommand.class,
