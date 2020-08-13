@@ -8,10 +8,10 @@ import io.zeebe.db.ColumnFamily;
 import io.zeebe.db.impl.DbLong;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.ZeebeState;
+import io.zeebe.engine.state.instance.ElementInstance;
 import io.zeebe.engine.state.instance.Incident;
 import io.zeebe.protocol.impl.encoding.MsgPackConverter;
 import io.zeebe.protocol.impl.record.value.incident.IncidentRecord;
-import io.zeebe.protocol.record.value.ErrorType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class IncidentInspection implements EntityInspection {
 
           final var incidentAsString =
               String.format(
-                  "Incident[key: %d, workflow-instance-key: %d, BPMN-process-id: \"%s\", error-type: %s]%n",
+                  "Incident[key: %d, workflow-instance-key: %d, BPMN-process-id: \"%s\", error-type: %s]",
                   incidentKey,
                   incidentRecord.getWorkflowInstanceKey(),
                   incidentRecord.getBpmnProcessId(),
@@ -50,33 +50,62 @@ public class IncidentInspection implements EntityInspection {
 
     final var incidentState = partitionState.getZeebeState().getIncidentState();
 
+    final var stringBuilder = new StringBuilder("Incident:");
     return Optional.ofNullable(incidentState.getIncidentRecord(key))
         .map(
-            incidentRecord ->
-                String.format(
-                    "Incident[key: %d, workflow-instance-key: %d, BPMN-process-id: \"%s\", error-type: %s, error-message: \"%s\" , \"%s\"]",
-                    key,
-                    incidentRecord.getWorkflowInstanceKey(),
-                    incidentRecord.getBpmnProcessId(),
-                    incidentRecord.getErrorType(),
-                    incidentRecord.getErrorMessage(),
-                    getIOMappingIncidentsDetails(incidentRecord, partitionState.getZeebeState())))
+            incidentRecord -> {
+              final ElementInstance elementInstance =
+                  partitionState
+                      .getZeebeState()
+                      .getWorkflowState()
+                      .getElementInstanceState()
+                      .getInstance(incidentRecord.getElementInstanceKey());
+              return stringBuilder
+                  .append("\nIncidentKey: ")
+                  .append(key)
+                  .append("\nWorkflowInstanceKey: ")
+                  .append(incidentRecord.getWorkflowInstanceKey())
+                  .append("\nBpmnProcessId: ")
+                  .append(incidentRecord.getBpmnProcessId())
+                  .append("\nErrorType: ")
+                  .append(incidentRecord.getErrorType())
+                  .append("\nErrorMessage: ")
+                  .append(incidentRecord.getErrorMessage())
+                  .append("\nElementInstanceKey: ")
+                  .append(incidentRecord.getElementInstanceKey())
+                  .append("\nElementId: ")
+                  .append(incidentRecord.getElementId())
+                  .append("\nBpmnElementType: ")
+                  .append(elementInstance.getValue().getBpmnElementType())
+                  .append("\nState")
+                  .append(elementInstance.getState())
+                  .append(getIncidentDetails(incidentRecord, partitionState.getZeebeState()))
+                  .toString();
+            })
         .orElse("No incident found with key: " + key);
   }
 
-  private String getIOMappingIncidentsDetails(IncidentRecord incidentRecord, ZeebeState state) {
-    if (incidentRecord.getErrorType() == ErrorType.IO_MAPPING_ERROR) {
-      final var variables =
-          state
-              .getWorkflowState()
-              .getElementInstanceState()
-              .getVariablesState()
-              .getVariablesAsDocument(incidentRecord.getVariableScopeKey());
-      return String.format(
-          "Variables: %s ", MsgPackConverter.convertToJson(bufferAsArray(variables)));
+  private String getIncidentDetails(IncidentRecord incidentRecord, ZeebeState state) {
+    switch (incidentRecord.getErrorType()) {
+      case IO_MAPPING_ERROR:
+      case CONDITION_ERROR:
+        final var variables =
+            state
+                .getWorkflowState()
+                .getElementInstanceState()
+                .getVariablesState()
+                .getVariablesAsDocument(incidentRecord.getVariableScopeKey());
+        return "\nVariables: " + MsgPackConverter.convertToJson(bufferAsArray(variables));
+      case JOB_NO_RETRIES:
+        final var jobKey = incidentRecord.getJobKey();
+        return "\nJobKey: " + jobKey + "\nJobType: " + state.getJobState().getJob(jobKey).getType();
+      case CALLED_ELEMENT_ERROR:
+      case UNHANDLED_ERROR_EVENT:
+      case EXTRACT_VALUE_ERROR:
+      case UNKNOWN:
+      default:
+        return "";
     }
-
-    return "";
   }
 
   private ColumnFamily<DbLong, Incident> getIncidentColumnFamily(
