@@ -10,7 +10,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
-@Command(name = "log", mixinStandardHelpOptions = true)
+@Command(name = "log", mixinStandardHelpOptions = true, subcommands = LogSearchCommand.class)
 public class LogCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
