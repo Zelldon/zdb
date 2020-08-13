@@ -10,12 +10,12 @@ import io.atomix.storage.journal.index.JournalIndex;
 import io.atomix.storage.journal.index.Position;
 import io.zeebe.logstreams.storage.atomix.ZeebeIndexAdapter;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public final class LogScanner {
+public final class LogStatus {
 
-  private static final String ANSI_RESET = "\u001B[0m";
-  private static final String ANSI_GREEN = "\u001B[32m";
-  private static final String ANSI_RED = "\u001B[31m";
   private static final String PARTITION_NAME_FORMAT = "raft-partition-partition-%d";
 
   public String scan(Path path) {
@@ -62,15 +62,17 @@ public final class LogScanner {
   private static class Scanner implements JournalIndex {
 
     private final ZeebeIndexAdapter zeebeIndexAdapter;
-
     private final StringBuilder report;
-    private long lastIndex = Long.MIN_VALUE;
-    private long lastRecordPosition = Long.MIN_VALUE;
+    private final List<String> initialEntries = new ArrayList<>();
+
+    private long highestIndex = Long.MIN_VALUE;
+    private long lowestIndex = Long.MAX_VALUE;
+    private long highestRecordPosition = Long.MIN_VALUE;
     private long lowestRecordPosition = Long.MAX_VALUE;
-    private String lastInitEntry = "none";
-    private boolean inconsistentLog = false;
+
     private double avgEntrySize = 0.0f;
-    private double maxEntrySize = 0.0f;
+    private int maxEntrySize = Integer.MIN_VALUE;
+    private int minEntrySize = Integer.MAX_VALUE;
     private int scannedEntries = 0;
 
     Scanner(StringBuilder report) {
@@ -88,9 +90,9 @@ public final class LogScanner {
       processEntrySize(indexedEntry);
 
       if (indexedEntry.type() == InitializeEntry.class) {
-        processInitialEntry(indexedEntry);
+        processInitialEntry((InitializeEntry) indexedEntry.entry());
       } else if (indexedEntry.type() == ZeebeEntry.class) {
-        processZeebeEntry(indexedEntry, currentIndex);
+        processZeebeEntry((ZeebeEntry) indexedEntry.entry());
       }
 
       // delegate
@@ -112,75 +114,49 @@ public final class LogScanner {
       zeebeIndexAdapter.compact(index);
     }
 
-    private void processZeebeEntry(final Indexed indexedEntry, final long currentIndex) {
-      final var zeebeEntry = (ZeebeEntry) indexedEntry.entry();
-
+    private void processZeebeEntry(final ZeebeEntry zeebeEntry) {
       final var highestPosition = zeebeEntry.highestPosition();
       final var lowestPosition = zeebeEntry.lowestPosition();
 
-      if (lowestPosition > highestPosition) {
-        report
-            .append("Inconsistent ZeebeEntry lowestPosition")
-            .append(lowestPosition)
-            .append(" is higher than highestPosition ")
-            .append(highestPosition)
-            .append(" at index")
-            .append(currentIndex)
-            .append(System.lineSeparator());
+      if (highestPosition > highestRecordPosition) {
+        highestRecordPosition = highestPosition;
       }
 
-      if (lastRecordPosition > lowestPosition) {
-        report
-            .append("Inconsistent log lastRecordPosition")
-            .append(lastRecordPosition)
-            .append(" is higher than next lowestRecordPosition ")
-            .append(lowestPosition)
-            .append(" at index")
-            .append(currentIndex)
-            .append(System.lineSeparator());
-      }
-
-      lastRecordPosition = highestPosition;
-      if (lowestRecordPosition > lowestPosition) {
+      if (lowestPosition < lowestRecordPosition) {
         lowestRecordPosition = lowestPosition;
       }
     }
 
-    private void processInitialEntry(final Indexed indexedEntry) {
-      final var entry = (InitializeEntry) indexedEntry.entry();
-      lastInitEntry = entry.toString();
+    private void processInitialEntry(final InitializeEntry initializeEntry) {
+      initialEntries.add(initializeEntry.toString());
     }
 
     private void processEntrySize(final Indexed indexedEntry) {
       final var currentSize = indexedEntry.size();
+
       if (currentSize > maxEntrySize) {
         maxEntrySize = currentSize;
+      }
+
+      if (currentSize < minEntrySize) {
+        minEntrySize = currentSize;
       }
       avgEntrySize += currentSize;
       scannedEntries++;
     }
 
     private void processIndex(final long currentIndex) {
-      if (lastIndex > currentIndex
-          || (((lastIndex + 1) != currentIndex) && (lastIndex != Long.MIN_VALUE))) {
-        inconsistentLog = true;
-        report
-            .append("Log is inconsistent at index ")
-            .append(currentIndex)
-            .append(" last index was ")
-            .append(lastIndex)
-            .append(System.lineSeparator());
-      } else {
-        lastIndex = currentIndex;
+      if (currentIndex > highestIndex) {
+        highestIndex = currentIndex;
+      }
+
+      if (currentIndex < lowestIndex) {
+        lowestIndex = currentIndex;
       }
     }
 
     public String getReport() {
       report
-          .append(
-              inconsistentLog
-                  ? ANSI_RED + "LOG IS INCONSISTENT!" + ANSI_RESET
-                  : ANSI_GREEN + "LOG IS CONSISTENT." + ANSI_RESET)
           .append(System.lineSeparator())
           .append("Scanned entries: ")
           .append(scannedEntries)
@@ -188,20 +164,29 @@ public final class LogScanner {
           .append("Maximum entry size: ")
           .append(maxEntrySize)
           .append(System.lineSeparator())
+          .append("Minimum entry size: ")
+          .append(minEntrySize)
+          .append(System.lineSeparator())
           .append("Avg entry size: ")
           .append(avgEntrySize / (double) scannedEntries)
           .append(System.lineSeparator())
           .append("LowestRecordPosition: ")
           .append(lowestRecordPosition)
           .append(System.lineSeparator())
-          .append("LastRecordPosition: ")
-          .append(lastRecordPosition)
+          .append("HighestRecordPosition: ")
+          .append(highestRecordPosition)
           .append(System.lineSeparator())
-          .append("LastIndex: ")
-          .append(lastIndex)
+          .append("HighestIndex: ")
+          .append(highestIndex)
           .append(System.lineSeparator())
-          .append("LastInitialEntry: ")
-          .append(lastInitEntry)
+          .append("LowestIndex: ")
+          .append(lowestIndex)
+          .append(System.lineSeparator())
+          .append("InitialEntries: ")
+          .append(
+              initialEntries.isEmpty()
+                  ? "No initial entries in the log."
+                  : Arrays.toString(initialEntries.toArray(new String[0])))
           .append(System.lineSeparator());
 
       return report.toString();
