@@ -50,7 +50,11 @@ public final class LogScanner {
         .build();
 
     final var endTime = System.currentTimeMillis();
-    report.append("Log scanned in ").append(endTime - startTime).append(" ms").append(System.lineSeparator());
+    report
+        .append("Log scanned in ")
+        .append(endTime - startTime)
+        .append(" ms")
+        .append(System.lineSeparator());
 
     return scanner.getReport();
   }
@@ -60,7 +64,7 @@ public final class LogScanner {
     private final ZeebeIndexAdapter zeebeIndexAdapter;
 
     private final StringBuilder report;
-    private long lastIndex;
+    private long lastIndex = Long.MIN_VALUE;
     private long lastRecordPosition = Long.MIN_VALUE;
     private long lowestRecordPosition = Long.MAX_VALUE;
     private String lastInitEntry = "none";
@@ -76,7 +80,6 @@ public final class LogScanner {
 
     @Override
     public void index(final Indexed indexedEntry, final int position) {
-
       // check index
       final var currentIndex = indexedEntry.index();
       processIndex(currentIndex);
@@ -158,7 +161,8 @@ public final class LogScanner {
     }
 
     private void processIndex(final long currentIndex) {
-      if (lastIndex > currentIndex || (lastIndex + 1 != currentIndex)) {
+      if (lastIndex > currentIndex
+          || (((lastIndex + 1) != currentIndex) && (lastIndex != Long.MIN_VALUE))) {
         inconsistentLog = true;
         report
             .append("Log is inconsistent at index ")
