@@ -3,7 +3,12 @@ package io.zeebe.impl.log;
 import io.atomix.raft.storage.log.RaftLogReader;
 import io.atomix.raft.zeebe.ZeebeEntry;
 import io.atomix.storage.journal.JournalReader.Mode;
+import io.zeebe.engine.processor.RecordValues;
+import io.zeebe.engine.processor.TypedEventImpl;
+import io.zeebe.logstreams.impl.log.LoggedEventImpl;
+import io.zeebe.protocol.impl.record.RecordMetadata;
 import java.nio.file.Path;
+import org.agrona.concurrent.UnsafeBuffer;
 
 public final class LogSearch {
 
@@ -129,6 +134,7 @@ public final class LogSearch {
   }
 
   private static class PositionSearcher {
+    private static final RecordValues RECORD_VALUES = new RecordValues();
 
     private final RaftLogReader logReader;
     private final StringBuilder report;
@@ -155,7 +161,17 @@ public final class LogSearch {
           if (highestPosition >= searchPosition) {
             final var lowestPosition = entry.lowestPosition();
             if (lowestPosition <= searchPosition) {
-              report.append("Index ").append(currentIndex).append(System.lineSeparator());
+              report
+                  .append("Searched for record position '")
+                  .append(searchPosition)
+                  .append("' and found entry on index ")
+                  .append(currentIndex)
+                  .append(" with lowestPosition ")
+                  .append(lowestPosition)
+                  .append(" and highestPosition ")
+                  .append(highestPosition)
+                  .append(System.lineSeparator());
+              processEntry(searchPosition, entry);
             } else {
               report
                   .append(ANSI_RED)
@@ -192,6 +208,40 @@ public final class LogSearch {
           .append("', last record position was '")
           .append(lastRecordPosition)
           .append("'.")
+          .append(ANSI_RESET)
+          .append(System.lineSeparator());
+    }
+
+    private void processEntry(final long searchPosition, final ZeebeEntry entry) {
+
+      var lastPosition = 0L;
+      final var readBuffer = new UnsafeBuffer(entry.data());
+      final var loggedEvent = new LoggedEventImpl();
+      final var metadata = new RecordMetadata();
+
+      int offset = 0;
+      do {
+        loggedEvent.wrap(readBuffer, offset);
+        final var position = loggedEvent.getPosition();
+        if (searchPosition == position) {
+          loggedEvent.readMetadata(metadata);
+
+          final var unifiedRecordValue =
+              RECORD_VALUES.readRecordValue(loggedEvent, metadata.getValueType());
+          final var typedEvent = new TypedEventImpl(1);
+          typedEvent.wrap(loggedEvent, metadata, unifiedRecordValue);
+          report.append("Found: ").append(typedEvent.toJson()).append(System.lineSeparator());
+          return;
+        }
+        lastPosition = position;
+        offset += loggedEvent.getLength();
+      } while (offset < readBuffer.capacity());
+
+      report
+          .append(ANSI_RED)
+          .append("Was not able to find the given position in the index entry!")
+          .append("Last position was ")
+          .append(lastPosition)
           .append(ANSI_RESET)
           .append(System.lineSeparator());
     }
