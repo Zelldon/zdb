@@ -51,10 +51,11 @@ public class IncidentInspection {
 
   public String entity(final PartitionState partitionState, final long key) {
 
-    final var incidentState = partitionState.getZeebeState().getIncidentState();
+    final var incidentKey = new DbLong();
+    incidentKey.wrapLong(key);
 
     final var stringBuilder = new StringBuilder();
-    return Optional.ofNullable(incidentState.getIncidentRecord(key))
+    return Optional.ofNullable(getIncidentColumnFamily(partitionState).get(incidentKey).getRecord())
         .map(
             incidentRecord -> {
               final ElementInstance elementInstance =

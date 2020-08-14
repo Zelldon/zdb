@@ -9,30 +9,34 @@ package io.zeebe.zdb.impl;
 
 import static io.zeebe.util.buffer.BufferUtil.bufferAsString;
 
+import io.zeebe.db.ColumnFamily;
+import io.zeebe.db.impl.DbLong;
+import io.zeebe.engine.state.ZbColumnFamilies;
+import io.zeebe.engine.state.deployment.PersistedWorkflow;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public final class WorkflowInspection {
 
   public List<String> list(final PartitionState partitionState) {
-    final var workflowState = partitionState.getZeebeState().getWorkflowState();
-
-    return workflowState.getWorkflows().stream()
-        .map(
+    final List<String> workflows = new ArrayList<>();
+    getColumnFamily(partitionState)
+        .forEach(
             workflow ->
-                String.format(
-                    "Workflow[key: %d, BPMN-process-id: \"%s\", version: %d]",
-                    workflow.getKey(),
-                    bufferAsString(workflow.getBpmnProcessId()),
-                    workflow.getVersion()))
-        .collect(Collectors.toList());
+                workflows.add(
+                    String.format(
+                        "Workflow[key: %d, BPMN-process-id: \"%s\", version: %d]",
+                        workflow.getKey(),
+                        bufferAsString(workflow.getBpmnProcessId()),
+                        workflow.getVersion())));
+    return workflows;
   }
 
   public String entity(final PartitionState partitionState, final long key) {
-    final var workflowState = partitionState.getZeebeState().getWorkflowState();
-
-    return Optional.ofNullable(workflowState.getWorkflowByKey(key))
+    final var workflowKey = new DbLong();
+    workflowKey.wrapLong(key);
+    return Optional.ofNullable(getColumnFamily(partitionState).get(workflowKey))
         .map(
             workflow ->
                 String.format(
@@ -43,5 +47,16 @@ public final class WorkflowInspection {
                     bufferAsString(workflow.getResourceName()),
                     bufferAsString(workflow.getResource())))
         .orElse("No workflow found with key: " + key);
+  }
+
+  private ColumnFamily<DbLong, PersistedWorkflow> getColumnFamily(
+      final PartitionState partitionState) {
+    return partitionState
+        .getZeebeDb()
+        .createColumnFamily(
+            ZbColumnFamilies.WORKFLOW_CACHE,
+            partitionState.getDbContext(),
+            new DbLong(),
+            new PersistedWorkflow());
   }
 }

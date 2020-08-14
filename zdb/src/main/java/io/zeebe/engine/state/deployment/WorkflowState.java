@@ -9,31 +9,15 @@ package io.zeebe.engine.state.deployment;
 
 import io.zeebe.db.DbContext;
 import io.zeebe.db.ZeebeDb;
-import io.zeebe.engine.processor.KeyGenerator;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.instance.ElementInstanceState;
-import java.util.Collection;
 
 public final class WorkflowState {
 
-  private final WorkflowPersistenceCache workflowPersistenceCache;
   private final ElementInstanceState elementInstanceState;
 
-  public WorkflowState(
-      final ZeebeDb<ZbColumnFamilies> zeebeDb,
-      final DbContext dbContext,
-      final KeyGenerator keyGenerator) {
-    workflowPersistenceCache = new WorkflowPersistenceCache(zeebeDb, dbContext);
+  public WorkflowState(final ZeebeDb<ZbColumnFamilies> zeebeDb, final DbContext dbContext) {
     elementInstanceState = new ElementInstanceState(zeebeDb, dbContext);
-  }
-
-  public PersistedWorkflow getWorkflowByKey(final long workflowKey) {
-    return workflowPersistenceCache.getWorkflowByKey(workflowKey);
-  }
-
-  public Collection<PersistedWorkflow> getWorkflows() {
-
-    return workflowPersistenceCache.getWorkflows();
   }
 
   public ElementInstanceState getElementInstanceState() {

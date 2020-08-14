@@ -26,7 +26,7 @@ public final class PartitionState {
   private PartitionState(Path path) {
     this.zeebeDb = openZeebeDb(path);
     this.dbContext = zeebeDb.createContext();
-    this.zeebeState = new ZeebeState(1, zeebeDb, dbContext);
+    this.zeebeState = new ZeebeState(zeebeDb, dbContext);
     this.exporterState = new ExportersState(zeebeDb, dbContext);
   }
 

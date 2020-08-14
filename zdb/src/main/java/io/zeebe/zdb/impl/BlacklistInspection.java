@@ -19,7 +19,6 @@ import java.util.Optional;
 public class BlacklistInspection {
 
   public List<String> list(final PartitionState partitionState) {
-
     final var elementInstanceState =
         partitionState.getZeebeState().getWorkflowState().getElementInstanceState();
 

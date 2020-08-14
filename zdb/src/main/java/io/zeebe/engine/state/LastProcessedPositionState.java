@@ -17,25 +17,22 @@ public final class LastProcessedPositionState {
   private static final String LAST_PROCESSED_EVENT_KEY = "LAST_PROCESSED_EVENT_KEY";
   private static final long NO_EVENTS_PROCESSED = -1L;
 
-  private final DbString positionKey;
-  private final LastProcessedPosition position = new LastProcessedPosition();
-  private final ColumnFamily<DbString, LastProcessedPosition> positionColumnFamily;
+  private final ZeebeDb<ZbColumnFamilies> zeebeDb;
+  private final DbContext dbContext;
 
   public LastProcessedPositionState(
       final ZeebeDb<ZbColumnFamilies> zeebeDb, final DbContext dbContext) {
-    positionKey = new DbString();
-    positionKey.wrapString(LAST_PROCESSED_EVENT_KEY);
-    positionColumnFamily =
-        zeebeDb.createColumnFamily(ZbColumnFamilies.DEFAULT, dbContext, positionKey, position);
+    this.zeebeDb = zeebeDb;
+    this.dbContext = dbContext;
   }
 
   public long getPosition() {
-    final LastProcessedPosition position = positionColumnFamily.get(positionKey);
-    return position != null ? position.get() : NO_EVENTS_PROCESSED;
-  }
-
-  public void setPosition(final long position) {
-    this.position.set(position);
-    positionColumnFamily.put(positionKey, this.position);
+    final DbString positionKey = new DbString();
+    positionKey.wrapString(LAST_PROCESSED_EVENT_KEY);
+    final LastProcessedPosition position = new LastProcessedPosition();
+    final ColumnFamily<DbString, LastProcessedPosition> positionColumnFamily =
+        zeebeDb.createColumnFamily(ZbColumnFamilies.DEFAULT, dbContext, positionKey, position);
+    final LastProcessedPosition result = positionColumnFamily.get(positionKey);
+    return result != null ? result.get() : NO_EVENTS_PROCESSED;
   }
 }
