@@ -60,7 +60,7 @@ public class ReadOnlyDbFactory<ColumnFamilyType extends Enum<ColumnFamilyType>>
           new DBOptions()
               .setCreateMissingColumnFamilies(true)
               .setErrorIfExists(false)
-              .setCreateIfMissing(true)
+              .setCreateIfMissing(false)
               .setParanoidChecks(true);
       closeables.add(dbOptions);
 
@@ -73,7 +73,7 @@ public class ReadOnlyDbFactory<ColumnFamilyType extends Enum<ColumnFamilyType>>
               columnFamilyTypeClass);
 
     } catch (final RocksDBException e) {
-      throw new RuntimeException("Unexpected error occurred trying to open the database", e);
+      throw new IllegalStateException("Unexpected error occurred trying to open the database", e);
     }
     return db;
   }
