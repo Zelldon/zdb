@@ -122,6 +122,10 @@
           <groupId>io.netty</groupId>
           <artifactId>netty-transport-native-epoll</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>uk.co.real-logic</groupId>
+          <artifactId>sbe-tool</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
