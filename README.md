@@ -169,9 +169,21 @@ LowestIndex: 1
 InitialEntries: [InitializeEntry{term=1, timestamp=2020-07-29 10:59:18,416}, InitializeEntry{term=2, timestamp=2020-08-07 10:13:02,953}, InitializeEntry{term=3, timestamp=2020-08-07 10:49:02,330}, InitializeEntry{term=0, timestamp=1970-01-01 01:00:00,004}]
 ```
 
+## Autocompletion
+`zdb` comes with autocompletion. Just print it to a file:
+
+```sh
+zdb generate-completion >> ~/.autocompletions/zdb
+```
+
+and source that file in your shell profile (i.e. `.bash_rc`, `.zsh_rc`, `.bash_profile`, etc.):
+```sh
+source <(cat $HOME/.autocompletions/zdb)
+```
+
 ## Testing
 As a hackday project, we've kept testing simple. Just execute the following in the root folder:
 
-```shell
+```sh
 ./test.sh
 ```
