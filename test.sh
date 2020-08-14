@@ -17,4 +17,5 @@ java -jar zdb/target/zdb-0.1.0-SNAPSHOT.jar workflow --path=database/data/raft-p
 java -jar zdb/target/zdb-0.1.0-SNAPSHOT.jar workflow --path=database/data/raft-partition/partitions/1/runtime entity 2251799813685305 &&
 
 java -jar zdb/target/zdb-0.1.0-SNAPSHOT.jar log status --path=database/data/raft-partition/partitions/1/ &&
-java -jar zdb/target/zdb-0.1.0-SNAPSHOT.jar log consistency --path=database/data/raft-partition/partitions/1
+java -jar zdb/target/zdb-0.1.0-SNAPSHOT.jar log consistency --path=database/data/raft-partition/partitions/1 &&
+java -jar zdb/target/zdb-0.1.0-SNAPSHOT.jar log search --path=database/data/raft-partition/partitions/1 -pos=4294967296

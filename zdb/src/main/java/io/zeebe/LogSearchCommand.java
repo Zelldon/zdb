@@ -16,10 +16,7 @@ import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-@Command(
-    name = "search",
-    mixinStandardHelpOptions = true,
-    description = "Search's in the log for a given position or index")
+@Command(name = "search", description = "Search's in the log for a given position or index")
 public class LogSearchCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
@@ -37,7 +34,7 @@ public class LogSearchCommand implements Callable<Integer> {
       result = new LogSearch().searchForIndex(logPath, exclusive.index);
     }
     System.out.println(result);
-    return 1;
+    return 0;
   }
 
   static class Exclusive {
