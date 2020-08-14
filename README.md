@@ -26,12 +26,7 @@ In order to shade some more light in the dark we build a tool called zdb - Zeebe
 
 ## How does it solve it
 
-Using `zdb` you can inspect the internal `runtime` data or a snapshot.
-It shows some information about the current state, incidents, workflows and so on from a single partition.
-To inspect the database you should provide the path to the `raft-partition/partitions/../runtime/` folder in a partition or one of the snapshot folders `raft-partition/partitions/../snapshot/<snapshot-folder>`
-
-You can also inspect the log stream using the command `zdb log`.
-To inspect the log you should provide the path to the partition `raft-partition/partitions/<partition-id>/`
+Using `zdb` you can inspect the internal state or the partition log.
 
 ### State Inspection
 
