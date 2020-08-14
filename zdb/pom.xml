@@ -50,11 +50,6 @@
   <dependencies>
     <dependency>
       <groupId>io.zeebe</groupId>
-      <artifactId>zeebe-bpmn-model</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.zeebe</groupId>
       <artifactId>zeebe-protocol-impl</artifactId>
     </dependency>
 

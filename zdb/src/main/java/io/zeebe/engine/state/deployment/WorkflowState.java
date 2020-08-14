@@ -13,7 +13,6 @@ import io.zeebe.engine.processor.KeyGenerator;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.instance.ElementInstanceState;
 import java.util.Collection;
-import org.agrona.DirectBuffer;
 
 public final class WorkflowState {
 
@@ -35,10 +34,6 @@ public final class WorkflowState {
   public Collection<PersistedWorkflow> getWorkflows() {
 
     return workflowPersistenceCache.getWorkflows();
-  }
-
-  public Collection<PersistedWorkflow> getWorkflowsByBpmnProcessId(final DirectBuffer processId) {
-    return workflowPersistenceCache.getWorkflowsByBpmnProcessId(processId);
   }
 
   public ElementInstanceState getElementInstanceState() {
