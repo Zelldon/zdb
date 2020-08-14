@@ -132,3 +132,39 @@ zdb log search --path=<pathToPartition> --index=<position>
 ```
 
 It will print a details to the specific index, when it exists in the log.
+
+## Examples
+
+```sh
+> zdb status --path=data/raft-partition/partitions/1/runtime/
+
+Last processed position: 47248515375
+Lowest exported position: No exporters
+Blacklisted instances: Yes
+Incidents: Yes
+```
+
+```sh
+> zdb incident list --path=data/raft-partition/partitions/1/runtime/
+
+Incident[key: 2251799813685269, workflow-instance-key: 2251799813685264, BPMN-process-id: "variable-mappings-workflow", error-type: IO_MAPPING_ERROR]
+Incident[key: 2251799813685276, workflow-instance-key: 2251799813685271, BPMN-process-id: "variable-mappings-workflow", error-type: IO_MAPPING_ERROR]
+Incident[key: 2251799813685567, workflow-instance-key: 2251799813685560, BPMN-process-id: "failing-job-workflow", error-type: UNHANDLED_ERROR_EVENT]
+Incident[key: 2251799813685575, workflow-instance-key: 2251799813685568, BPMN-process-id: "failing-job-workflow", error-type: JOB_NO_RETRIES]
+```
+
+```sh
+> zdblog status --path=data/raft-partition/partitions/1/
+Scan log...
+Log scanned in 1177 ms
+
+Scanned entries: 726
+Maximum entry size: 3873646
+Minimum entry size: 10
+Avg entry size: 88123.79201101928
+LowestRecordPosition: 4294967296
+HighestRecordPosition: 47248515296
+HighestIndex: 726
+LowestIndex: 1
+InitialEntries: [InitializeEntry{term=1, timestamp=2020-07-29 10:59:18,416}, InitializeEntry{term=2, timestamp=2020-08-07 10:13:02,953}, InitializeEntry{term=3, timestamp=2020-08-07 10:49:02,330}, InitializeEntry{term=0, timestamp=1970-01-01 01:00:00,004}]
+```
