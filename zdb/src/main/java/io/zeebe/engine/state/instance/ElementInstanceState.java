@@ -35,13 +35,11 @@ public final class ElementInstanceState {
   private final ColumnFamily<DbLong, StoredRecord> recordColumnFamily;
 
   private final DbLong recordParentKey;
-  private final DbCompositeKey<DbCompositeKey<DbLong, DbByte>, DbLong> recordParentStateRecordKey;
   private final DbByte stateKey;
   private final DbCompositeKey<DbLong, DbByte> recordParentStateKey;
   private final ColumnFamily<DbCompositeKey<DbCompositeKey<DbLong, DbByte>, DbLong>, DbNil>
       recordParentChildColumnFamily;
 
-  private final AwaitWorkflowInstanceResultMetadata awaitResultMetadata;
   private final ColumnFamily<DbLong, AwaitWorkflowInstanceResultMetadata>
       awaitWorkflowInstanceResultMetadataColumnFamily;
 
@@ -73,7 +71,8 @@ public final class ElementInstanceState {
     recordParentKey = new DbLong();
     stateKey = new DbByte();
     recordParentStateKey = new DbCompositeKey<>(recordParentKey, stateKey);
-    recordParentStateRecordKey = new DbCompositeKey<>(recordParentStateKey, recordKey);
+    final DbCompositeKey<DbCompositeKey<DbLong, DbByte>, DbLong> recordParentStateRecordKey =
+        new DbCompositeKey<>(recordParentStateKey, recordKey);
     recordParentChildColumnFamily =
         zeebeDb.createColumnFamily(
             ZbColumnFamilies.STORED_INSTANCE_EVENTS_PARENT_CHILD,
@@ -82,7 +81,8 @@ public final class ElementInstanceState {
             DbNil.INSTANCE);
 
     variablesState = new VariablesState(zeebeDb, dbContext);
-    awaitResultMetadata = new AwaitWorkflowInstanceResultMetadata();
+    final AwaitWorkflowInstanceResultMetadata awaitResultMetadata =
+        new AwaitWorkflowInstanceResultMetadata();
     awaitWorkflowInstanceResultMetadataColumnFamily =
         zeebeDb.createColumnFamily(
             ZbColumnFamilies.AWAIT_WORKLOW_RESULT,
@@ -165,15 +165,6 @@ public final class ElementInstanceState {
     return records;
   }
 
-  public boolean isEmpty() {
-    return elementInstanceColumnFamily.isEmpty()
-        && parentChildColumnFamily.isEmpty()
-        && recordColumnFamily.isEmpty()
-        && recordParentChildColumnFamily.isEmpty()
-        && variablesState.isEmpty()
-        && awaitWorkflowInstanceResultMetadataColumnFamily.isEmpty();
-  }
-
   private void visitRecords(
       final long scopeKey, final Purpose purpose, final RecordVisitor visitor) {
     recordParentKey.wrapLong(scopeKey);
@@ -205,18 +196,6 @@ public final class ElementInstanceState {
       return copiedElementInstance;
     }
     return null;
-  }
-
-  public void setAwaitResultRequestMetadata(
-      final long workflowInstanceKey, final AwaitWorkflowInstanceResultMetadata metadata) {
-    elementInstanceKey.wrapLong(workflowInstanceKey);
-    awaitWorkflowInstanceResultMetadataColumnFamily.put(elementInstanceKey, metadata);
-  }
-
-  public AwaitWorkflowInstanceResultMetadata getAwaitResultRequestMetadata(
-      final long workflowInstanceKey) {
-    elementInstanceKey.wrapLong(workflowInstanceKey);
-    return awaitWorkflowInstanceResultMetadataColumnFamily.get(elementInstanceKey);
   }
 
   @FunctionalInterface

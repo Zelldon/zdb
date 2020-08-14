@@ -29,16 +29,6 @@ public final class IndexedRecord extends UnpackedObject implements DbValue {
     declareProperty(keyProp).declareProperty(stateProp).declareProperty(valueProp);
   }
 
-  public IndexedRecord(
-      final long key,
-      final WorkflowInstanceIntent instanceState,
-      final WorkflowInstanceRecord record) {
-    this();
-    keyProp.setValue(key);
-    stateProp.setValue(instanceState);
-    setValue(record);
-  }
-
   public long getKey() {
     return keyProp.getValue();
   }
@@ -55,10 +45,6 @@ public final class IndexedRecord extends UnpackedObject implements DbValue {
   public IndexedRecord setState(final WorkflowInstanceIntent state) {
     stateProp.setValue(state);
     return this;
-  }
-
-  public boolean hasState(final WorkflowInstanceIntent state) {
-    return getState() == state;
   }
 
   public WorkflowInstanceRecord getValue() {

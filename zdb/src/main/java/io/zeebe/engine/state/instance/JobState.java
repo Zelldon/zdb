@@ -16,16 +16,15 @@ import io.zeebe.protocol.impl.record.value.job.JobRecord;
 
 public final class JobState {
 
-  // key => job record value
-  // we need two separate wrapper to not interfere with get and put
-  // see https://github.com/zeebe-io/zeebe/issues/1914
-  private final JobRecordValue jobRecordToRead = new JobRecordValue();
-
   private final DbLong jobKey;
   private final ColumnFamily<DbLong, JobRecordValue> jobsColumnFamily;
 
   public JobState(final ZeebeDb<ZbColumnFamilies> zeebeDb, final DbContext dbContext) {
     jobKey = new DbLong();
+    // key => job record value
+    // we need two separate wrapper to not interfere with get and put
+    // see https://github.com/zeebe-io/zeebe/issues/1914
+    final JobRecordValue jobRecordToRead = new JobRecordValue();
     jobsColumnFamily =
         zeebeDb.createColumnFamily(ZbColumnFamilies.JOBS, dbContext, jobKey, jobRecordToRead);
   }

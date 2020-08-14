@@ -30,35 +30,6 @@ public final class AwaitWorkflowInstanceResultMetadata extends UnifiedRecordValu
         .declareProperty(fetchVariablesProperty);
   }
 
-  public long getRequestId() {
-    return requestIdProperty.getValue();
-  }
-
-  public AwaitWorkflowInstanceResultMetadata setRequestId(final long requestId) {
-    requestIdProperty.setValue(requestId);
-    return this;
-  }
-
-  public int getRequestStreamId() {
-    return requestStreamIdProperty.getValue();
-  }
-
-  public AwaitWorkflowInstanceResultMetadata setRequestStreamId(final int requestStreamId) {
-    requestStreamIdProperty.setValue(requestStreamId);
-    return this;
-  }
-
-  public ArrayProperty<StringValue> fetchVariables() {
-    return fetchVariablesProperty;
-  }
-
-  public AwaitWorkflowInstanceResultMetadata setFetchVariables(
-      final ArrayProperty<StringValue> variables) {
-    fetchVariablesProperty.reset();
-    variables.forEach(variable -> fetchVariablesProperty.add().wrap(variable));
-    return this;
-  }
-
   @Override
   public int hashCode() {
     return Objects.hash(
