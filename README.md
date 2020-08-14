@@ -16,6 +16,8 @@ It was created during the Camunda Summer Hackdays in 2020.
     * [Inspect Log Status](#inspect-log-status)
     * [Inspect Log Consistency](#inspect-log-consistency)
     * [Inspect Log](#inspect-log)
+ * [Autocompletion](#autocompletion)
+ * [Testing](#testing)
 
 ## What problem does it solve
 
@@ -154,7 +156,7 @@ Incident[key: 2251799813685575, workflow-instance-key: 2251799813685568, BPMN-pr
 ```
 
 ```sh
-> zdblog status --path=data/raft-partition/partitions/1/
+> zdb log status --path=data/raft-partition/partitions/1/
 Scan log...
 Log scanned in 1177 ms
 
