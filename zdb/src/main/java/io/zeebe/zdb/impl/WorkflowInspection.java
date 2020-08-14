@@ -5,19 +5,16 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.impl;
+package io.zeebe.zdb.impl;
 
 import static io.zeebe.util.buffer.BufferUtil.bufferAsString;
 
-import io.zeebe.EntityInspection;
-import io.zeebe.PartitionState;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class WorkflowInspection implements EntityInspection {
+public final class WorkflowInspection {
 
-  @Override
   public List<String> list(final PartitionState partitionState) {
     final var workflowState = partitionState.getZeebeState().getWorkflowState();
 
@@ -32,7 +29,6 @@ public final class WorkflowInspection implements EntityInspection {
         .collect(Collectors.toList());
   }
 
-  @Override
   public String entity(final PartitionState partitionState, final long key) {
     final var workflowState = partitionState.getZeebeState().getWorkflowState();
 

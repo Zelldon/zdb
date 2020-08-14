@@ -5,8 +5,14 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.db;
+package io.zeebe.zdb.impl.db;
 
+import io.zeebe.db.DbContext;
+import io.zeebe.db.DbKey;
+import io.zeebe.db.DbValue;
+import io.zeebe.db.TransactionOperation;
+import io.zeebe.db.ZeebeDbException;
+import io.zeebe.db.ZeebeDbTransaction;
 import io.zeebe.util.exception.RecoverableException;
 import java.util.ArrayDeque;
 import java.util.Queue;

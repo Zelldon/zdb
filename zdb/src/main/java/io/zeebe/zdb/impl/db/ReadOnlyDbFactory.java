@@ -5,8 +5,10 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.db;
+package io.zeebe.zdb.impl.db;
 
+import io.zeebe.db.ZeebeDb;
+import io.zeebe.db.ZeebeDbFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;

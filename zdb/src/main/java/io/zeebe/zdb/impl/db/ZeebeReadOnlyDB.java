@@ -5,10 +5,16 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.db;
+package io.zeebe.zdb.impl.db;
 
 import static io.zeebe.util.buffer.BufferUtil.startsWith;
 
+import io.zeebe.db.ColumnFamily;
+import io.zeebe.db.DbContext;
+import io.zeebe.db.DbKey;
+import io.zeebe.db.DbValue;
+import io.zeebe.db.KeyValuePairVisitor;
+import io.zeebe.db.ZeebeDb;
 import io.zeebe.db.impl.rocksdb.Loggers;
 import io.zeebe.db.impl.rocksdb.transaction.RocksDbInternal;
 import java.io.File;

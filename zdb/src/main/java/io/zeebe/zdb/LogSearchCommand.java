@@ -5,9 +5,9 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe;
+package io.zeebe.zdb;
 
-import io.zeebe.impl.log.LogSearch;
+import io.zeebe.zdb.impl.log.LogSearch;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.ArgGroup;

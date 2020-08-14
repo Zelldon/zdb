@@ -5,14 +5,14 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe;
+package io.zeebe.zdb.impl;
 
 import io.zeebe.broker.exporter.stream.ExportersState;
 import io.zeebe.db.DbContext;
-import io.zeebe.db.ReadOnlyDbFactory;
 import io.zeebe.db.ZeebeDb;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.ZeebeState;
+import io.zeebe.zdb.impl.db.ReadOnlyDbFactory;
 import java.nio.file.Path;
 
 public final class PartitionState {
@@ -29,7 +29,7 @@ public final class PartitionState {
     this.exporterState = new ExportersState(zeebeDb, dbContext);
   }
 
-  static PartitionState of(Path path) {
+  public static PartitionState of(Path path) {
     return new PartitionState(path);
   }
 

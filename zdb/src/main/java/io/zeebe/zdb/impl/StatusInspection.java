@@ -5,20 +5,31 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.impl;
+package io.zeebe.zdb.impl;
 
-import io.zeebe.PartitionState;
-import io.zeebe.ZeebeStatus;
 import io.zeebe.db.impl.DbLong;
 import io.zeebe.db.impl.DbNil;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.instance.Incident;
 
-public class ZeebeStatusImpl implements ZeebeStatus {
+public class StatusInspection {
 
   private final StringBuilder statusBuilder = new StringBuilder();
 
-  @Override
+  /**
+   * Returns an well formated string which contains all status information about Zeebe, it searchs
+   * in the given partition state for the necessary information.
+   *
+   * <p>Returned information's are:
+   *
+   * <ul>
+   *   <li>lastExportedPosition
+   *   <li>lastProcessedPosition
+   * </ul>
+   *
+   * @param partitionState the state of the partition
+   * @return a well formated string which contains all information
+   */
   public String status(final PartitionState partitionState) {
     lastProcessedPosition(partitionState);
     lowestExportedPosition(partitionState);

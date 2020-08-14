@@ -5,10 +5,8 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.impl;
+package io.zeebe.zdb.impl;
 
-import io.zeebe.EntityInspection;
-import io.zeebe.PartitionState;
 import io.zeebe.db.impl.DbLong;
 import io.zeebe.db.impl.DbNil;
 import io.zeebe.engine.state.ZbColumnFamilies;
@@ -18,9 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class BlacklistInspection implements EntityInspection {
+public class BlacklistInspection {
 
-  @Override
   public List<String> list(final PartitionState partitionState) {
 
     final var elementInstanceState =
@@ -51,7 +48,6 @@ public class BlacklistInspection implements EntityInspection {
     return blacklistedInstances;
   }
 
-  @Override
   public String entity(final PartitionState partitionState, final long key) {
     final var elementInstanceState =
         partitionState.getZeebeState().getWorkflowState().getElementInstanceState();

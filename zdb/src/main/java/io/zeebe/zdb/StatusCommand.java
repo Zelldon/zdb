@@ -5,9 +5,10 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe;
+package io.zeebe.zdb;
 
-import io.zeebe.impl.ZeebeStatusImpl;
+import io.zeebe.zdb.impl.PartitionState;
+import io.zeebe.zdb.impl.StatusInspection;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -29,7 +30,7 @@ public class StatusCommand implements Callable<Integer> {
   @Override
   public Integer call() {
     final var partitionState = PartitionState.of(partitionPath);
-    final var status = new ZeebeStatusImpl().status(partitionState);
+    final var status = new StatusInspection().status(partitionState);
     System.out.println(status);
     return 0;
   }

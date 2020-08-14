@@ -5,12 +5,10 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.impl;
+package io.zeebe.zdb.impl;
 
 import static io.zeebe.util.buffer.BufferUtil.bufferAsArray;
 
-import io.zeebe.EntityInspection;
-import io.zeebe.PartitionState;
 import io.zeebe.db.ColumnFamily;
 import io.zeebe.db.impl.DbLong;
 import io.zeebe.engine.state.ZbColumnFamilies;
@@ -23,9 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class IncidentInspection implements EntityInspection {
+public class IncidentInspection {
 
-  @Override
   public List<String> list(final PartitionState partitionState) {
 
     final var incidents = new ArrayList<String>();
@@ -52,7 +49,6 @@ public class IncidentInspection implements EntityInspection {
     return incidents;
   }
 
-  @Override
   public String entity(final PartitionState partitionState, final long key) {
 
     final var incidentState = partitionState.getZeebeState().getIncidentState();

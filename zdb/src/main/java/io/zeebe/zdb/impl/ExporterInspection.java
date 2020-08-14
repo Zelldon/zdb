@@ -5,10 +5,8 @@
  * Licensed under the Zeebe Community License 1.0. You may not use this file
  * except in compliance with the Zeebe Community License 1.0.
  */
-package io.zeebe.impl;
+package io.zeebe.zdb.impl;
 
-import io.zeebe.EntityInspection;
-import io.zeebe.PartitionState;
 import io.zeebe.broker.exporter.stream.ExporterPosition;
 import io.zeebe.db.ColumnFamily;
 import io.zeebe.db.impl.DbString;
@@ -17,9 +15,8 @@ import io.zeebe.util.buffer.BufferUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ExporterInspection implements EntityInspection {
+public final class ExporterInspection {
 
-  @Override
   public List<String> list(final PartitionState partitionState) {
 
     final ColumnFamily<DbString, ExporterPosition> exporterPositionColumnFamily =
@@ -39,7 +36,6 @@ public final class ExporterInspection implements EntityInspection {
     return exporters;
   }
 
-  @Override
   public String entity(final PartitionState partitionState, final long key) {
     return "nope";
   }
