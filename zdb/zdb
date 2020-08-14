@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+java -jar target/zdb-1.0-SNAPSHOT.jar $@
