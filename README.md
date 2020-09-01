@@ -24,7 +24,7 @@ It was created during the Camunda Summer Hackdays in 2020.
 When Zeebe is broken there is currently no possibility to find out the last state of Zeebe.
 If there was no exporter configured or they haven't exported for a while it get even worse, since it is not clear what the internal engine state is.
 
-In order to shade some more light in the dark we build a tool called zdb - Zeebe Debuger. It should help you along the way during incidents and broken systems.
+In order to shed some more light in the dark we build a tool called zdb - Zeebe Debugger. It should help you along the way during incidents and broken systems.
 
 ## How does it solve it
 
