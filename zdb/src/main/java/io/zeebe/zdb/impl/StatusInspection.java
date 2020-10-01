@@ -75,6 +75,11 @@ public class StatusInspection {
 
   private void lowestExportedPosition(PartitionState partitionState) {
     final var exporterState = partitionState.getExporterState();
+    exporterState.visitPositions(
+        (id, position) -> {
+          addToStatus(id, "position " + position);
+        });
+
     final String positionString;
     if (exporterState.hasExporters()) {
       positionString = String.valueOf(exporterState.getLowestPosition());
