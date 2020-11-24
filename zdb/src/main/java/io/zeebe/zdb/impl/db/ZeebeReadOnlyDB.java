@@ -375,6 +375,11 @@ public class ZeebeReadOnlyDB<ColumnFamilyNames extends Enum<ColumnFamilyNames>>
   }
 
   @Override
+  public boolean isEmpty(final ColumnFamilyNames column, final DbContext context) {
+    return isEmpty(columnFamilyMap.get(column), context);
+  }
+
+  @Override
   public void close() {
     // Correct order of closing
     // 1. transaction

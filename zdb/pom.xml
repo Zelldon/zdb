@@ -23,12 +23,12 @@
     <maven.compiler.release>11</maven.compiler.release>
     <license.header>https://raw.githubusercontent.com/zeebe-io/zeebe/develop/parent/COPYING-HEADER.txt</license.header>
 
-    <version.guava>29.0-jre</version.guava>
-    <version.jackson-dataformat-msgpack>0.8.20</version.jackson-dataformat-msgpack>
+    <version.guava>30.0-jre</version.guava>
+    <version.jackson-dataformat-msgpack>0.8.21</version.jackson-dataformat-msgpack>
     <version.log4j>2.13.3</version.log4j>
     <version.kryo>4.0.2</version.kryo>
     <version.picocli>4.5.0</version.picocli>
-    <version.zeebe>0.24.1</version.zeebe>
+    <version.zeebe>0.25.1</version.zeebe>
 
     <plugin.version.checkstyle>3.1.1</plugin.version.checkstyle>
     <plugin.version.fmt>2.9</plugin.version.fmt>
@@ -199,6 +199,10 @@
         <exclusion>
           <groupId>org.objenesis</groupId>
           <artifactId>objenesis</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.esotericsoftware</groupId>
+          <artifactId>minlog</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
