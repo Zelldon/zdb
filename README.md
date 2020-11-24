@@ -16,6 +16,7 @@ It was created during the Camunda Summer Hackdays in 2020.
     * [Inspect Log Status](#inspect-log-status)
     * [Inspect Log Consistency](#inspect-log-consistency)
     * [Inspect Log](#inspect-log)
+    * [Print Log](#print-log)
  * [Autocompletion](#autocompletion)
  * [Testing](#testing)
 
