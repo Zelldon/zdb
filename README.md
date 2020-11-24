@@ -135,6 +135,23 @@ zdb log search --path=<pathToPartition> --index=<position>
 
 It will print a details to the specific index, when it exists in the log.
 
+#### Print Log
+
+It is possible to print the complete log to standard out. This is can be quite helpful if you want to track down some records, which might have caused some issues.
+
+To print the log:
+
+```sh
+zdb log print --path=<pathToPartition>
+```
+
+To pipe it to a file:
+
+```sh
+zdb log print --path=<pathToPartition> > output.log
+```
+The `output.log` file will contain all records as json. Zeebe entries are written as json, RAFT entries unfortunately not.
+
 ## Examples
 
 ```sh
