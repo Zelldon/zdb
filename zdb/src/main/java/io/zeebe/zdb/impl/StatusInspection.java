@@ -7,10 +7,15 @@
  */
 package io.zeebe.zdb.impl;
 
+import io.zeebe.db.DbKey;
+import io.zeebe.db.impl.DbCompositeKey;
 import io.zeebe.db.impl.DbLong;
 import io.zeebe.db.impl.DbNil;
+import io.zeebe.db.impl.DbString;
 import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.instance.Incident;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class StatusInspection {
 
@@ -35,7 +40,58 @@ public class StatusInspection {
     lowestExportedPosition(partitionState);
     hasBlacklistedInstances(partitionState);
     hasIncidents(partitionState);
+    messages(partitionState);
     return statusBuilder.toString();
+  }
+
+  private void messages(final PartitionState partitionState) {
+    messageCount(partitionState);
+    messageDeadlines(partitionState);
+  }
+
+  private void messageCount(final PartitionState partitionState) {
+
+    final DbLong messageKey = new DbLong();
+    final DbString messageName = new DbString();
+    final DbString correlationKey = new DbString();
+    final DbCompositeKey<DbString, DbString> nameAndCorrelationKey = new DbCompositeKey<>(
+        messageName, correlationKey);
+    final DbCompositeKey<DbCompositeKey<DbString, DbString>, DbKey> nameCorrelationMessageKey = new DbCompositeKey<>(
+        nameAndCorrelationKey, messageKey);
+    final var nameCorrelationMessageColumnFamily = partitionState.getZeebeDb().createColumnFamily(
+        ZbColumnFamilies.MESSAGES, partitionState.getDbContext(), nameCorrelationMessageKey, DbNil.INSTANCE);
+
+    final AtomicLong counter = new AtomicLong(0);
+    nameCorrelationMessageColumnFamily.forEach(nil -> counter.incrementAndGet());
+    addToStatus("Messages: ", "" + counter.get());
+  }
+
+  private void messageDeadlines(final PartitionState partitionState) {
+
+    final DbLong messageKey = new DbLong();
+
+    final DbLong deadline = new DbLong();
+    final DbCompositeKey<DbLong, DbLong> deadlineMessageKey = new DbCompositeKey<>(deadline,
+        messageKey);
+    final var deadlineColumnFamily =
+        partitionState.getZeebeDb().createColumnFamily(
+            ZbColumnFamilies.MESSAGE_DEADLINES, partitionState.getDbContext(), deadlineMessageKey, DbNil.INSTANCE);
+
+    final AtomicLong firstDeadline = new AtomicLong(-1);
+    final AtomicLong lastDeadline = new AtomicLong(0);
+    deadlineColumnFamily.forEach(((dbLongDbLongDbCompositeKey, dbNil) -> {
+      final var currentDeadline = dbLongDbLongDbCompositeKey.getFirst().getValue();
+
+      if (firstDeadline.get() == -1)
+      {
+        firstDeadline.set(currentDeadline);
+      }
+      lastDeadline.set(currentDeadline);
+    }));
+
+    addToStatus("\tCurrent Time: ", "" + System.currentTimeMillis());
+    addToStatus("\tMessage next deadline: ", "" + firstDeadline.get());
+    addToStatus("\tMessage last deadline: ", "" + lastDeadline.get());
   }
 
   private void hasIncidents(final PartitionState partitionState) {
