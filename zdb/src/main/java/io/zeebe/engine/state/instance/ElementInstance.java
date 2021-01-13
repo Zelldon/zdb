@@ -31,7 +31,7 @@ public final class ElementInstance extends UnpackedObject implements DbValue {
   private final ObjectProperty<IndexedRecord> recordProp =
       new ObjectProperty<>("elementRecord", new IndexedRecord());
 
-  ElementInstance() {
+  public ElementInstance() {
     declareProperty(parentKeyProp)
         .declareProperty(childCountProp)
         .declareProperty(jobKeyProp)

@@ -13,8 +13,9 @@ import io.zeebe.db.impl.DbLong;
 import io.zeebe.db.impl.DbNil;
 import io.zeebe.db.impl.DbString;
 import io.zeebe.engine.state.ZbColumnFamilies;
+import io.zeebe.engine.state.instance.ElementInstance;
 import io.zeebe.engine.state.instance.Incident;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.zeebe.engine.state.instance.VariableInstance;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class StatusInspection {
@@ -33,15 +34,80 @@ public class StatusInspection {
    * </ul>
    *
    * @param partitionState the state of the partition
-   * @return a well formated string which contains all information
+   * @return a well formatted string which contains all information
    */
   public String status(final PartitionState partitionState) {
-    lastProcessedPosition(partitionState);
-    lowestExportedPosition(partitionState);
-    hasBlacklistedInstances(partitionState);
-    hasIncidents(partitionState);
+    processing(partitionState);
+    exporting(partitionState);
+    incidentRelated(partitionState);
     messages(partitionState);
+    workflowInstances(partitionState);
+    variables(partitionState);
     return statusBuilder.toString();
+  }
+
+  private void processing(final PartitionState partitionState) {
+    addToStatus("Processing", "");
+    lastProcessedPosition(partitionState);
+  }
+
+  private void exporting(final PartitionState partitionState) {
+    addToStatus("Exporting", "");
+    lowestExportedPosition(partitionState);
+  }
+
+  private void workflowInstances(final PartitionState partitionState) {
+    final DbLong elementInstanceKey = new DbLong();
+
+    final ElementInstance elementInstance = new ElementInstance();
+    final var elementInstanceColumnFamily =
+        partitionState.getZeebeDb().createColumnFamily(
+            ZbColumnFamilies.ELEMENT_INSTANCE_KEY, partitionState.getDbContext(), elementInstanceKey, elementInstance);
+
+    final AtomicLong workflowInstanceCounter = new AtomicLong(0);
+    final AtomicLong elementInstanceCounter = new AtomicLong(0);
+    elementInstanceColumnFamily.forEach(((dbLong, elementInstance1) -> {
+      final var parentKey = elementInstance1.getParentKey();
+      if (parentKey == -1){
+        workflowInstanceCounter.incrementAndGet();
+      }
+      elementInstanceCounter.incrementAndGet();
+    }));
+    addToStatus("WorkflowInstances: ", "" + workflowInstanceCounter.get());
+    addToStatus("\tElementInstances: ", "" + elementInstanceCounter.get());
+  }
+
+  private void variables(final PartitionState partitionState) {
+
+    final DbLong scopeKey = new DbLong();
+    final DbString variableName = new DbString();
+    final DbCompositeKey<DbLong, DbString> scopeKeyVariableNameKey = new DbCompositeKey<>(scopeKey,
+        variableName);
+    final var variablesColumnFamily =
+        partitionState.getZeebeDb().createColumnFamily(
+            ZbColumnFamilies.VARIABLES, partitionState.getDbContext(), scopeKeyVariableNameKey, new VariableInstance());
+
+    final AtomicLong counter = new AtomicLong(0);
+    final AtomicLong minSize = new AtomicLong(Long.MAX_VALUE);
+    final AtomicLong maxSize = new AtomicLong(Long.MIN_VALUE);
+    final AtomicLong avgSize = new AtomicLong(0);
+    variablesColumnFamily.forEach(variableInstance -> {
+      counter.incrementAndGet();
+      final var size = variableInstance.getValue().capacity();
+
+      if (minSize.get() > size) {
+        minSize.set(size);
+      }
+
+      if (maxSize.get() < size) {
+        maxSize.set(size);
+      }
+      avgSize.addAndGet(size);
+    });
+    addToStatus("Variables", "" + counter.get());
+    addToStatus("\tmin size", "" + minSize.get());
+    addToStatus("\tmax size", "" + maxSize.get());
+    addToStatus("\tavg size", "" + (avgSize.get() / (float) counter.get()));
   }
 
   private void messages(final PartitionState partitionState) {
@@ -94,7 +160,15 @@ public class StatusInspection {
     addToStatus("\tMessage last deadline: ", "" + lastDeadline.get());
   }
 
-  private void hasIncidents(final PartitionState partitionState) {
+
+  private void incidentRelated(final PartitionState partitionState) {
+    addToStatus("Incident related:", "");
+
+    blacklistedInstanceCount(partitionState);
+    incidentCount(partitionState);
+  }
+
+  private void incidentCount(final PartitionState partitionState) {
     final var incidentColumnFamily =
         partitionState
             .getZeebeDb()
@@ -104,10 +178,12 @@ public class StatusInspection {
                 new DbLong(),
                 new Incident());
 
-    addToStatus("Incidents", incidentColumnFamily.isEmpty() ? "No" : "Yes");
+    final AtomicLong counter = new AtomicLong();
+    incidentColumnFamily.forEach(n -> counter.incrementAndGet());
+    addToStatus("\tIncidents", "" + counter.get());
   }
 
-  private void hasBlacklistedInstances(final PartitionState partitionState) {
+  private void blacklistedInstanceCount(final PartitionState partitionState) {
     final var blacklistColumnFamily =
         partitionState
             .getZeebeDb()
@@ -116,7 +192,10 @@ public class StatusInspection {
                 partitionState.getDbContext(),
                 new DbLong(),
                 DbNil.INSTANCE);
-    addToStatus("Blacklisted instances", blacklistColumnFamily.isEmpty() ? "No" : "Yes");
+
+    final AtomicLong counter = new AtomicLong();
+    blacklistColumnFamily.forEach(n -> counter.incrementAndGet());
+    addToStatus("\tBlacklisted instances", "" + counter.get());
   }
 
   private void addToStatus(String key, String value) {
@@ -125,16 +204,14 @@ public class StatusInspection {
 
   private void lastProcessedPosition(PartitionState partitionState) {
     addToStatus(
-        "Last processed position",
+        "\tLast processed position",
         String.valueOf(partitionState.getZeebeState().getLastSuccessfulProcessedRecordPosition()));
   }
 
   private void lowestExportedPosition(PartitionState partitionState) {
     final var exporterState = partitionState.getExporterState();
     exporterState.visitPositions(
-        (id, position) -> {
-          addToStatus(id, "position " + position);
-        });
+        (id, position) -> addToStatus("\t" + id, "position " + position));
 
     final String positionString;
     if (exporterState.hasExporters()) {
@@ -142,6 +219,6 @@ public class StatusInspection {
     } else {
       positionString = "No exporters";
     }
-    addToStatus("Lowest exported position", positionString);
+    addToStatus("\tLowest exported position", positionString);
   }
 }
