@@ -158,10 +158,25 @@ The `output.log` file will contain all records as json. Zeebe entries are writte
 ```sh
 > zdb status --path=data/raft-partition/partitions/1/runtime/
 
-Last processed position: 47248515375
-Lowest exported position: No exporters
-Blacklisted instances: Yes
-Incidents: Yes
+Processing: 
+	Last processed position: 141169121
+Exporting: 
+	elasticsearch: position 141169060
+	MetricsExporter: position 141169122
+	Lowest exported position: 141169060
+Incident related:: 
+	Blacklisted instances: 0
+	Incidents: 33
+Messages: : 3656965
+	Current Time: : 1610561195140
+	Message next deadline: : 1610556566223
+	Message last deadline: : 1615738151675
+WorkflowInstances: : 17
+	ElementInstances: : 34
+Variables: 158
+	min size: 1
+	max size: 963
+	avg size: 27.158228
 ```
 
 ```sh
