@@ -61,18 +61,24 @@ public class StatusInspection {
 
     final ElementInstance elementInstance = new ElementInstance();
     final var elementInstanceColumnFamily =
-        partitionState.getZeebeDb().createColumnFamily(
-            ZbColumnFamilies.ELEMENT_INSTANCE_KEY, partitionState.getDbContext(), elementInstanceKey, elementInstance);
+        partitionState
+            .getZeebeDb()
+            .createColumnFamily(
+                ZbColumnFamilies.ELEMENT_INSTANCE_KEY,
+                partitionState.getDbContext(),
+                elementInstanceKey,
+                elementInstance);
 
     final AtomicLong workflowInstanceCounter = new AtomicLong(0);
     final AtomicLong elementInstanceCounter = new AtomicLong(0);
-    elementInstanceColumnFamily.forEach(((dbLong, elementInstance1) -> {
-      final var parentKey = elementInstance1.getParentKey();
-      if (parentKey == -1){
-        workflowInstanceCounter.incrementAndGet();
-      }
-      elementInstanceCounter.incrementAndGet();
-    }));
+    elementInstanceColumnFamily.forEach(
+        ((dbLong, elementInstance1) -> {
+          final var parentKey = elementInstance1.getParentKey();
+          if (parentKey == -1) {
+            workflowInstanceCounter.incrementAndGet();
+          }
+          elementInstanceCounter.incrementAndGet();
+        }));
     addToStatus("WorkflowInstances: ", "" + workflowInstanceCounter.get());
     addToStatus("\tElementInstances: ", "" + elementInstanceCounter.get());
   }
@@ -81,29 +87,35 @@ public class StatusInspection {
 
     final DbLong scopeKey = new DbLong();
     final DbString variableName = new DbString();
-    final DbCompositeKey<DbLong, DbString> scopeKeyVariableNameKey = new DbCompositeKey<>(scopeKey,
-        variableName);
+    final DbCompositeKey<DbLong, DbString> scopeKeyVariableNameKey =
+        new DbCompositeKey<>(scopeKey, variableName);
     final var variablesColumnFamily =
-        partitionState.getZeebeDb().createColumnFamily(
-            ZbColumnFamilies.VARIABLES, partitionState.getDbContext(), scopeKeyVariableNameKey, new VariableInstance());
+        partitionState
+            .getZeebeDb()
+            .createColumnFamily(
+                ZbColumnFamilies.VARIABLES,
+                partitionState.getDbContext(),
+                scopeKeyVariableNameKey,
+                new VariableInstance());
 
     final AtomicLong counter = new AtomicLong(0);
     final AtomicLong minSize = new AtomicLong(Long.MAX_VALUE);
     final AtomicLong maxSize = new AtomicLong(Long.MIN_VALUE);
     final AtomicLong avgSize = new AtomicLong(0);
-    variablesColumnFamily.forEach(variableInstance -> {
-      counter.incrementAndGet();
-      final var size = variableInstance.getValue().capacity();
+    variablesColumnFamily.forEach(
+        variableInstance -> {
+          counter.incrementAndGet();
+          final var size = variableInstance.getValue().capacity();
 
-      if (minSize.get() > size) {
-        minSize.set(size);
-      }
+          if (minSize.get() > size) {
+            minSize.set(size);
+          }
 
-      if (maxSize.get() < size) {
-        maxSize.set(size);
-      }
-      avgSize.addAndGet(size);
-    });
+          if (maxSize.get() < size) {
+            maxSize.set(size);
+          }
+          avgSize.addAndGet(size);
+        });
     addToStatus("Variables", "" + counter.get());
     addToStatus("\tmin size", "" + minSize.get());
     addToStatus("\tmax size", "" + maxSize.get());
@@ -120,12 +132,18 @@ public class StatusInspection {
     final DbLong messageKey = new DbLong();
     final DbString messageName = new DbString();
     final DbString correlationKey = new DbString();
-    final DbCompositeKey<DbString, DbString> nameAndCorrelationKey = new DbCompositeKey<>(
-        messageName, correlationKey);
-    final DbCompositeKey<DbCompositeKey<DbString, DbString>, DbKey> nameCorrelationMessageKey = new DbCompositeKey<>(
-        nameAndCorrelationKey, messageKey);
-    final var nameCorrelationMessageColumnFamily = partitionState.getZeebeDb().createColumnFamily(
-        ZbColumnFamilies.MESSAGES, partitionState.getDbContext(), nameCorrelationMessageKey, DbNil.INSTANCE);
+    final DbCompositeKey<DbString, DbString> nameAndCorrelationKey =
+        new DbCompositeKey<>(messageName, correlationKey);
+    final DbCompositeKey<DbCompositeKey<DbString, DbString>, DbKey> nameCorrelationMessageKey =
+        new DbCompositeKey<>(nameAndCorrelationKey, messageKey);
+    final var nameCorrelationMessageColumnFamily =
+        partitionState
+            .getZeebeDb()
+            .createColumnFamily(
+                ZbColumnFamilies.MESSAGES,
+                partitionState.getDbContext(),
+                nameCorrelationMessageKey,
+                DbNil.INSTANCE);
 
     final AtomicLong counter = new AtomicLong(0);
     nameCorrelationMessageColumnFamily.forEach(nil -> counter.incrementAndGet());
@@ -137,29 +155,33 @@ public class StatusInspection {
     final DbLong messageKey = new DbLong();
 
     final DbLong deadline = new DbLong();
-    final DbCompositeKey<DbLong, DbLong> deadlineMessageKey = new DbCompositeKey<>(deadline,
-        messageKey);
+    final DbCompositeKey<DbLong, DbLong> deadlineMessageKey =
+        new DbCompositeKey<>(deadline, messageKey);
     final var deadlineColumnFamily =
-        partitionState.getZeebeDb().createColumnFamily(
-            ZbColumnFamilies.MESSAGE_DEADLINES, partitionState.getDbContext(), deadlineMessageKey, DbNil.INSTANCE);
+        partitionState
+            .getZeebeDb()
+            .createColumnFamily(
+                ZbColumnFamilies.MESSAGE_DEADLINES,
+                partitionState.getDbContext(),
+                deadlineMessageKey,
+                DbNil.INSTANCE);
 
     final AtomicLong firstDeadline = new AtomicLong(-1);
     final AtomicLong lastDeadline = new AtomicLong(0);
-    deadlineColumnFamily.forEach(((dbLongDbLongDbCompositeKey, dbNil) -> {
-      final var currentDeadline = dbLongDbLongDbCompositeKey.getFirst().getValue();
+    deadlineColumnFamily.forEach(
+        ((dbLongDbLongDbCompositeKey, dbNil) -> {
+          final var currentDeadline = dbLongDbLongDbCompositeKey.getFirst().getValue();
 
-      if (firstDeadline.get() == -1)
-      {
-        firstDeadline.set(currentDeadline);
-      }
-      lastDeadline.set(currentDeadline);
-    }));
+          if (firstDeadline.get() == -1) {
+            firstDeadline.set(currentDeadline);
+          }
+          lastDeadline.set(currentDeadline);
+        }));
 
     addToStatus("\tCurrent Time: ", "" + System.currentTimeMillis());
     addToStatus("\tMessage next deadline: ", "" + firstDeadline.get());
     addToStatus("\tMessage last deadline: ", "" + lastDeadline.get());
   }
-
 
   private void incidentRelated(final PartitionState partitionState) {
     addToStatus("Incident related:", "");
@@ -210,8 +232,7 @@ public class StatusInspection {
 
   private void lowestExportedPosition(PartitionState partitionState) {
     final var exporterState = partitionState.getExporterState();
-    exporterState.visitPositions(
-        (id, position) -> addToStatus("\t" + id, "position " + position));
+    exporterState.visitPositions((id, position) -> addToStatus("\t" + id, "position " + position));
 
     final String positionString;
     if (exporterState.hasExporters()) {
