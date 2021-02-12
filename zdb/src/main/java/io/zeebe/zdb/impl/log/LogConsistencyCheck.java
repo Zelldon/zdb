@@ -107,13 +107,15 @@ public final class LogConsistencyCheck {
       }
 
       if (lastRecordPosition > lowestPosition) {
+        inconsistentLog = true;
         report
-            .append("Inconsistent log lastRecordPosition")
+            .append("Inconsistent log lastRecordPosition '")
             .append(lastRecordPosition)
-            .append(" is higher than next lowestRecordPosition ")
+            .append("' is higher than next lowestRecordPosition '")
             .append(lowestPosition)
-            .append(" at index")
+            .append("' at index: '")
             .append(currentIndex)
+            .append("'")
             .append(System.lineSeparator());
       }
 
