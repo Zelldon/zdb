@@ -28,7 +28,7 @@ import picocli.CommandLine.RunLast;
     })
 public class ZeebeDebugger implements Callable<Integer> {
 
-  protected static final String ZDB_VERSION = "zdb 0.1";
+  protected static final String ZDB_VERSION = "zdb 0.4.0";
 
   private static CommandLine cli;
 
