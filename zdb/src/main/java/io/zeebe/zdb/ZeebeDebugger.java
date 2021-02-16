@@ -32,7 +32,17 @@ public class ZeebeDebugger implements Callable<Integer> {
 
   private static CommandLine cli;
 
+  /**
+   * Disables the error stream to prevent IllegalAccess warnings to be logged.
+   * https://stackoverflow.com/questions/46454995/how-to-hide-warning-illegal-reflective-access-in-java-9-without-jvm-argument
+   */
+  public static void disableWarning() {
+    System.err.close();
+    System.setErr(System.out);
+  }
+
   public static void main(String[] args) {
+    disableWarning();
     cli = new CommandLine(new ZeebeDebugger()).setExecutionStrategy(new RunLast());
     final int exitcode = cli.execute(args);
     System.exit(exitcode);
