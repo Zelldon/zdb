@@ -22,7 +22,7 @@ public final class LogStatus {
 
   public String scan(Path path) {
     final var zeebeLog = ZeebeLog.ofPath(path);
-
+    final var metaStore = new MetaStore(path);
     final var startTime = System.currentTimeMillis();
     final var report = new StringBuilder("Scan log...").append(System.lineSeparator());
     final var scanner = new Scanner(report);
@@ -36,6 +36,21 @@ public final class LogStatus {
         .append(endTime - startTime)
         .append(" ms")
         .append(System.lineSeparator());
+
+    report
+        .append("Meta: ")
+        .append(System.lineSeparator())
+        .append("\t")
+        .append("Last voted for: ")
+        .append(metaStore.loadVote())
+        .append(System.lineSeparator())
+        .append("\t")
+        .append("Persisted term: ")
+        .append(metaStore.loadTerm())
+        .append(System.lineSeparator());
+
+    final var configuration = metaStore.loadConfiguration();
+    report.append("Configuration: ").append(configuration).append(System.lineSeparator());
 
     return scanner.getReport();
   }
@@ -71,7 +86,7 @@ public final class LogStatus {
       processEntrySize(indexedEntry);
 
       if (indexedEntry.type() == InitializeEntry.class) {
-        processInitialEntry((InitializeEntry) indexedEntry.entry());
+        processInitialEntry(indexedEntry);
       } else if (indexedEntry.type() == ZeebeEntry.class) {
         processZeebeEntry((ZeebeEntry) indexedEntry.entry());
       }
@@ -108,8 +123,8 @@ public final class LogStatus {
       }
     }
 
-    private void processInitialEntry(final InitializeEntry initializeEntry) {
-      initialEntries.add(initializeEntry.toString());
+    private void processInitialEntry(final Indexed indexedEntry) {
+      initialEntries.add(indexedEntry.toString());
     }
 
     private void processEntrySize(final Indexed indexedEntry) {
