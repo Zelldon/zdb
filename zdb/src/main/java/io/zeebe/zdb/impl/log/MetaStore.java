@@ -18,8 +18,6 @@ import io.atomix.storage.buffer.FileBuffer;
 import io.atomix.utils.serializer.Serializer;
 import java.io.File;
 import java.nio.file.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Manages persistence of server configurations.
