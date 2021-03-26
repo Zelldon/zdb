@@ -7,8 +7,8 @@
  */
 package io.zeebe.zdb;
 
+import io.zeebe.zdb.impl.InstanceInspection;
 import io.zeebe.zdb.impl.PartitionState;
-import io.zeebe.zdb.impl.WorkflowInspection;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -19,10 +19,10 @@ import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 @Command(
-    name = "workflow",
+    name = "instance",
     mixinStandardHelpOptions = true,
-    description = "Print's information about deployed workflow's")
-public class WorkflowCommand implements Callable<Integer> {
+    description = "Print's information about running instances")
+public class InstanceCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -40,30 +40,12 @@ public class WorkflowCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "list", description = "List all workflows")
-  public int list() {
-    final var partitionState = PartitionState.of(partitionPath);
-    final var outputLines = new WorkflowInspection().list(partitionState);
-    outputLines.forEach(System.out::println);
-    return 0;
-  }
-
-  @Command(name = "entity", description = "Show details about a workflow")
+  @Command(name = "entity", description = "Show details about an  workflow instance")
   public int entity(
-      @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the workflow instance", arity = "1")
           final long key) {
     final var partitionState = PartitionState.of(partitionPath);
-    final var output = new WorkflowInspection().entity(partitionState, key);
-    System.out.println(output);
-    return 0;
-  }
-
-  @Command(name = "instances", description = "Show all instances of a workflow")
-  public int instances(
-      @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
-          final long key) {
-    final var partitionState = PartitionState.of(partitionPath);
-    final var output = new WorkflowInspection().getInstancesOfWorkflow(partitionState, key);
+    final var output = new InstanceInspection().entity(partitionState, key);
     System.out.println(output);
     return 0;
   }
