@@ -141,6 +141,11 @@ public class CompactRecordLogger {
   }
 
   public void log() {
+    final String bulkMessage = format();
+    LOG.info(bulkMessage);
+  }
+
+  public String format() {
     final var bulkMessage = new StringBuilder().append("Compact log representation:\n");
     bulkMessage
         .append("--------\n")
@@ -171,7 +176,7 @@ public class CompactRecordLogger {
                     .append(entry.getKey())
                     .append("\n"));
 
-    LOG.info(bulkMessage.toString());
+    return bulkMessage.toString();
   }
 
   private StringBuilder summarizeRecord(final Record<?> record) {
@@ -237,7 +242,8 @@ public class CompactRecordLogger {
 
     final var formattedProcessId =
         StringUtils.isEmpty(bpmnProcessId) ? "?" : formatId(bpmnProcessId);
-    final var formattedInstanceKey = workflowInstanceKey < 0 ? "?" : shortenKey(workflowInstanceKey);
+    final var formattedInstanceKey =
+        workflowInstanceKey < 0 ? "?" : shortenKey(workflowInstanceKey);
 
     return String.format(" in <process %s[%s]>", formattedProcessId, formattedInstanceKey);
   }
@@ -265,7 +271,8 @@ public class CompactRecordLogger {
       result
           .append(summarizeElementInformation(value.getElementId(), value.getElementInstanceKey()))
           .append(
-              summarizeWorkflowInformation(value.getBpmnProcessId(), value.getWorkflowInstanceKey()));
+              summarizeWorkflowInformation(
+                  value.getBpmnProcessId(), value.getWorkflowInstanceKey()));
     } else {
       result.append(shortenKey(record.getKey()));
     }
@@ -361,7 +368,7 @@ public class CompactRecordLogger {
         .append(" starting <process ")
         .append(formatId(value.getBpmnProcessId()))
         // variables don't exist on this record in 0.26
-        //.append(summarizeVariables(value.getVariables()))
+        // .append(summarizeVariables(value.getVariables()))
         .toString();
   }
 
@@ -372,9 +379,9 @@ public class CompactRecordLogger {
         new StringBuilder().append("\"").append(value.getMessageName()).append("\" ");
 
     // isInterrupting does not yet exist on this record in 0.26
-    //if (value.isInterrupting()) {
+    // if (value.isInterrupting()) {
     //  result.append("(inter.) ");
-    //}
+    // }
 
     if (!StringUtils.isEmpty(value.getCorrelationKey())) {
       result.append("correlationKey: ").append(value.getCorrelationKey()).append(" ");
@@ -387,7 +394,7 @@ public class CompactRecordLogger {
         .append(
             summarizeWorkflowInformation(value.getBpmnProcessId(), value.getWorkflowInstanceKey()))
         // variables don't exist on this record in 0.26
-        //.append(summarizeVariables(value.getVariables()));
+        // .append(summarizeVariables(value.getVariables()));
         .toString();
   }
 
@@ -419,9 +426,9 @@ public class CompactRecordLogger {
         new StringBuilder().append("\"").append(value.getMessageName()).append("\" ");
 
     // isInterrupting does not yet exist on this record in 0.26
-    //if (value.isInterrupting()) {
+    // if (value.isInterrupting()) {
     //  result.append("(inter.) ");
-    //}
+    // }
 
     if (!StringUtils.isEmpty(value.getCorrelationKey())) {
       result.append("correlationKey: ").append(value.getCorrelationKey()).append(" ");
