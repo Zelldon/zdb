@@ -27,12 +27,11 @@ import io.zeebe.protocol.record.value.JobRecordValue;
 import io.zeebe.protocol.record.value.MessageRecordValue;
 import io.zeebe.protocol.record.value.MessageStartEventSubscriptionRecordValue;
 import io.zeebe.protocol.record.value.MessageSubscriptionRecordValue;
-import io.zeebe.protocol.record.value.ProcessInstanceCreationRecordValue;
-import io.zeebe.protocol.record.value.ProcessInstanceRecordValue;
-import io.zeebe.protocol.record.value.ProcessMessageSubscriptionRecordValue;
 import io.zeebe.protocol.record.value.TimerRecordValue;
 import io.zeebe.protocol.record.value.VariableRecordValue;
-import io.zeebe.protocol.record.value.deployment.DeployedProcess;
+import io.zeebe.protocol.record.value.WorkflowInstanceCreationRecordValue;
+import io.zeebe.protocol.record.value.WorkflowInstanceRecordValue;
+import io.zeebe.protocol.record.value.WorkflowInstanceSubscriptionRecordValue;
 import io.zeebe.protocol.record.value.deployment.DeploymentResource;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -89,11 +88,10 @@ public class CompactRecordLogger {
     valueLoggers.put(
         ValueType.MESSAGE_START_EVENT_SUBSCRIPTION, this::summarizeMessageStartEventSubscription);
     valueLoggers.put(ValueType.MESSAGE_SUBSCRIPTION, this::summarizeMessageSubscription);
-    valueLoggers.put(ValueType.PROCESS, this::summarizeProcess);
-    valueLoggers.put(ValueType.PROCESS_INSTANCE, this::summarizeProcessInstance);
-    valueLoggers.put(ValueType.PROCESS_INSTANCE_CREATION, this::summarizeProcessInstanceCreation);
+    valueLoggers.put(ValueType.WORKFLOW_INSTANCE, this::summarizeProcessInstance);
+    valueLoggers.put(ValueType.WORKFLOW_INSTANCE_CREATION, this::summarizeProcessInstanceCreation);
     valueLoggers.put(
-        ValueType.PROCESS_MESSAGE_SUBSCRIPTION, this::summarizeProcessInstanceSubscription);
+        ValueType.WORKFLOW_INSTANCE_SUBSCRIPTION, this::summarizeProcessInstanceSubscription);
     valueLoggers.put(ValueType.VARIABLE, this::summarizeVariable);
     valueLoggers.put(ValueType.TIMER, this::summarizeTimer);
     valueLoggers.put(ValueType.ERROR, this::summarizeError);
@@ -234,12 +232,12 @@ public class CompactRecordLogger {
     return String.format(" @%s[%s]", formatId(elementId), shortenKey(elementInstanceKey));
   }
 
-  private String summarizeProcessInformation(
-      final String bpmnProcessId, final long processInstanceKey) {
+  private String summarizeWorkflowInformation(
+      final String bpmnProcessId, final long workflowInstanceKey) {
 
     final var formattedProcessId =
         StringUtils.isEmpty(bpmnProcessId) ? "?" : formatId(bpmnProcessId);
-    final var formattedInstanceKey = processInstanceKey < 0 ? "?" : shortenKey(processInstanceKey);
+    final var formattedInstanceKey = workflowInstanceKey < 0 ? "?" : shortenKey(workflowInstanceKey);
 
     return String.format(" in <process %s[%s]>", formattedProcessId, formattedInstanceKey);
   }
@@ -267,7 +265,7 @@ public class CompactRecordLogger {
       result
           .append(summarizeElementInformation(value.getElementId(), value.getElementInstanceKey()))
           .append(
-              summarizeProcessInformation(value.getBpmnProcessId(), value.getProcessInstanceKey()));
+              summarizeWorkflowInformation(value.getBpmnProcessId(), value.getWorkflowInstanceKey()));
     } else {
       result.append(shortenKey(record.getKey()));
     }
@@ -302,7 +300,7 @@ public class CompactRecordLogger {
 
     result
         .append(
-            summarizeProcessInformation(value.getBpmnProcessId(), value.getProcessInstanceKey()))
+            summarizeWorkflowInformation(value.getBpmnProcessId(), value.getWorkflowInstanceKey()))
         .append(summarizeVariables(value.getVariables()));
 
     return result.toString();
@@ -362,7 +360,8 @@ public class CompactRecordLogger {
         .append("\"")
         .append(" starting <process ")
         .append(formatId(value.getBpmnProcessId()))
-        .append(summarizeVariables(value.getVariables()))
+        // variables don't exist on this record in 0.26
+        //.append(summarizeVariables(value.getVariables()))
         .toString();
   }
 
@@ -372,50 +371,39 @@ public class CompactRecordLogger {
     final var result =
         new StringBuilder().append("\"").append(value.getMessageName()).append("\" ");
 
-    if (value.isInterrupting()) {
-      result.append("(inter.) ");
-    }
+    // isInterrupting does not yet exist on this record in 0.26
+    //if (value.isInterrupting()) {
+    //  result.append("(inter.) ");
+    //}
 
     if (!StringUtils.isEmpty(value.getCorrelationKey())) {
       result.append("correlationKey: ").append(value.getCorrelationKey()).append(" ");
     }
 
-    result
+    return result
         .append("@[")
         .append(shortenKey(value.getElementInstanceKey()))
         .append("]")
         .append(
-            summarizeProcessInformation(value.getBpmnProcessId(), value.getProcessInstanceKey()))
-        .append(summarizeVariables(value.getVariables()));
-    return result.toString();
-  }
-
-  private String summarizeProcess(final Record<?> record) {
-    final var value = (DeployedProcess) record.getValue();
-
-    return new StringBuilder()
-        .append(value.getResourceName())
-        .append("->")
-        .append(formatId(value.getBpmnProcessId()))
-        .append(" (version:")
-        .append(value.getVersion())
-        .append(")")
+            summarizeWorkflowInformation(value.getBpmnProcessId(), value.getWorkflowInstanceKey()))
+        // variables don't exist on this record in 0.26
+        //.append(summarizeVariables(value.getVariables()));
         .toString();
   }
 
   private String summarizeProcessInstance(final Record<?> record) {
-    final var value = (ProcessInstanceRecordValue) record.getValue();
+    final var value = (WorkflowInstanceRecordValue) record.getValue();
     return new StringBuilder()
         .append(value.getBpmnElementType())
         .append(" ")
         .append(formatId(value.getElementId()))
         .append(
-            summarizeProcessInformation(value.getBpmnProcessId(), value.getProcessInstanceKey()))
+            summarizeWorkflowInformation(value.getBpmnProcessId(), value.getWorkflowInstanceKey()))
         .toString();
   }
 
   private String summarizeProcessInstanceCreation(final Record<?> record) {
-    final var value = (ProcessInstanceCreationRecordValue) record.getValue();
+    final var value = (WorkflowInstanceCreationRecordValue) record.getValue();
     return new StringBuilder()
         .append("new <process ")
         .append(formatId(value.getBpmnProcessId()))
@@ -425,14 +413,15 @@ public class CompactRecordLogger {
   }
 
   private String summarizeProcessInstanceSubscription(final Record<?> record) {
-    final var value = (ProcessMessageSubscriptionRecordValue) record.getValue();
+    final var value = (WorkflowInstanceSubscriptionRecordValue) record.getValue();
 
     final var result =
         new StringBuilder().append("\"").append(value.getMessageName()).append("\" ");
 
-    if (value.isInterrupting()) {
-      result.append("(inter.) ");
-    }
+    // isInterrupting does not yet exist on this record in 0.26
+    //if (value.isInterrupting()) {
+    //  result.append("(inter.) ");
+    //}
 
     if (!StringUtils.isEmpty(value.getCorrelationKey())) {
       result.append("correlationKey: ").append(value.getCorrelationKey()).append(" ");
@@ -443,7 +432,7 @@ public class CompactRecordLogger {
         .append(shortenKey(value.getElementInstanceKey()))
         .append("]")
         .append(
-            summarizeProcessInformation(value.getBpmnProcessId(), value.getProcessInstanceKey()))
+            summarizeWorkflowInformation(value.getBpmnProcessId(), value.getWorkflowInstanceKey()))
         .append(summarizeVariables(value.getVariables()));
 
     return result.toString();
@@ -458,7 +447,7 @@ public class CompactRecordLogger {
         .append(value.getValue())
         .append(" in <process ")
         .append("[")
-        .append(shortenKey(value.getProcessInstanceKey()))
+        .append(shortenKey(value.getWorkflowInstanceKey()))
         .append("]>")
         .toString();
   }
@@ -482,8 +471,8 @@ public class CompactRecordLogger {
             summarizeElementInformation(value.getTargetElementId(), value.getElementInstanceKey()))
         .append(" ")
         .append(
-            summarizeProcessInformation(
-                shortenKey(value.getProcessDefinitionKey()), value.getProcessInstanceKey()))
+            summarizeWorkflowInformation(
+                shortenKey(value.getWorkflowKey()), value.getWorkflowInstanceKey()))
         .append(" due ")
         .append(shortenDateTime(dueTime));
 
@@ -501,7 +490,7 @@ public class CompactRecordLogger {
         .append(value.getExceptionMessage())
         .append("\"")
         .append(" ")
-        .append(summarizeProcessInformation(null, value.getProcessInstanceKey()))
+        .append(summarizeWorkflowInformation(null, value.getWorkflowInstanceKey()))
         .append(" (")
         .append(StringUtils.abbreviate(value.getStacktrace(), "..", 100))
         .append(")")
@@ -525,7 +514,7 @@ public class CompactRecordLogger {
 
     if (key > 0) {
       result.append(
-          "K" + leftPad(Long.toString(Protocol.decodeKeyInPartition(key)), keyDigits, '0'));
+          "K" + leftPad(Long.toString(CopiedProtocol.decodeKeyInPartition(key)), keyDigits, '0'));
     } else {
       result.append(leftPad(Long.toString(key), keyDigits + 1, ' '));
     }
@@ -566,5 +555,15 @@ public class CompactRecordLogger {
 
     builder.append("T").append(DateTimeFormatter.ISO_LOCAL_TIME.format(time));
     return builder.toString();
+  }
+
+  // copied from io.zeebe.protocol.Protocol (commit ed3d259a2)
+  private static class CopiedProtocol {
+    public static long decodeKeyInPartition(final long key) {
+      // For comprehension, we calculate: key - ((long) partitionId << KEY_BITS);
+
+      // for efficiency we do it as a bit-wise operation
+      return key & 0x0007FFFFFFFFFFFFL;
+    }
   }
 }
