@@ -48,6 +48,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated copied from zeebe-test-util - in future versions, that class should just be used
+ *     directly through a dependency on zeebe-test-util
+ */
+@Deprecated
 public class CompactRecordLogger {
 
   private static final Logger LOG = LoggerFactory.getLogger("io.zeebe.test");
