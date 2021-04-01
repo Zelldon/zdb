@@ -44,7 +44,10 @@ public class ZeebeDebugger implements Callable<Integer> {
 
   public static void main(String[] args) {
     disableWarning();
-    cli = new CommandLine(new ZeebeDebugger()).setExecutionStrategy(new RunLast());
+    cli =
+        new CommandLine(new ZeebeDebugger())
+            .setExecutionStrategy(new RunLast())
+            .setCaseInsensitiveEnumValuesAllowed(true);
     final int exitcode = cli.execute(args);
     System.exit(exitcode);
   }
