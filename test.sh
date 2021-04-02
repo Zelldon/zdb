@@ -4,7 +4,7 @@ trap 'echo Terminated $0; exit' INT;
 
 set -x
 
-version=0.2.0-SNAPSHOT
+version=*
 
 java -jar zdb/target/zdb-$version.jar &&
 java -jar zdb/target/zdb-$version.jar status --path=database/data/raft-partition/partitions/1/runtime &&

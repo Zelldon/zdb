@@ -6,7 +6,7 @@
 
   <groupId>io.zeebe</groupId>
   <artifactId>zdb</artifactId>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
   <inceptionYear>2020</inceptionYear>
   <name>zdb</name>
   <url>https://github.com/Zelldon/zdb</url>
