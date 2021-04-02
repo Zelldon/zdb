@@ -7,73 +7,23 @@
  */
 package io.zeebe.zdb.impl;
 
-import io.zeebe.db.impl.DbLong;
-import io.zeebe.db.impl.DbNil;
-import io.zeebe.engine.state.ZbColumnFamilies;
 import io.zeebe.engine.state.instance.ElementInstance;
 import io.zeebe.engine.state.instance.ElementInstanceState;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
-public class BlacklistInspection {
-
-  public List<String> list(final PartitionState partitionState) {
-    final var elementInstanceState =
-        partitionState.getZeebeState().getWorkflowState().getElementInstanceState();
-
-    final var blacklistColumnFamily =
-        partitionState
-            .getZeebeDb()
-            .createColumnFamily(
-                ZbColumnFamilies.BLACKLIST,
-                partitionState.getDbContext(),
-                new DbLong(),
-                DbNil.INSTANCE);
-
-    final var blacklistedInstances = new ArrayList<String>();
-
-    blacklistColumnFamily.forEach(
-        (key, nil) -> {
-          final var workflowInstanceKey = key.getValue();
-
-          final var workflowInstance = elementInstanceState.getInstance(workflowInstanceKey);
-
-          final var bpmnProcessId = workflowInstance.getValue().getBpmnProcessId();
-
-          blacklistedInstances.add(toString(workflowInstanceKey, bpmnProcessId));
-        });
-
-    return blacklistedInstances;
-  }
+public final class InstanceInspection {
 
   public String entity(final PartitionState partitionState, final long key) {
     final var elementInstanceState =
         partitionState.getZeebeState().getWorkflowState().getElementInstanceState();
 
-    final var keyType = new DbLong();
-    final var blacklistColumnFamily =
-        partitionState
-            .getZeebeDb()
-            .createColumnFamily(
-                ZbColumnFamilies.BLACKLIST, partitionState.getDbContext(), keyType, DbNil.INSTANCE);
-
-    keyType.wrapLong(key);
-    final var dbNil = blacklistColumnFamily.get(keyType);
-
-    return Optional.ofNullable(dbNil)
-        .map(
-            nil -> {
-              final var workflowInstance = elementInstanceState.getInstance(key);
-              return getBlacklistedWorkflowInstanceAsString(elementInstanceState, workflowInstance);
-            })
-        .orElse("No entity found for given key " + key);
+    final var workflowInstance = elementInstanceState.getInstance(key);
+    return getWorkflowInstance(elementInstanceState, workflowInstance);
   }
 
-  private static String getBlacklistedWorkflowInstanceAsString(
+  private static String getWorkflowInstance(
       ElementInstanceState elementInstanceState, ElementInstance workflowInstance) {
 
-    final var stringBuilder = new StringBuilder("Blacklisted workflow instance:\n");
+    final var stringBuilder = new StringBuilder("Workflow instance:");
 
     final var workflowInstanceValue = workflowInstance.getValue();
     stringBuilder
@@ -143,12 +93,6 @@ public class BlacklistInspection {
 
   private static String getIntend(final int intend) {
     return " ".repeat(calculateIntend(intend));
-  }
-
-  private static String toString(final long workflowInstanceKey, final String bpmnProcessId) {
-    return String.format(
-        "Blacklisted Instance [workflow-instance-key: %d, BPMN-process-id: \"%s\"]",
-        workflowInstanceKey, bpmnProcessId);
   }
 
   private static int calculateIntend(int intend) {

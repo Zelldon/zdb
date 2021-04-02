@@ -2,8 +2,8 @@
  * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH under
  * one or more contributor license agreements. See the NOTICE file distributed
  * with this work for additional information regarding copyright ownership.
- * Licensed under the Zeebe Community License 1.0. You may not use this file
- * except in compliance with the Zeebe Community License 1.0.
+ * Licensed under the Zeebe Community License 1.1. You may not use this file
+ * except in compliance with the Zeebe Community License 1.1.
  */
 package io.zeebe.zdb;
 
@@ -24,7 +24,8 @@ import picocli.CommandLine.RunLast;
       BlacklistCommand.class,
       IncidentCommand.class,
       WorkflowCommand.class,
-      LogCommand.class
+      LogCommand.class,
+      InstanceCommand.class
     })
 public class ZeebeDebugger implements Callable<Integer> {
 
@@ -43,7 +44,10 @@ public class ZeebeDebugger implements Callable<Integer> {
 
   public static void main(String[] args) {
     disableWarning();
-    cli = new CommandLine(new ZeebeDebugger()).setExecutionStrategy(new RunLast());
+    cli =
+        new CommandLine(new ZeebeDebugger())
+            .setExecutionStrategy(new RunLast())
+            .setCaseInsensitiveEnumValuesAllowed(true);
     final int exitcode = cli.execute(args);
     System.exit(exitcode);
   }
