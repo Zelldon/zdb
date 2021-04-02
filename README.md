@@ -12,6 +12,7 @@ It was created during the Camunda Summer Hackdays in 2020.
     * [Inspect Incidents](#inspect-incidents)
     * [Inspect Blacklisted Workflow Instances](#inspect-blacklisted-workflow-instances)
     * [Inspect Workflows](#inspect-workflows)
+    * [Inspect Instances](#inspect-instances)
   * [Log Inspection](#log-inspection)
     * [Inspect Log Status](#inspect-log-status)
     * [Inspect Log Consistency](#inspect-log-consistency)
@@ -93,6 +94,22 @@ Returns details to a specific workflow:
 zdb workflow entity <WorkflowKey> --path=<pathToDatabase>
 ```
 
+List all element instances for the given workflow:
+
+```sh
+zdb workflow --path=<pathToDatabase> instances <WorkflowKey>
+```
+
+#### Inspect Instances
+
+You can inspect existing element instances and get details viewed of there state.
+
+Print all information to a given element instance:
+
+```sh
+zdb instance --path=<pathToDatabase> entity <elementInstanceKey>
+```
+
 ### Log Inspection
 
 You can also inspect the log stream using the command `zdb log` and his subcommands.
@@ -152,6 +169,12 @@ To pipe it to a file:
 zdb log print --path=<pathToPartition> > output.log
 ```
 The `output.log` file will contain all records as json. Zeebe entries are written as json, RAFT entries unfortunately not.
+
+If the log is quite big or you want to search for a specific order of ZeebeRecord then a compact view of the log is helpful. You can specify the format of the log output (per default it is json).
+
+```sh
+zdb log print  --path=<pathToPartition> --format compact
+```
 
 ## Examples
 
