@@ -7,16 +7,18 @@
  */
 package io.zeebe.zdb;
 
+import io.zeebe.zdb.ZeebeDebugger.VersionProvider;
 import java.util.concurrent.Callable;
 import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
+import picocli.CommandLine.IVersionProvider;
 import picocli.CommandLine.RunLast;
 
 @Command(
     name = "zdb",
     mixinStandardHelpOptions = true,
-    version = ZeebeDebugger.ZDB_VERSION,
+    versionProvider = VersionProvider.class,
     description = "Zeebe debug and inspection tool",
     subcommands = {
       GenerateCompletion.class, // to generate auto completion
@@ -28,9 +30,6 @@ import picocli.CommandLine.RunLast;
       InstanceCommand.class
     })
 public class ZeebeDebugger implements Callable<Integer> {
-
-  protected static final String ZDB_VERSION = "zdb 0.4.0";
-
   private static CommandLine cli;
 
   /**
@@ -38,6 +37,7 @@ public class ZeebeDebugger implements Callable<Integer> {
    * https://stackoverflow.com/questions/46454995/how-to-hide-warning-illegal-reflective-access-in-java-9-without-jvm-argument
    */
   public static void disableWarning() {
+
     System.err.close();
     System.setErr(System.out);
   }
@@ -56,5 +56,11 @@ public class ZeebeDebugger implements Callable<Integer> {
   public Integer call() {
     cli.usage(System.out);
     return 0;
+  }
+
+  static class VersionProvider implements IVersionProvider {
+    public String[] getVersion() {
+      return new String[] {"zdv v" + ZeebeDebugger.class.getPackage().getImplementationVersion()};
+    }
   }
 }
