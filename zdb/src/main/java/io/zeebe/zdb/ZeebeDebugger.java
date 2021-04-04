@@ -60,7 +60,7 @@ public class ZeebeDebugger implements Callable<Integer> {
 
   static class VersionProvider implements IVersionProvider {
     public String[] getVersion() {
-      return new String[] {"zdv v" + ZeebeDebugger.class.getPackage().getImplementationVersion()};
+      return new String[] {"zdb v" + ZeebeDebugger.class.getPackage().getImplementationVersion()};
     }
   }
 }
