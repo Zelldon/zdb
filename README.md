@@ -32,18 +32,16 @@ In order to shed some more light in the dark we build a tool called zdb - Zeebe 
 
 ## Installation
 
+Log into your Zeebe broker machine/container: e.g. `docker exec -it <container_id> /bin/bash`. Then run the following commands (requires `curl` to be installed):
+```bash
+cd /usr/bin
+curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb
+mkdir target
+curl -o target/zdb-<version>.jar -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb-<version>.jar
+chmod u+x zdb
+zdb --version
+```
 Substitute `<version>` with the version you want to install. Check [releases](https://github.com/Zelldon/zdb/releases) to see all the available versions.
-```
-$ docker exec -it <container_id> /bin/bash
-$ cd /usr/bin
-$ apt-get update
-$ apt-get install curl
-$ curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb
-$ mkdir target
-$ curl -o target/zdb-<version>.jar -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb-<version>.jar
-$ chmod +x zdb target/zdb-<version>.jar
-$ ./zdb --version
-```
 
 ## How does it solve it
 
