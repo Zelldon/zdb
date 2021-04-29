@@ -6,7 +6,7 @@ It was created during the Camunda Summer Hackdays in 2020.
 ## Table Of Contents
 
 * [What problem does it solve](#what-problem-does-it-solve)
-* [Installation](#installation)
+* [Usage](#usage)
 * [How does it solve it](#how-does-it-solve-it)
   * [State Inspection](#state-inspection)
     * [Inspect Zeebe Partition Status](#inspect-zeebe-partition-status)
@@ -30,14 +30,14 @@ If there was no exporter configured or they haven't exported for a while it get 
 In order to shed some more light in the dark we build a tool called zdb - Zeebe Debugger. It should help you along the way during incidents and broken systems.
 
 
-## Installation
+## Usage
 
 Log into your Zeebe broker machine/container: e.g. `docker exec -it <container_id> /bin/bash`. Then run the following commands (requires `curl` to be installed):
 ```bash
 cd /usr/bin
 curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb
-mkdir target
-curl -o target/zdb-<version>.jar -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb-<version>.jar
+curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb-<version>.jar
+sed -i 's/target\/// zdb
 chmod u+x zdb
 zdb --version
 ```
