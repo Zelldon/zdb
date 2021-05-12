@@ -106,18 +106,17 @@
             <artifactId>kotlin-stdlib-jdk8</artifactId>
             <version>1.4.10</version>
         </dependency>
-
         <dependency>
             <groupId>io.zeebe</groupId>
             <artifactId>zeebe-test-container</artifactId>
             <version>3.0.0</version>
-<!--            <scope>test</scope>-->
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.camunda</groupId>
             <artifactId>zeebe-client-java</artifactId>
             <version>1.0.0</version>
-<!--            <scope>test</scope>-->
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.camunda</groupId>
@@ -128,7 +127,7 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>1.15.3</version>
-<!--            <scope>test</scope>-->
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.camunda</groupId>
@@ -139,17 +138,7 @@
             <groupId>io.camunda</groupId>
             <artifactId>zeebe-test-util</artifactId>
             <version>1.0.0</version>
-<!--            <scope>test</scope>-->
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.junit.vintage/junit-vintage-engine -->
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>5.7.1</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
-
 </project>
