@@ -140,5 +140,11 @@
             <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.camunda</groupId>
+            <artifactId>zeebe-workflow-engine</artifactId>
+            <version>1.0.0</version>
+<!--            <scope>test</scope>-->
+        </dependency>
     </dependencies>
 </project>
