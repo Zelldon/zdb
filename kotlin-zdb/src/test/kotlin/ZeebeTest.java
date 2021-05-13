@@ -106,5 +106,6 @@ public class ZeebeTest {
     assertThat(deployedProcess.getVersion()).isEqualTo(1);
     assertThat(deployedProcess.getBpmnProcessId()).isEqualTo(BufferUtil.wrapString("process"));
     assertThat(deployedProcess.getResourceName()).isEqualTo(BufferUtil.wrapString("process.bpmn"));
+    assertThat(deployedProcess.getKey()).isEqualTo(deploymentEvent.getProcesses().get(0).getProcessDefinitionKey());
   }
 }
