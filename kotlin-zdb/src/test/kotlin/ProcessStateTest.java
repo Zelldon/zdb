@@ -19,7 +19,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public class ProcessInspectionTest {
+public class ProcessStateTest {
 
   public File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
 
