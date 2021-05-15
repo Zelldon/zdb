@@ -30,15 +30,8 @@ import org.rocksdb.Transaction;
 
 public final class RocksDbInternal {
 
-  static final EnumSet<Code> RECOVERABLE_ERROR_CODES =
-      EnumSet.of(Ok, Aborted, Expired, IOError, Busy, TimedOut, TryAgain, MergeInProgress);
-
   static Field nativeHandle;
-
-  static Method putWithHandle;
   static Method getWithHandle;
-  static Method removeWithHandle;
-
   static Method seekMethod;
 
   static {
@@ -53,11 +46,7 @@ public final class RocksDbInternal {
 
   private static void resolveInternalMethods() throws NoSuchFieldException, NoSuchMethodException {
     nativeHandles();
-
-    putWithHandle();
     getWithHandle();
-    removeWithHandle();
-
     seekWithHandle();
   }
 
@@ -66,36 +55,11 @@ public final class RocksDbInternal {
     nativeHandle.setAccessible(true);
   }
 
-  //    private native void put(final long handle, final byte[] key,
-  //      final int keyLength, final byte[] value, final int valueLength,
-  //      final long columnFamilyHandle)
-
-  private static void putWithHandle() throws NoSuchMethodException {
-    putWithHandle =
-        Transaction.class.getDeclaredMethod(
-            "put",
-            Long.TYPE,
-            byte[].class,
-            Integer.TYPE,
-            byte[].class,
-            Integer.TYPE,
-            Long.TYPE,
-            Boolean.TYPE);
-    putWithHandle.setAccessible(true);
-  }
-
   private static void getWithHandle() throws NoSuchMethodException {
     getWithHandle =
-        Transaction.class.getDeclaredMethod(
-            "get", Long.TYPE, Long.TYPE, byte[].class, Integer.TYPE, Long.TYPE);
+        RocksDB.class.getDeclaredMethod(
+            "get", Long.TYPE, Long.TYPE, byte[].class, Integer.TYPE, Integer.TYPE);
     getWithHandle.setAccessible(true);
-  }
-
-  private static void removeWithHandle() throws NoSuchMethodException {
-    removeWithHandle =
-        Transaction.class.getDeclaredMethod(
-            "delete", Long.TYPE, byte[].class, Integer.TYPE, Long.TYPE, Boolean.TYPE);
-    removeWithHandle.setAccessible(true);
   }
 
   private static void seekWithHandle() throws NoSuchMethodException {
@@ -114,10 +78,5 @@ public final class RocksDbInternal {
     } catch (final IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException("Unexpected error occurred trying to seek with RocksIterator", e);
     }
-  }
-
-  static boolean isRocksDbExceptionRecoverable(final RocksDBException rdbex) {
-    final Status status = rdbex.getStatus();
-    return RECOVERABLE_ERROR_CODES.contains(status.getCode());
   }
 }

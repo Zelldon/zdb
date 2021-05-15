@@ -37,7 +37,7 @@ public class ZeebeTransaction implements ZeebeDbTransaction {
       final int keyLength)
       throws Exception {
     return (byte[])
-        RocksDbInternal.getWithHandle.invoke(nativeHandle, readOptionsHandle, key, keyLength, columnFamilyHandle);
+        RocksDbInternal.getWithHandle.invoke(rocksDB, nativeHandle, readOptionsHandle, key, 0, keyLength);
   }
 
   public RocksIterator newIterator(final ReadOptions options, final ColumnFamilyHandle handle) {
