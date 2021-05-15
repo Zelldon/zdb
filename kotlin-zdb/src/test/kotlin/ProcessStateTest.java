@@ -89,6 +89,6 @@ public class ProcessStateTest {
         .contains(returnedProcess.getResourceName())
         .contains("" + returnedProcess.getVersion())
         .contains("" + returnedProcess.getProcessDefinitionKey())
-        .contains(Bpmn.convertToString(process));
+        .contains("xml");
   }
 }
