@@ -57,4 +57,38 @@ public class ProcessInspectionTest {
         .contains("" + returnedProcess.getVersion())
         .contains("" + returnedProcess.getProcessDefinitionKey());
   }
+
+
+  @Test
+  public void shouldGetProcessesDetails() {
+    // given
+    final ZeebeClient client =
+        ZeebeClient.newClientBuilder()
+            .gatewayAddress(zeebeContainer.getExternalGatewayAddress())
+            .usePlaintext()
+            .build();
+    final BpmnModelInstance process =
+        Bpmn.createExecutableProcess("process").startEvent().endEvent().done();
+    final DeploymentEvent deploymentEvent =
+        client.newDeployCommand().addProcessModel(process, "process.bpmn").send().join();
+
+    // when
+    final var processState = new ProcessState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+    final var returnedProcess = deploymentEvent.getProcesses().get(0);
+    final var processDetails = processState.processDetails(returnedProcess.getProcessDefinitionKey());
+
+    // then
+    assertThat(processDetails.getBpmnProcessId()).isEqualTo(returnedProcess.getBpmnProcessId());
+    assertThat(processDetails.getProcessDefinitionKey()).isEqualTo(returnedProcess.getProcessDefinitionKey());
+    assertThat(processDetails.getResourceName()).isEqualTo(returnedProcess.getResourceName());
+    assertThat(processDetails.getVersion()).isEqualTo(returnedProcess.getVersion());
+    assertThat(processDetails.getResource()).isEqualTo(Bpmn.convertToString(process));
+
+    assertThat(processDetails.toString())
+        .contains(returnedProcess.getBpmnProcessId())
+        .contains(returnedProcess.getResourceName())
+        .contains("" + returnedProcess.getVersion())
+        .contains("" + returnedProcess.getProcessDefinitionKey())
+        .contains(Bpmn.convertToString(process));
+  }
 }

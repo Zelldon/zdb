@@ -4,11 +4,11 @@ import io.camunda.zeebe.engine.state.ZeebeDbState
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
-class ProcessState {
+class ProcessState(statePath: Path) {
 
     private var zeebeDbState: ZeebeDbState
 
-    constructor(statePath : Path) {
+    init {
         val readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
         zeebeDbState = ZeebeDbState(readonlyDb, readonlyDb.createContext())
     }
@@ -17,5 +17,11 @@ class ProcessState {
         return zeebeDbState
             .processState
             .processes.map { ProcessMeta(it) }
+    }
+
+    fun processDetails(processDefinitionKey : Long): ProcessDetails {
+        return ProcessDetails(zeebeDbState
+            .processState
+            .getProcessByKey(processDefinitionKey))
     }
 }
