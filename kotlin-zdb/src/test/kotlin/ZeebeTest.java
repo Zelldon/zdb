@@ -40,8 +40,11 @@ public class ZeebeTest {
   @Container
   public ZeebeContainer zeebeContainer = new ZeebeContainer().withFileSystemBind(tempDir.getPath(), "/usr/local/zeebe/data/", BindMode.READ_WRITE);
 
+  /**
+   * Just ot verify whether test container works with Zeebe Client.
+   */
   @Test
-  public void shouldRunProcessInstanceUntilEnd() throws Exception {
+  public void shouldRunProcessInstanceUntilEnd() {
     // given
     final ZeebeClient client =
         ZeebeClient.newClientBuilder()

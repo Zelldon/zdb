@@ -56,6 +56,7 @@ public class ProcessStateTest {
     client.newWorker().jobType("type").handler((jobClient, job) -> jobLatch.countDown()).open();
     jobLatch.await();
   }
+
 // This is currently not working - it will cause java.nio.file.AccessDeniedException: /tmp/data--7809705097131595652/raft-partition/partitions/1/runtime/OPTIONS-000007
 // Might be related to the test container usage
 //  @AfterAll
