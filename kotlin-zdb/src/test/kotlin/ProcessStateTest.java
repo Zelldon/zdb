@@ -6,16 +6,18 @@ import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.record.value.BpmnElementType;
-import io.camunda.zeebe.util.FileUtil;
+import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
+import io.zell.zdb.state.incident.IncidentDetails;
+import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceDetails;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
-import org.junit.jupiter.api.AfterAll;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -26,7 +28,19 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class ProcessStateTest {
 
   private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
-  private static final BpmnModelInstance process = Bpmn.createExecutableProcess("process").startEvent().serviceTask("task").zeebeJobType("type").endEvent().done();;
+  private static final BpmnModelInstance process =
+      Bpmn.createExecutableProcess("process")
+          .startEvent()
+          .parallelGateway("gw")
+            .serviceTask("task")
+            .zeebeJobType("type")
+            .endEvent()
+          .moveToLastGateway()
+            .serviceTask("incidentTask")
+            .zeebeInputExpression("=foo", "bar")
+            .zeebeJobType("type")
+            .endEvent()
+          .done();;
 
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
@@ -35,6 +49,7 @@ public class ProcessStateTest {
   private static DeploymentEvent deploymentEvent;
   private static ProcessInstanceEvent returnedProcessInstance;
   private static CountDownLatch jobLatch;
+  private static final AtomicLong jobKey = new AtomicLong();
 
   @BeforeAll
   public static void setup() throws Exception {
@@ -53,7 +68,10 @@ public class ProcessStateTest {
         .join();
 
     jobLatch = new CountDownLatch(1);
-    client.newWorker().jobType("type").handler((jobClient, job) -> jobLatch.countDown()).open();
+    client.newWorker().jobType("type").handler((jobClient, job) -> {
+      jobKey.set(job.getKey());
+      jobLatch.countDown();
+    }).open();
     jobLatch.await();
   }
 
@@ -150,7 +168,7 @@ public class ProcessStateTest {
     assertThat(actualInstanceDetails.getParentProcessInstanceKey()).isEqualTo(-1);
     assertThat(actualInstanceDetails.getParentElementInstanceKey()).isEqualTo(-1);
     assertThat(actualInstanceDetails.getFlowScopeKey()).isEqualTo(-1);
-    assertThat(actualInstanceDetails.getChildren()).hasSize(1);
+    assertThat(actualInstanceDetails.getChildren()).hasSize(2);
 
     assertThat(actualInstanceDetails.toString())
         .contains(returnedProcessInstance.getBpmnProcessId())
@@ -170,7 +188,7 @@ public class ProcessStateTest {
 
     // when
     InstanceDetails actualElementInstance = processState
-        .instanceDetails(processInstance.getChildren().get(0));
+        .instanceDetails(processInstance.getChildren().get(1));
 
     // then
     assertThat(actualElementInstance).isNotNull();
@@ -183,6 +201,7 @@ public class ProcessStateTest {
     assertThat(actualElementInstance.getElementType()).isEqualTo(BpmnElementType.SERVICE_TASK);
     assertThat(actualElementInstance.getParentProcessInstanceKey()).isEqualTo(-1);
     assertThat(actualElementInstance.getParentElementInstanceKey()).isEqualTo(-1);
+    assertThat(actualElementInstance.getJobKey()).isEqualTo(jobKey.get());
     assertThat(actualElementInstance.getFlowScopeKey()).isEqualTo(processInstance.getKey());
     assertThat(actualElementInstance.getChildren()).isEmpty();
 
@@ -205,5 +224,41 @@ public class ProcessStateTest {
 
     // then
     assertThat(actualInstanceDetails).isNull();
+  }
+
+  @Test
+  public void shouldGetIncidentDetails() {
+    // given
+    final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
+    final var processState = new InstanceState(runtimePath);
+    final var processInstance = processState
+        .instanceDetails(returnedProcessInstance.getProcessInstanceKey());
+    InstanceDetails actualElementInstance = processState
+        .instanceDetails(processInstance.getChildren().get(0));
+    final var incidentState = new IncidentState(runtimePath);
+    final var incidentKey = incidentState.processInstanceIncidentKey(actualElementInstance.getKey());
+
+    // when
+    final var incidentDetails = incidentState.incidentDetails(incidentKey);
+
+    // then
+    assertThat(incidentDetails).isNotNull();
+    assertThat(incidentDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
+    assertThat(incidentDetails.getProcessDefinitionKey())
+        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
+    assertThat(incidentDetails.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(incidentDetails.getElementInstanceKey()).isEqualTo(actualElementInstance.getKey());
+    assertThat(incidentDetails.getElementId()).isEqualTo("incidentTask");
+    assertThat(incidentDetails.getErrorMessage()).isEqualTo("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
+    assertThat(incidentDetails.getErrorType()).isEqualTo(ErrorType.IO_MAPPING_ERROR);
+    assertThat(incidentDetails.getVariablesScopeKey()).isEqualTo(actualElementInstance.getKey());
+    assertThat(incidentDetails.getJobKey()).isEqualTo(-1);
+
+    assertThat(incidentDetails.toString())
+        .contains(returnedProcessInstance.getBpmnProcessId())
+        .contains("incidentTask")
+        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
+        .contains(ErrorType.IO_MAPPING_ERROR.toString())
+        .contains("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
   }
 }

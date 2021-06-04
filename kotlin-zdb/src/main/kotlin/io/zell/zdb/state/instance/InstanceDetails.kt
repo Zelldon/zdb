@@ -19,6 +19,7 @@ class InstanceDetails private constructor(val key : Long,
                                           val parentProcessInstanceKey : Long,
                                           val elementType : BpmnElementType,
                                           val elementId : String,
+                                          val jobKey: Long,
                                           val children: List<Long>) {
 
     constructor(elementInstance: ElementInstance, children: List<ElementInstance>?) :
@@ -32,6 +33,7 @@ class InstanceDetails private constructor(val key : Long,
                 elementInstance.value.parentProcessInstanceKey,
                 elementInstance.value.bpmnElementType,
                 elementInstance.value.elementId,
+                elementInstance.jobKey,
                 children?.map { it.key } ?: listOf())
 
 
