@@ -31,6 +31,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <zeebe-test-container.version>3.0.0</zeebe-test-container.version>
     <zeebe.version>1.0.0</zeebe.version>
+    <version.slf4j>1.7.30</version.slf4j>
   </properties>
 
   <repositories>
@@ -105,6 +106,13 @@
   </build>
 
   <dependencies>
+    <!-- logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${version.slf4j}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>io.camunda</groupId>
       <artifactId>zeebe-bpmn-model</artifactId>
