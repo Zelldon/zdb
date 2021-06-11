@@ -7,10 +7,13 @@
  */
 package io.zeebe.zdb;
 
+import io.zell.zdb.state.instance.InstanceDetails;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -56,11 +59,17 @@ public class ProcessCommand implements Callable<Integer> {
     return 0;
   }
 
-// TODO list instances for a workflow https://github.com/Zelldon/zdb/issues/19
-//  @Command(name = "instances", description = "Show all instances of a process")
+  @Command(name = "instances", description = "Show all instances of a process")
   public int instances(
       @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
-    throw new UnsupportedOperationException("Sorry not implemented yet. Feel free to create an PR for it ^.^");
+    final var instances =
+        new InstanceState(partitionPath)
+            .listInstances()
+            .stream()
+            .filter(instanceDetails -> instanceDetails.getProcessDefinitionKey() == key)
+            .collect(Collectors.toList());
+    System.out.printf("[%ns%n]%n", instances);
+    return 0;
   }
 }
