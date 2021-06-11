@@ -7,8 +7,6 @@
  */
 package io.zeebe.zdb;
 
-import io.zeebe.zdb.impl.PartitionState;
-import io.zeebe.zdb.impl.StatusInspection;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -29,9 +27,9 @@ public class StatusCommand implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    final var partitionState = PartitionState.of(partitionPath);
-    final var status = new StatusInspection().status(partitionState);
-    System.out.println(status);
+//    final var partitionState = PartitionState.of(partitionPath);
+//    final var status = new StatusInspection().status(partitionState);
+//    System.out.println(status);
     return 0;
   }
 }

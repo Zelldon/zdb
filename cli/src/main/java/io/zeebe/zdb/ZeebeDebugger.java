@@ -7,7 +7,7 @@
  */
 package io.zeebe.zdb;
 
-import io.zeebe.zdb.ZeebeDebugger.VersionProvider;
+import io.camunda.zeebe.zdb.ZeebeDebugger.VersionProvider;
 import java.util.concurrent.Callable;
 import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;

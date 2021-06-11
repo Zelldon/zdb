@@ -7,8 +7,8 @@
  */
 package io.zeebe.zdb;
 
-import io.zeebe.zdb.impl.IncidentInspection;
-import io.zeebe.zdb.impl.PartitionState;
+import io.camunda.zeebe.zdb.impl.IncidentInspection;
+import io.camunda.zeebe.zdb.impl.PartitionState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;

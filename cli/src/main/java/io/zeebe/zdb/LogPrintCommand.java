@@ -7,8 +7,6 @@
  */
 package io.zeebe.zdb;
 
-import io.zeebe.zdb.impl.log.LogPrint;
-import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Help.Visibility;
@@ -31,9 +29,9 @@ public class LogPrintCommand implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    final Path logPath = spec.findOption("-p").getValue();
-    final var output = new LogPrint(format).print(logPath);
-    System.out.println(output);
+//    final Path logPath = spec.findOption("-p").getValue();
+//    final var output = new LogPrint(format).print(logPath);
+//    System.out.println(output);
     return 0;
   }
 

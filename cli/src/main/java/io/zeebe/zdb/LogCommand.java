@@ -7,8 +7,6 @@
  */
 package io.zeebe.zdb;
 
-import io.zeebe.zdb.impl.log.LogConsistencyCheck;
-import io.zeebe.zdb.impl.log.LogStatus;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -36,15 +34,15 @@ public class LogCommand implements Callable<Integer> {
 
   @Command(name = "status", description = "Print's the status of the log")
   public int status() {
-    final var output = new LogStatus().scan(partitionPath);
-    System.out.println(output);
+//    final var output = new LogStatus().scan(partitionPath);
+//    System.out.println(output);
     return 0;
   }
 
   @Command(name = "consistency", description = "Checks the given log for consistency")
   public int consistency() {
-    final var output = new LogConsistencyCheck().consistencyCheck(partitionPath);
-    System.out.println(output);
+//    final var output = new LogConsistencyCheck().consistencyCheck(partitionPath);
+//    System.out.println(output);
     return 0;
   }
 

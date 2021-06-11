@@ -110,47 +110,73 @@
       <artifactId>zeebe-bpmn-model</artifactId>
       <version>${zeebe.version}</version>
     </dependency>
+
     <dependency>
       <groupId>io.camunda</groupId>
       <artifactId>zeebe-client-java</artifactId>
       <version>${zeebe.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>io.camunda</groupId>
       <artifactId>zeebe-test-util</artifactId>
       <version>${zeebe.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>io.camunda</groupId>
       <artifactId>zeebe-util</artifactId>
       <version>${zeebe.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-context</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-autoconfigure</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-actuator</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-actuator-autoconfigure</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    <!--            <scope>test</scope>-->
-    <dependency>
-      <groupId>io.camunda</groupId>
-      <artifactId>zeebe-util</artifactId>
-      <version>${zeebe.version}</version>
-    </dependency>
+
     <dependency>
       <groupId>io.camunda</groupId>
       <artifactId>zeebe-workflow-engine</artifactId>
       <version>${zeebe.version}</version>
     </dependency>
-    <!--            <scope>test</scope>-->
+
     <dependency>
       <groupId>io.zeebe</groupId>
       <artifactId>zeebe-test-container</artifactId>
       <version>${zeebe-test-container.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>${assertj-core.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib-jdk8</artifactId>

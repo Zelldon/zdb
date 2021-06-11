@@ -7,8 +7,6 @@
  */
 package io.zeebe.zdb;
 
-import io.zeebe.zdb.impl.PartitionState;
-import io.zeebe.zdb.impl.WorkflowInspection;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -42,9 +40,10 @@ public class WorkflowCommand implements Callable<Integer> {
 
   @Command(name = "list", description = "List all workflows")
   public int list() {
-    final var partitionState = PartitionState.of(partitionPath);
-    final var outputLines = new WorkflowInspection().list(partitionState);
-    outputLines.forEach(System.out::println);
+
+//    final var partitionState = PartitionState.of(partitionPath);
+//    final var outputLines = new WorkflowInspection().list(partitionState);
+//    outputLines.forEach(System.out::println);
     return 0;
   }
 
@@ -52,9 +51,9 @@ public class WorkflowCommand implements Callable<Integer> {
   public int entity(
       @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
           final long key) {
-    final var partitionState = PartitionState.of(partitionPath);
-    final var output = new WorkflowInspection().entity(partitionState, key);
-    System.out.println(output);
+//    final var partitionState = PartitionState.of(partitionPath);
+//    final var output = new WorkflowInspection().entity(partitionState, key);
+//    System.out.println(output);
     return 0;
   }
 
@@ -62,9 +61,9 @@ public class WorkflowCommand implements Callable<Integer> {
   public int instances(
       @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
           final long key) {
-    final var partitionState = PartitionState.of(partitionPath);
-    final var output = new WorkflowInspection().getInstancesOfWorkflow(partitionState, key);
-    System.out.println(output);
+//    final var partitionState = PartitionState.of(partitionPath);
+//    final var output = new WorkflowInspection().getInstancesOfWorkflow(partitionState, key);
+//    System.out.println(output);
     return 0;
   }
 }
