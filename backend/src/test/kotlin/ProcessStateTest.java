@@ -9,12 +9,21 @@ import io.camunda.zeebe.protocol.record.value.BpmnElementType;
 import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.state.incident.IncidentDetails;
+import io.zell.zdb.state.general.ExportingDetails;
+import io.zell.zdb.state.general.GeneralDetails;
+import io.zell.zdb.state.general.GeneralState;
+import io.zell.zdb.state.general.IncidentDetails;
+import io.zell.zdb.state.general.MessagesDetails;
+import io.zell.zdb.state.general.ProcessInstancesDetails;
+import io.zell.zdb.state.general.ProcessingDetails;
+import io.zell.zdb.state.general.VariablesDetails;
 import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceDetails;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.io.File;
+import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
@@ -64,8 +73,12 @@ public class ProcessStateTest {
         .newCreateInstanceCommand()
         .bpmnProcessId("process")
         .latestVersion()
+        .variables(Map.of("var1", "1", "var2", "12", "var3", "123"))
         .send()
         .join();
+
+    client.newPublishMessageCommand().messageName("msg").correlationKey("123").timeToLive(Duration.ofSeconds(1)).send().join();
+    client.newPublishMessageCommand().messageName("msg12").correlationKey("123").timeToLive(Duration.ofHours(1)).send().join();
 
     jobLatch = new CountDownLatch(1);
     client.newWorker().jobType("type").handler((jobClient, job) -> {
@@ -378,5 +391,75 @@ public class ProcessStateTest {
         .contains("" + returnedProcessInstance.getProcessDefinitionKey())
         .contains(ErrorType.IO_MAPPING_ERROR.toString())
         .contains("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
+  }
+
+  @Test
+  public void shouldGetGeneralState() {
+    // given
+    final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
+    final var generalState = new GeneralState(runtimePath);
+
+    // when
+    final var generalDetails = generalState.generalDetails();
+
+    // then
+    assertThat(generalDetails).isNotNull();
+
+    final var exportingDetails = generalDetails.getExportingDetails();
+    assertThat(exportingDetails).isNotNull();
+    assertThat(exportingDetails.getExporters()).isEmpty();
+    assertThat(exportingDetails.getLowestExportedPosition()).isZero();
+
+    final var processingDetails = generalDetails.getProcessingDetails();
+    assertThat(processingDetails).isNotNull();
+    assertThat(processingDetails.getLastProcessedPosition()).isGreaterThan(1);
+
+    final var incidentDetails = generalDetails.getIncidentDetails();
+    assertThat(incidentDetails).isNotNull();
+    assertThat(incidentDetails.getIncidents()).isEqualTo(1);
+    assertThat(incidentDetails.getBlacklistedInstances()).isZero();
+
+    final var processInstancesDetails = generalDetails.getProcessInstancesDetails();
+    assertThat(processInstancesDetails).isNotNull();
+    assertThat(processInstancesDetails.getProcessInstanceCount()).isEqualTo(1);
+    assertThat(processInstancesDetails.getElementInstanceCount()).isEqualTo(2);
+
+    final var variablesDetails = generalDetails.getVariablesDetails();
+    assertThat(variablesDetails).isNotNull();
+    assertThat(variablesDetails.getVariablesCount()).isEqualTo(3);
+    assertThat(variablesDetails.getMinSize()).isEqualTo(2);
+    assertThat(variablesDetails.getMaxSize()).isEqualTo(4);
+    assertThat(variablesDetails.getAvgSize()).isEqualTo(3);
+
+    final var messageDetails = generalDetails.getMessageDetails();
+    assertThat(messageDetails).isNotNull();
+    assertThat(messageDetails.getCount()).isEqualTo(2);
+    assertThat(messageDetails.getLastDeadline()).isNotZero();
+    assertThat(messageDetails.getLastDeadline()).isGreaterThan(messageDetails.getNextDeadline());
+    assertThat(messageDetails.getNextDeadline()).isNotZero();
+    assertThat(messageDetails.getNextDeadline()).isLessThan(messageDetails.getLastDeadline());
+  }
+
+  @Test
+  public void shouldProduceJsonOnGeneralState() {
+    // given
+    final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
+    final var generalState = new GeneralState(runtimePath);
+    final var generalDetails = generalState.generalDetails();
+
+    // when
+    final var jsonOutput = generalDetails.toString();
+
+    // then
+    assertThat(jsonOutput)
+        .contains("processingDetails")
+        .contains("lastProcessedPosition")
+        .contains("exportingDetails")
+        .contains("exporters")
+        .contains("lowestExportedPosition")
+        .contains("incidentDetails")
+        .contains("messageDetails")
+        .contains("processInstancesDetails")
+        .contains("variablesDetails");
   }
 }

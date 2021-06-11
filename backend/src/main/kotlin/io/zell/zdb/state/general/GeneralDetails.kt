@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 class GeneralDetails constructor(val processingDetails: ProcessingDetails,
                                  val exportingDetails: ExportingDetails,
                                  val incidentDetails: IncidentDetails,
-                                 val messageDetails: MessageDetails,
+                                 val messageDetails: MessagesDetails,
                                  val processInstancesDetails: ProcessInstancesDetails,
                                  val variablesDetails: VariablesDetails) {
     override fun toString(): String {

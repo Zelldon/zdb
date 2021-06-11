@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 
 
 @Serializable
-class MessageDetails constructor(val count: Long, val nextDeadline: Long, val lastDeadline: Long) {
+class MessagesDetails constructor(val count: Long, val nextDeadline: Long, val lastDeadline: Long) {
     override fun toString(): String {
         return Json.encodeToString(this)
     }
