@@ -7,12 +7,9 @@
  */
 package io.zeebe.zdb;
 
-import io.zell.zdb.state.process.ProcessDetails;
-import io.zell.zdb.state.process.ProcessMeta;
+import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -22,10 +19,10 @@ import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 @Command(
-    name = "workflow",
+    name = "process",
     mixinStandardHelpOptions = true,
-    description = "Print's information about deployed workflow's")
-public class WorkflowCommand implements Callable<Integer> {
+    description = "Print's information about deployed processes")
+public class ProcessCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -43,26 +40,26 @@ public class WorkflowCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "list", description = "List all workflows")
+  @Command(name = "list", description = "List all processes")
   public int list() {
     final var processMetas = new ProcessState(partitionPath).listProcesses();
     System.out.printf("[%ns%n]%n", processMetas);
     return 0;
   }
 
-  @Command(name = "entity", description = "Show details about a workflow")
+  @Command(name = "entity", description = "Show details about a process")
   public int entity(
-      @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
     final var processDetails = new ProcessState(partitionPath).processDetails(key);
     System.out.println(processDetails);
     return 0;
   }
 
-  @Command(name = "instances", description = "Show all instances of a workflow")
+  @Command(name = "instances", description = "Show all instances of a process")
   public int instances(
-      @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
-    throw new UnsupportedOperationException("not implemented");
+    throw new UnsupportedOperationException("Sorry not implemented yet. Feel free to create an PR for it ^.");
   }
 }

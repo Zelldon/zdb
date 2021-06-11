@@ -7,7 +7,7 @@
  */
 package io.zeebe.zdb;
 
-import io.camunda.zeebe.zdb.ZeebeDebugger.VersionProvider;
+import io.zeebe.zdb.ZeebeDebugger.VersionProvider;
 import java.util.concurrent.Callable;
 import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;
@@ -25,7 +25,7 @@ import picocli.CommandLine.RunLast;
       StatusCommand.class,
       BlacklistCommand.class,
       IncidentCommand.class,
-      WorkflowCommand.class,
+      ProcessCommand.class,
       LogCommand.class,
       InstanceCommand.class
     })
