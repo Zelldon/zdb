@@ -7,6 +7,8 @@
  */
 package io.zeebe.zdb;
 
+import io.zell.zdb.state.instance.InstanceDetails;
+import io.zell.zdb.state.instance.InstanceState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -38,13 +40,12 @@ public class InstanceCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "entity", description = "Show details about an  workflow instance")
+  @Command(name = "entity", description = "Show details about any element instance")
   public int entity(
-      @Parameters(paramLabel = "KEY", description = "The key of the workflow instance", arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the process or element instance", arity = "1")
           final long key) {
-//    final var partitionState = PartitionState.of(partitionPath);
-//    final var output = new InstanceInspection().entity(partitionState, key);
-//    System.out.println(output);
+    final var instanceDetails = new InstanceState(partitionPath).instanceDetails(key);
+    System.out.println(instanceDetails);
     return 0;
   }
 }
