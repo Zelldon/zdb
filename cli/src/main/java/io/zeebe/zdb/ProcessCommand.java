@@ -60,6 +60,6 @@ public class ProcessCommand implements Callable<Integer> {
   public int instances(
       @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
-    throw new UnsupportedOperationException("Sorry not implemented yet. Feel free to create an PR for it ^.");
+    throw new UnsupportedOperationException("Sorry not implemented yet. Feel free to create an PR for it ^.^");
   }
 }
