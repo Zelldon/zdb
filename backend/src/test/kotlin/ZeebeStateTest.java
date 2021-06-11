@@ -34,7 +34,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-public class ProcessStateTest {
+public class ZeebeStateTest {
 
   private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
   private static final BpmnModelInstance process =
