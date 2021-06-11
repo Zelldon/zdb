@@ -4,19 +4,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>io.zeebe</groupId>
-  <artifactId>zdb</artifactId>
-  <version>0.5.1</version>
-  <inceptionYear>2020</inceptionYear>
-  <name>zdb</name>
-  <url>https://github.com/Zelldon/zdb</url>
+  <parent>
+    <groupId>io.zell</groupId>
+    <artifactId>zdb</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
 
-  <licenses>
-    <license>
-      <name>Zeebe Community License v1.0</name>
-      <url>https://zeebe.io/legal/zeebe-community-license-1.0</url>
-    </license>
-  </licenses>
+  <artifactId>cli</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>ZDB CLI</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,31 +32,19 @@
     <plugin.version.license>3.0</plugin.version.license>
   </properties>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>io.zeebe</groupId>
-        <artifactId>zeebe-bom</artifactId>
-        <version>${version.zeebe}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
   <dependencies>
     <dependency>
-      <groupId>io.zeebe</groupId>
+      <groupId>io.camunda</groupId>
       <artifactId>zeebe-protocol-impl</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>io.zeebe</groupId>
+      <groupId>io.camunda</groupId>
       <artifactId>zeebe-db</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>io.zeebe</groupId>
+      <groupId>io.camunda</groupId>
       <artifactId>zeebe-util</artifactId>
       <exclusions>
         <exclusion>
@@ -90,8 +75,8 @@
     </dependency>
 
     <dependency>
-      <groupId>io.zeebe</groupId>
-      <artifactId>atomix-cluster</artifactId>
+      <groupId>io.camunda</groupId>
+      <artifactId>zeebe-atomix-cluster</artifactId>
       <exclusions>
         <exclusion>
           <groupId>io.netty</groupId>
@@ -125,7 +110,7 @@
     </dependency>
 
     <dependency>
-      <groupId>io.zeebe</groupId>
+      <groupId>io.camunda</groupId>
       <artifactId>zeebe-logstreams</artifactId>
       <exclusions>
         <exclusion>
@@ -156,13 +141,13 @@
     <!--
     Required to deal with:
     Dependency convergence error for com.google.errorprone:error_prone_annotations:2.4.0 paths to dependency are:
-    +-io.zeebe:zdb:0.1.0-SNAPSHOT
-      +-io.zeebe:atomix-cluster:0.24.1
-        +-io.zeebe:atomix-utils:0.24.1
+    +-io.camunda:zdb:0.1.0-SNAPSHOT
+      +-io.camunda:atomix-cluster:0.24.1
+        +-io.camunda:atomix-utils:0.24.1
           +-com.google.errorprone:error_prone_annotations:2.4.0
     and
-    +-io.zeebe:zdb:0.1.0-SNAPSHOT
-      +-io.zeebe:atomix-cluster:0.24.1
+    +-io.camunda:zdb:0.1.0-SNAPSHOT
+      +-io.camunda:atomix-cluster:0.24.1
         +-com.google.guava:guava:29.0-jre
           +-com.google.errorprone:error_prone_annotations:2.3.4
     -->
@@ -181,13 +166,13 @@
     <!--
     Required to deal with:
     Dependency convergence error for org.objenesis:objenesis:3.1 paths to dependency are:
-    +-io.zeebe:zdb:0.1.0-SNAPSHOT
-      +-io.zeebe:atomix-cluster:0.24.1
-        +-io.zeebe:atomix-utils:0.24.1
+    +-io.camunda:zdb:0.1.0-SNAPSHOT
+      +-io.camunda:atomix-cluster:0.24.1
+        +-io.camunda:atomix-utils:0.24.1
           +-org.objenesis:objenesis:3.1
     and
-    +-io.zeebe:zdb:0.1.0-SNAPSHOT
-      +-io.zeebe:atomix-cluster:0.24.1
+    +-io.camunda:zdb:0.1.0-SNAPSHOT
+      +-io.camunda:atomix-cluster:0.24.1
         +-com.esotericsoftware:kryo:4.0.2
           +-org.objenesis:objenesis:2.5.1
     -->
@@ -210,12 +195,12 @@
     <!--
     Required to deal with:
     Dependency convergence error for com.fasterxml.jackson.core:jackson-databind:2.11.1 paths to dependency are:
-    +-io.zeebe:zdb:0.1.0-SNAPSHOT
-      +-io.zeebe:zeebe-protocol-impl:0.24.1
+    +-io.camunda:zdb:0.1.0-SNAPSHOT
+      +-io.camunda:zeebe-protocol-impl:0.24.1
         +-com.fasterxml.jackson.core:jackson-databind:2.11.1
     and
-    +-io.zeebe:zdb:0.1.0-SNAPSHOT
-      +-io.zeebe:zeebe-protocol-impl:0.24.1
+    +-io.camunda:zdb:0.1.0-SNAPSHOT
+      +-io.camunda:zeebe-protocol-impl:0.24.1
         +-org.msgpack:jackson-dataformat-msgpack:0.8.20
       +-com.fasterxml.jackson.core:jackson-databind:2.9.9.3
      -->
@@ -326,9 +311,9 @@
         <!-- dependency on build tool to reference the checkstyle cfg -->
         <dependencies>
           <dependency>
-            <groupId>io.zeebe</groupId>
+            <groupId>io.camunda</groupId>
             <artifactId>zeebe-build-tools</artifactId>
-            <version>${version.zeebe}</version>
+            <version>${zeebe.version}</version>
           </dependency>
         </dependencies>
         <configuration>
@@ -396,7 +381,7 @@
           </filters>
           <transformers>
             <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-              <mainClass>io.zeebe.zdb.ZeebeDebugger</mainClass>
+              <mainClass>io.camunda.zdb.ZeebeDebugger</mainClass>
               <manifestEntries>
                 <Multi-Release>true</Multi-Release>
               </manifestEntries>
