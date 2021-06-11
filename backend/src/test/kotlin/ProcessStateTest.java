@@ -213,6 +213,85 @@ public class ProcessStateTest {
         .contains("task");
   }
 
+
+  @Test
+  public void shouldListElementInstanceDetails() {
+    // given
+    final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+
+    // when
+    final var detailsList = processState.listInstances();
+
+    // then
+    assertThat(detailsList).hasSize(3);
+
+    final var actualInstanceDetails = detailsList.get(0);
+    assertThat(actualInstanceDetails).isNotNull();
+    assertThat(actualInstanceDetails.getKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(actualInstanceDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
+    assertThat(actualInstanceDetails.getProcessDefinitionKey())
+        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
+    assertThat(actualInstanceDetails.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
+    assertThat(actualInstanceDetails.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(actualInstanceDetails.getElementId()).isEqualTo("process");
+    assertThat(actualInstanceDetails.getElementType()).isEqualTo(BpmnElementType.PROCESS);
+    assertThat(actualInstanceDetails.getParentProcessInstanceKey()).isEqualTo(-1);
+    assertThat(actualInstanceDetails.getParentElementInstanceKey()).isEqualTo(-1);
+    assertThat(actualInstanceDetails.getFlowScopeKey()).isEqualTo(-1);
+    assertThat(actualInstanceDetails.getChildren()).hasSize(2);
+
+    assertThat(actualInstanceDetails.toString())
+        .contains(returnedProcessInstance.getBpmnProcessId())
+        .contains("" + returnedProcessInstance.getVersion())
+        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
+        .contains(BpmnElementType.PROCESS.toString())
+        .contains("process");
+
+    var actualElementInstance = detailsList.get(1);
+    assertThat(actualElementInstance).isNotNull();
+    assertThat(actualElementInstance.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
+    assertThat(actualElementInstance.getProcessDefinitionKey())
+        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
+    assertThat(actualElementInstance.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
+    assertThat(actualElementInstance.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(actualElementInstance.getElementId()).isEqualTo("incidentTask");
+    assertThat(actualElementInstance.getElementType()).isEqualTo(BpmnElementType.SERVICE_TASK);
+    assertThat(actualElementInstance.getParentProcessInstanceKey()).isEqualTo(-1);
+    assertThat(actualElementInstance.getParentElementInstanceKey()).isEqualTo(-1);
+    assertThat(actualElementInstance.getJobKey()).isZero(); // because of incident
+    assertThat(actualElementInstance.getFlowScopeKey()).isEqualTo(actualInstanceDetails.getKey());
+    assertThat(actualElementInstance.getChildren()).isEmpty();
+
+    assertThat(actualElementInstance.toString())
+        .contains(returnedProcessInstance.getBpmnProcessId())
+        .contains("" + returnedProcessInstance.getVersion())
+        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
+        .contains(BpmnElementType.SERVICE_TASK.toString())
+        .contains("incidentTask");
+
+    actualElementInstance = detailsList.get(2);
+    assertThat(actualElementInstance).isNotNull();
+    assertThat(actualElementInstance.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
+    assertThat(actualElementInstance.getProcessDefinitionKey())
+        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
+    assertThat(actualElementInstance.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
+    assertThat(actualElementInstance.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(actualElementInstance.getElementId()).isEqualTo("task");
+    assertThat(actualElementInstance.getElementType()).isEqualTo(BpmnElementType.SERVICE_TASK);
+    assertThat(actualElementInstance.getParentProcessInstanceKey()).isEqualTo(-1);
+    assertThat(actualElementInstance.getParentElementInstanceKey()).isEqualTo(-1);
+    assertThat(actualElementInstance.getJobKey()).isEqualTo(jobKey.get());
+    assertThat(actualElementInstance.getFlowScopeKey()).isEqualTo(actualInstanceDetails.getKey());
+    assertThat(actualElementInstance.getChildren()).isEmpty();
+
+    assertThat(actualElementInstance.toString())
+        .contains(returnedProcessInstance.getBpmnProcessId())
+        .contains("" + returnedProcessInstance.getVersion())
+        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
+        .contains(BpmnElementType.SERVICE_TASK.toString())
+        .contains("task");
+  }
+
   @Test
   public void shouldNotFailOnNonExistingProcessInstance() {
     // given
