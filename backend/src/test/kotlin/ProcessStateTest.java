@@ -340,4 +340,43 @@ public class ProcessStateTest {
         .contains(ErrorType.IO_MAPPING_ERROR.toString())
         .contains("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
   }
+
+  @Test
+  public void shouldListIncidentDetails() {
+    // given
+    final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
+    final var processState = new InstanceState(runtimePath);
+    final var processInstance = processState
+        .instanceDetails(returnedProcessInstance.getProcessInstanceKey());
+    InstanceDetails actualElementInstance = processState
+        .instanceDetails(processInstance.getChildren().get(0));
+    final var incidentState = new IncidentState(runtimePath);
+    final var incidentKey = incidentState.processInstanceIncidentKey(actualElementInstance.getKey());
+
+    // when
+    final var incidents = incidentState.listIncidents();
+
+    // then
+    assertThat(incidents).hasSize(1);
+
+    final var incidentDetails = incidents.get(0);
+    assertThat(incidentDetails).isNotNull();
+    assertThat(incidentDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
+    assertThat(incidentDetails.getProcessDefinitionKey())
+        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
+    assertThat(incidentDetails.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(incidentDetails.getElementInstanceKey()).isEqualTo(actualElementInstance.getKey());
+    assertThat(incidentDetails.getElementId()).isEqualTo("incidentTask");
+    assertThat(incidentDetails.getErrorMessage()).isEqualTo("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
+    assertThat(incidentDetails.getErrorType()).isEqualTo(ErrorType.IO_MAPPING_ERROR);
+    assertThat(incidentDetails.getVariablesScopeKey()).isEqualTo(actualElementInstance.getKey());
+    assertThat(incidentDetails.getJobKey()).isEqualTo(-1);
+
+    assertThat(incidentDetails.toString())
+        .contains(returnedProcessInstance.getBpmnProcessId())
+        .contains("incidentTask")
+        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
+        .contains(ErrorType.IO_MAPPING_ERROR.toString())
+        .contains("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
+  }
 }

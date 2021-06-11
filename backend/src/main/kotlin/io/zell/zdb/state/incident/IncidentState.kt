@@ -1,15 +1,19 @@
 package io.zell.zdb.state.incident
 
+import io.camunda.zeebe.db.impl.DbLong
+import io.camunda.zeebe.engine.state.ZbColumnFamilies
 import io.camunda.zeebe.engine.state.ZeebeDbState
+import io.camunda.zeebe.engine.state.instance.Incident
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
 class IncidentState(statePath: Path) {
 
     private var zeebeDbState: ZeebeDbState
+    private var readonlyDb: ReadonlyTransactionDb
 
     init {
-        val readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
+        readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
         zeebeDbState = ZeebeDbState(readonlyDb, readonlyDb.createContext())
     }
 
@@ -26,6 +30,17 @@ class IncidentState(statePath: Path) {
         val incidentRecord = incidentState.getIncidentRecord(incidentKey)
 
         return IncidentDetails(incidentRecord)
+    }
+
+    fun listIncidents(): List<IncidentDetails> {
+        val incidentKey = DbLong()
+        val incident = Incident()
+        val incidentColumnFamily = readonlyDb.createColumnFamily(ZbColumnFamilies.INCIDENTS, readonlyDb.createContext(), incidentKey, incident)
+
+        val incidents = mutableListOf<IncidentDetails>()
+        incidentColumnFamily.forEach { key, _ -> incidents.add(incidentDetails(key.value))}
+
+        return incidents
     }
 
 }
