@@ -7,7 +7,12 @@
  */
 package io.zeebe.zdb;
 
+import io.zell.zdb.state.process.ProcessDetails;
+import io.zell.zdb.state.process.ProcessMeta;
+import io.zell.zdb.state.process.ProcessState;
 import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -40,10 +45,8 @@ public class WorkflowCommand implements Callable<Integer> {
 
   @Command(name = "list", description = "List all workflows")
   public int list() {
-
-//    final var partitionState = PartitionState.of(partitionPath);
-//    final var outputLines = new WorkflowInspection().list(partitionState);
-//    outputLines.forEach(System.out::println);
+    final var processMetas = new ProcessState(partitionPath).listProcesses();
+    System.out.printf("[%ns%n]%n", processMetas);
     return 0;
   }
 
@@ -51,9 +54,8 @@ public class WorkflowCommand implements Callable<Integer> {
   public int entity(
       @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
           final long key) {
-//    final var partitionState = PartitionState.of(partitionPath);
-//    final var output = new WorkflowInspection().entity(partitionState, key);
-//    System.out.println(output);
+    final var processDetails = new ProcessState(partitionPath).processDetails(key);
+    System.out.println(processDetails);
     return 0;
   }
 
@@ -61,9 +63,6 @@ public class WorkflowCommand implements Callable<Integer> {
   public int instances(
       @Parameters(paramLabel = "KEY", description = "The key of the workflow", arity = "1")
           final long key) {
-//    final var partitionState = PartitionState.of(partitionPath);
-//    final var output = new WorkflowInspection().getInstancesOfWorkflow(partitionState, key);
-//    System.out.println(output);
-    return 0;
+    throw new UnsupportedOperationException("not implemented");
   }
 }
