@@ -56,7 +56,8 @@ public class ProcessCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "instances", description = "Show all instances of a process")
+// TODO list instances for a workflow https://github.com/Zelldon/zdb/issues/19
+//  @Command(name = "instances", description = "Show all instances of a process")
   public int instances(
       @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
