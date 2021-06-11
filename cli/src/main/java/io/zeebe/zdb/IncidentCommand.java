@@ -7,8 +7,10 @@
  */
 package io.zeebe.zdb;
 
+import io.zell.zdb.state.incident.IncidentDetails;
 import io.zell.zdb.state.incident.IncidentState;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -39,10 +41,11 @@ public class IncidentCommand implements Callable<Integer> {
     return 0;
   }
 
-// TODO: Support list of incidents https://github.com/Zelldon/zdb/issues/18
-//  @Command(name = "list", description = "List all incidents")
+  @Command(name = "list", description = "List all incidents")
   public int list() {
-    throw new UnsupportedOperationException("Sorry not implemented yet. Feel free to create an PR for it ^.^");
+    final var incidents = new IncidentState(partitionPath).listIncidents();
+    System.out.printf("[%ns%n]%n", incidents);
+    return 0;
   }
 
   @Command(name = "entity", description = "Show details about an incident")
