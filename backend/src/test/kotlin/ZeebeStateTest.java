@@ -7,16 +7,10 @@ import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.record.value.BpmnElementType;
 import io.camunda.zeebe.protocol.record.value.ErrorType;
+import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.state.general.ExportingDetails;
-import io.zell.zdb.state.general.GeneralDetails;
 import io.zell.zdb.state.general.GeneralState;
-import io.zell.zdb.state.general.IncidentDetails;
-import io.zell.zdb.state.general.MessagesDetails;
-import io.zell.zdb.state.general.ProcessInstancesDetails;
-import io.zell.zdb.state.general.ProcessingDetails;
-import io.zell.zdb.state.general.VariablesDetails;
 import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceDetails;
 import io.zell.zdb.state.instance.InstanceState;
@@ -27,8 +21,10 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -37,6 +33,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class ZeebeStateTest {
 
   private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
+
+  static {
+    // for the Zeebe container the folder need to exist
+    tempDir.mkdirs();
+  }
+
   private static final BpmnModelInstance process =
       Bpmn.createExecutableProcess("process")
           .startEvent()
@@ -49,11 +51,15 @@ public class ZeebeStateTest {
             .zeebeInputExpression("=foo", "bar")
             .zeebeJobType("type")
             .endEvent()
-          .done();;
+          .done();
+  private static final String CONTAINER_PATH = "/usr/local/zeebe/data/";
+
 
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
-      .withFileSystemBind(tempDir.getPath(), "/usr/local/zeebe/data/", BindMode.READ_WRITE);
+      /* run the container with the current user, in order to access the data and delete it later */
+      .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
+      .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);
 
   private static DeploymentEvent deploymentEvent;
   private static ProcessInstanceEvent returnedProcessInstance;
@@ -88,12 +94,10 @@ public class ZeebeStateTest {
     jobLatch.await();
   }
 
-// This is currently not working - it will cause java.nio.file.AccessDeniedException: /tmp/data--7809705097131595652/raft-partition/partitions/1/runtime/OPTIONS-000007
-// Might be related to the test container usage
-//  @AfterAll
-//  public static void cleanup() throws Exception {
-//    FileUtil.deleteFolderIfExists(tempDir.toPath());
-//  }
+  @AfterAll
+  public static void cleanup() throws Exception {
+    FileUtil.deleteFolderIfExists(tempDir.toPath());
+  }
 
   @Test
   public void shouldListProcesses() {

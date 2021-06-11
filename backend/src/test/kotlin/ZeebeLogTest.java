@@ -5,6 +5,7 @@ import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
+import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
 import java.io.File;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -48,6 +50,7 @@ public class ZeebeLogTest {
 
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
+      /* run the container with the current user, in order to access the data and delete it later */
       .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
       .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);
 
@@ -85,12 +88,10 @@ public class ZeebeLogTest {
 
   }
 
-// This is currently not working - it will cause java.nio.file.AccessDeniedException: /tmp/data--7809705097131595652/raft-partition/partitions/1/runtime/OPTIONS-000007
-// Might be related to the test container usage
-//  @AfterAll
-//  public static void cleanup() throws Exception {
-//    FileUtil.deleteFolderIfExists(tempDir.toPath());
-//  }
+  @AfterAll
+  public static void cleanup() throws Exception {
+    FileUtil.deleteFolderIfExists(tempDir.toPath());
+  }
 
   @Test
   public void shouldPrintLog() {
