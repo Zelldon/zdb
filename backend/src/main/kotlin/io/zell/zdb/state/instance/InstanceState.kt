@@ -9,15 +9,17 @@ import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
-class InstanceState(statePath: Path) {
+class InstanceState(readonlyTransactionDb: ReadonlyTransactionDb) {
 
     private var zeebeDbState: ZeebeDbState
     private var readonlyDb : ReadonlyTransactionDb
 
     init {
-        readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
+        readonlyDb = readonlyTransactionDb
         zeebeDbState = ZeebeDbState(readonlyDb, readonlyDb.createContext())
     }
+
+    constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
 
     fun instanceDetails(elementInstanceKey : Long): InstanceDetails? {
         val instance : ElementInstance? = zeebeDbState.elementInstanceState.getInstance(elementInstanceKey)

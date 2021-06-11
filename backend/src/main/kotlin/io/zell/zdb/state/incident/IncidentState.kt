@@ -7,15 +7,17 @@ import io.camunda.zeebe.engine.state.instance.Incident
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
-class IncidentState(statePath: Path) {
+class IncidentState(readonlyDb: ReadonlyTransactionDb) {
 
     private var zeebeDbState: ZeebeDbState
     private var readonlyDb: ReadonlyTransactionDb
 
     init {
-        readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
+        this.readonlyDb = readonlyDb
         zeebeDbState = ZeebeDbState(readonlyDb, readonlyDb.createContext())
     }
+
+    constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
 
     fun jobIncidentKey(jobKey : Long): Long {
         return zeebeDbState.incidentState.getJobIncidentKey(jobKey)
