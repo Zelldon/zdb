@@ -8,6 +8,8 @@ import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
+import io.zell.zdb.log.LogStatus;
+import io.zell.zdb.log.LogStatusDetails;
 import java.io.File;
 import java.time.Duration;
 import java.util.Map;
@@ -46,7 +48,6 @@ public class ZeebeLogTest {
           .done();
 
   private static final String CONTAINER_PATH = "/usr/local/zeebe/data/";
-  private static final String PARTITION_NAME_FORMAT = "raft-partition-partition-%d";
 
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
@@ -94,35 +95,16 @@ public class ZeebeLogTest {
   }
 
   @Test
-  public void shouldPrintLog() {
+  public void shouldReadStatusFromLog() {
     // given
     final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
-
-//    SegmentedJournal.builder().withDirectory(logPath.toFile()).build()
-
-    var partitionName = "";
-    try {
-      final int partitionId = Integer.parseInt(logPath.getFileName().toString());
-      partitionName = String.format(PARTITION_NAME_FORMAT, partitionId);
-    } catch (NumberFormatException nfe) {
-      final var errorMsg =
-          String.format(
-              "Expected to extract partition as integer from path, but path was '%s'.", logPath);
-      throw new IllegalArgumentException(errorMsg, nfe);
-    }
-
-    final var raftLog =
-    RaftLog.builder()
-        .withDirectory(logPath.toFile())
-        .withName(partitionName)
-        .withMaxSegmentSize(512 * 1024 * 1024).build();
-
-    final var raftLogReader = raftLog.openReader(Mode.ALL);
-
-    raftLogReader.seekToLast();
-
+    var logStatus = new LogStatus(logPath);
 
     // when
+    final var status = logStatus.status();
+
+    // then
+
 
 
 
