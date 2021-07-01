@@ -1,3 +1,5 @@
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.atomix.raft.storage.log.RaftLog;
 import io.atomix.raft.storage.log.RaftLogReader.Mode;
 import io.camunda.zeebe.client.ZeebeClient;
@@ -104,9 +106,33 @@ public class ZeebeLogTest {
     final var status = logStatus.status();
 
     // then
+    assertThat(status.getHighestIndex()).isEqualTo(17);
+    assertThat(status.getScannedEntries()).isEqualTo(17);
+    assertThat(status.getHighestTerm()).isEqualTo(1);
+    assertThat(status.getHighestRecordPosition()).isEqualTo(39);
 
+    assertThat(status.getLowestIndex()).isEqualTo(1);
+    assertThat(status.getLowestRecordPosition()).isEqualTo(1);
 
+    assertThat(status.getMinEntrySize()).isNotZero();
+    assertThat(status.getMinEntrySize()).isLessThan(status.getMaxEntrySize());
 
+    assertThat(status.getMaxEntrySize()).isNotZero();
+    assertThat(status.getMaxEntrySize()).isGreaterThan(status.getMinEntrySize());
 
+    assertThat(status.getAvgEntrySize()).isNotZero();
+    assertThat(status.getAvgEntrySize()).isGreaterThan(status.getMinEntrySize());
+    assertThat(status.getAvgEntrySize()).isLessThan(status.getMaxEntrySize());
+
+    assertThat(status.toString())
+        .contains("lowestRecordPosition")
+        .contains("highestRecordPosition")
+        .contains("highestTerm")
+        .contains("highestIndex")
+        .contains("lowestIndex")
+        .contains("scannedEntries")
+        .contains("maxEntrySize")
+        .contains("minEntrySize")
+        .contains("avgEntrySize");
   }
 }
