@@ -7,11 +7,15 @@
  */
 package io.zeebe.zdb;
 
+import io.zell.zdb.log.LogContent;
+import io.zell.zdb.log.LogContentReader;
+import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Help.Visibility;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
+import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 @Command(name = "print", description = "Print's the complete log to standard out")
@@ -20,23 +24,17 @@ public class LogPrintCommand implements Callable<Integer> {
   @Spec private CommandSpec spec;
 
   @Option(
-      names = {"-f", "--format"},
-      paramLabel = "[json, compact]",
-      description = "The output format",
-      defaultValue = "json",
-      showDefaultValue = Visibility.ALWAYS)
-  private Format format;
+      names = {"-p", "--path"},
+      paramLabel = "LOG_PATH",
+      description = "The path to the partition log data, should end with the partition id.",
+      required = true,
+      scope = ScopeType.INHERIT)
+  private Path partitionPath;
 
   @Override
   public Integer call() {
-//    final Path logPath = spec.findOption("-p").getValue();
-//    final var output = new LogPrint(format).print(logPath);
-//    System.out.println(output);
+    final var logContent = new LogContentReader(partitionPath).toString();
+    System.out.println(logContent);
     return 0;
-  }
-
-  public enum Format {
-    JSON,
-    COMPACT;
   }
 }
