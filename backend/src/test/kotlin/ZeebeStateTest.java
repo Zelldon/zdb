@@ -3,6 +3,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
+import io.camunda.zeebe.client.api.worker.JobWorker;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.record.value.BpmnElementType;
@@ -87,11 +88,14 @@ public class ZeebeStateTest {
     client.newPublishMessageCommand().messageName("msg12").correlationKey("123").timeToLive(Duration.ofHours(1)).send().join();
 
     jobLatch = new CountDownLatch(1);
-    client.newWorker().jobType("type").handler((jobClient, job) -> {
+    final var jobWorker = client.newWorker().jobType("type").handler((jobClient, job) -> {
       jobKey.set(job.getKey());
       jobLatch.countDown();
     }).open();
     jobLatch.await();
+
+    jobWorker.close();
+    client.close();
   }
 
   @AfterAll
