@@ -32,6 +32,7 @@
     <zeebe-test-container.version>3.0.0</zeebe-test-container.version>
     <zeebe.version>1.0.0</zeebe.version>
     <version.slf4j>1.7.30</version.slf4j>
+    <jackson-databind.version>2.12.3</jackson-databind.version>
   </properties>
 
   <repositories>
@@ -217,6 +218,13 @@
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson-databind.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

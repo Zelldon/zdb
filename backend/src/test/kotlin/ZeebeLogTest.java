@@ -1,27 +1,32 @@
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.atomix.raft.storage.log.RaftLog;
-import io.atomix.raft.storage.log.RaftLogReader.Mode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
+import io.camunda.zeebe.client.api.worker.JobWorker;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
+import io.zell.zdb.log.LogContentReader;
 import io.zell.zdb.log.LogStatus;
-import io.zell.zdb.log.LogStatusDetails;
 import java.io.File;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+import kotlinx.serialization.DeserializationStrategy;
+import kotlinx.serialization.internal.MapLikeDescriptor;
+import kotlinx.serialization.internal.MapLikeSerializer;
+import kotlinx.serialization.json.Json;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -83,12 +88,14 @@ public class ZeebeLogTest {
     client.newPublishMessageCommand().messageName("msg12").correlationKey("123").timeToLive(Duration.ofHours(1)).send().join();
 
     jobLatch = new CountDownLatch(1);
-    client.newWorker().jobType("type").handler((jobClient, job) -> {
+    final var jobWorker = client.newWorker().jobType("type").handler((jobClient, job) -> {
       jobKey.set(job.getKey());
       jobLatch.countDown();
     }).open();
     jobLatch.await();
 
+    jobWorker.close();
+    client.close();
   }
 
   @AfterAll
@@ -134,5 +141,23 @@ public class ZeebeLogTest {
         .contains("maxEntrySize")
         .contains("minEntrySize")
         .contains("avgEntrySize");
+  }
+
+
+  @Test
+  public void shouldBuildLogContent() throws JsonProcessingException {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+
+    // when
+    final var content = logContentReader.content();
+
+    // then
+    assertThat(content.getRecords()).hasSize(17);
+    final var objectMapper = new ObjectMapper();
+
+    final var jsonNode = objectMapper.readTree(content.toString());
+    assertThat(jsonNode).isNotNull(); // is valid json
   }
 }
