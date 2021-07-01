@@ -42,13 +42,6 @@ public class LogCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "consistency", description = "Checks the given log for consistency")
-  public int consistency() {
-//    final var output = new LogConsistencyCheck().consistencyCheck(partitionPath);
-//    System.out.println(output);
-    return 0;
-  }
-
   @Override
   public Integer call() {
     spec.commandLine().usage(System.out);
