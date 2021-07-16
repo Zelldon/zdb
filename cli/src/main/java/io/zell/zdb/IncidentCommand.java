@@ -5,11 +5,12 @@
  * Licensed under the Zeebe Community License 1.1. You may not use this file
  * except in compliance with the Zeebe Community License 1.1.
  */
-package io.zeebe.zdb;
+package io.zell.zdb;
 
-import io.zell.zdb.state.instance.InstanceDetails;
-import io.zell.zdb.state.instance.InstanceState;
+import io.zell.zdb.state.incident.IncidentDetails;
+import io.zell.zdb.state.incident.IncidentState;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -19,10 +20,10 @@ import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 @Command(
-    name = "instance",
+    name = "incident",
     mixinStandardHelpOptions = true,
-    description = "Print's information about running instances")
-public class InstanceCommand implements Callable<Integer> {
+    description = "Print's information about created incident's")
+public class IncidentCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -40,12 +41,19 @@ public class InstanceCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "entity", description = "Show details about any element instance")
+  @Command(name = "list", description = "List all incidents")
+  public int list() {
+    final var incidents = new IncidentState(partitionPath).listIncidents();
+    System.out.printf("[%ns%n]%n", incidents);
+    return 0;
+  }
+
+  @Command(name = "entity", description = "Show details about an incident")
   public int entity(
-      @Parameters(paramLabel = "KEY", description = "The key of the process or element instance", arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the incident", arity = "1")
           final long key) {
-    final var instanceDetails = new InstanceState(partitionPath).instanceDetails(key);
-    System.out.println(instanceDetails);
+    final var incidentDetails = new IncidentState(partitionPath).incidentDetails(key);
+    System.out.println(incidentDetails);
     return 0;
   }
 }

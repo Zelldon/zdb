@@ -5,9 +5,9 @@
  * Licensed under the Zeebe Community License 1.1. You may not use this file
  * except in compliance with the Zeebe Community License 1.1.
  */
-package io.zeebe.zdb;
+package io.zell.zdb;
 
-import io.zeebe.zdb.ZeebeDebugger.VersionProvider;
+import io.zell.zdb.ZeebeDebugger.VersionProvider;
 import java.util.concurrent.Callable;
 import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;

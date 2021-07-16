@@ -5,10 +5,9 @@
  * Licensed under the Zeebe Community License 1.1. You may not use this file
  * except in compliance with the Zeebe Community License 1.1.
  */
-package io.zeebe.zdb;
+package io.zell.zdb;
 
 import io.zell.zdb.log.LogStatus;
-import io.zell.zdb.log.LogStatusDetails;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
