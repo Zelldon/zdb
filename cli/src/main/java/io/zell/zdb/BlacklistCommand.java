@@ -40,9 +40,9 @@ public class BlacklistCommand implements Callable<Integer> {
 
   @Command(name = "list", description = "List all blacklisted workflow instances")
   public int list() {
-//    final var partitionState = PartitionState.of(partitionPath);
-//    final var outputLines = new BlacklistInspection().list(partitionState);
-//    outputLines.forEach(System.out::println);
+    //    final var partitionState = PartitionState.of(partitionPath);
+    //    final var outputLines = new BlacklistInspection().list(partitionState);
+    //    outputLines.forEach(System.out::println);
     return 0;
   }
 
@@ -53,9 +53,9 @@ public class BlacklistCommand implements Callable<Integer> {
               description = "The key of the blacklisted workflow instance",
               arity = "1")
           final long key) {
-//    final var partitionState = PartitionState.of(partitionPath);
-//    final var output = new BlacklistInspection().entity(partitionState, key);
-//    System.out.println(output);
+    //    final var partitionState = PartitionState.of(partitionPath);
+    //    final var output = new BlacklistInspection().entity(partitionState, key);
+    //    System.out.println(output);
     return 0;
   }
 }

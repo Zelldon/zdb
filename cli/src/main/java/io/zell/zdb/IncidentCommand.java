@@ -7,10 +7,8 @@
  */
 package io.zell.zdb;
 
-import io.zell.zdb.state.incident.IncidentDetails;
 import io.zell.zdb.state.incident.IncidentState;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;

@@ -24,14 +24,14 @@ public class LogSearchCommand implements Callable<Integer> {
 
   @Override
   public Integer call() {
-//    final Path logPath = spec.findOption("-p").getValue();
-//    final String result;
-//    if (exclusive.index == 0) {
-//      result = new LogSearch().searchForPosition(logPath, exclusive.position);
-//    } else {
-//      result = new LogSearch().searchForIndex(logPath, exclusive.index);
-//    }
-//    System.out.println(result);
+    //    final Path logPath = spec.findOption("-p").getValue();
+    //    final String result;
+    //    if (exclusive.index == 0) {
+    //      result = new LogSearch().searchForPosition(logPath, exclusive.position);
+    //    } else {
+    //      result = new LogSearch().searchForIndex(logPath, exclusive.index);
+    //    }
+    //    System.out.println(result);
     return 0;
   }
 

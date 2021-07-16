@@ -7,7 +7,6 @@
  */
 package io.zell.zdb;
 
-import io.zell.zdb.state.general.GeneralDetails;
 import io.zell.zdb.state.general.GeneralState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;

@@ -7,7 +7,6 @@
  */
 package io.zell.zdb;
 
-import io.zell.zdb.state.instance.InstanceDetails;
 import io.zell.zdb.state.instance.InstanceState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -42,7 +41,10 @@ public class InstanceCommand implements Callable<Integer> {
 
   @Command(name = "entity", description = "Show details about any element instance")
   public int entity(
-      @Parameters(paramLabel = "KEY", description = "The key of the process or element instance", arity = "1")
+      @Parameters(
+              paramLabel = "KEY",
+              description = "The key of the process or element instance",
+              arity = "1")
           final long key) {
     final var instanceDetails = new InstanceState(partitionPath).instanceDetails(key);
     System.out.println(instanceDetails);
