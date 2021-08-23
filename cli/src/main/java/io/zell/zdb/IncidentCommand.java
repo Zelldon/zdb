@@ -42,7 +42,7 @@ public class IncidentCommand implements Callable<Integer> {
   @Command(name = "list", description = "List all incidents")
   public int list() {
     final var incidents = new IncidentState(partitionPath).listIncidents();
-    System.out.printf("[%ns%n]%n", incidents);
+    System.out.println(incidents);
     return 0;
   }
 

@@ -44,7 +44,7 @@ public class ProcessCommand implements Callable<Integer> {
   @Command(name = "list", description = "List all processes")
   public int list() {
     final var processMetas = new ProcessState(partitionPath).listProcesses();
-    System.out.printf("[%ns%n]%n", processMetas);
+    System.out.println(processMetas);
     return 0;
   }
 
@@ -66,7 +66,7 @@ public class ProcessCommand implements Callable<Integer> {
             .listInstances().stream()
                 .filter(instanceDetails -> instanceDetails.getProcessDefinitionKey() == key)
                 .collect(Collectors.toList());
-    System.out.printf("[%ns%n]%n", instances);
+    System.out.println(instances);
     return 0;
   }
 }
