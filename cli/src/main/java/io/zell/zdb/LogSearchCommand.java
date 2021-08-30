@@ -40,7 +40,13 @@ public class LogSearchCommand implements Callable<Integer> {
             result = record.toJson();
           }
         } else {
-          result = new LogSearch(logPath).searchIndex(exclusive.index);
+          var logContent = new LogSearch(logPath).searchIndex(exclusive.index);
+          if (logContent == null) {
+            result = "{}";
+          }
+          else {
+            result = logContent.toString();
+          }
         }
         System.out.println(result);
     return 0;

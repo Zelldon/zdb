@@ -204,4 +204,45 @@ public class ZeebeLogTest {
     // then
     assertThat(record).isNull();
   }
+
+  @Test
+  public void shouldSearchIndexInLog() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logSearch = new LogSearch(logPath);
+    final var index = 2;
+
+    // when
+    final var logContent = logSearch.searchIndex(index);
+
+    // then
+    assertThat(logContent).isNotNull();
+    assertThat(logContent.getRecords()).hasSize(1);
+  }
+
+  @Test
+  public void shouldReturnNullOnNegIndex() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logSearch = new LogSearch(logPath);
+
+    // when
+    final var logContent = logSearch.searchIndex(-1);
+
+    // then
+    assertThat(logContent).isNull();
+  }
+
+  @Test
+  public void shouldReturnNullOnToBigIndex() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logSearch = new LogSearch(logPath);
+
+    // when
+    final var logContent = logSearch.searchIndex(Long.MAX_VALUE);
+
+    // then
+    assertThat(logContent).isNull();
+  }
 }

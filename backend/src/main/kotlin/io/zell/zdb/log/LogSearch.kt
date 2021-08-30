@@ -1,5 +1,6 @@
 package io.zell.zdb.log
 
+import io.atomix.raft.storage.log.IndexedRaftLogEntry
 import io.atomix.raft.storage.log.RaftLogReader
 import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl
 import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventRegistry
@@ -11,6 +12,7 @@ import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 
 class LogSearch (logPath: Path) {
+
 
     private val reader: RaftLogReader = LogFactory.newReader(logPath)
 
@@ -54,7 +56,21 @@ class LogSearch (logPath: Path) {
         return null
     }
 
-    fun searchIndex(index: Long): String {
-        TODO("Not yet implemented")
+    fun searchIndex(index: Long): LogContent? {
+        if (index <= 0) {
+            return null
+        }
+
+        reader.seek(index);
+
+        if (reader.hasNext()) {
+            val logContent = LogContent()
+            val entry = reader.next()
+
+            LogContent.addEntryToContent(entry, logContent)
+            return logContent
+        }
+        return null
     }
+
 }
