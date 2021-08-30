@@ -9,10 +9,13 @@ import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.client.api.worker.JobWorker;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
+import io.camunda.zeebe.protocol.Protocol;
+import io.camunda.zeebe.protocol.record.Record;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
 import io.zell.zdb.log.LogContentReader;
+import io.zell.zdb.log.LogSearch;
 import io.zell.zdb.log.LogStatus;
 import java.io.File;
 import java.time.Duration;
@@ -159,5 +162,46 @@ public class ZeebeLogTest {
 
     final var jsonNode = objectMapper.readTree(content.toString());
     assertThat(jsonNode).isNotNull(); // is valid json
+  }
+
+  @Test
+  public void shouldSearchPositionInLog() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logSearch = new LogSearch(logPath);
+    final var position = 1;
+
+    // when
+    final Record<?> record = logSearch.searchPosition(position);
+
+    // then
+    assertThat(record).isNotNull();
+    assertThat(record.getPosition()).isEqualTo(position);
+  }
+
+  @Test
+  public void shouldReturnNullOnNegPosition() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logSearch = new LogSearch(logPath);
+
+    // when
+    final Record<?> record = logSearch.searchPosition(-1);
+
+    // then
+    assertThat(record).isNull();
+  }
+
+  @Test
+  public void shouldReturnNullOnToBigPosition() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logSearch = new LogSearch(logPath);
+
+    // when
+    final Record<?> record = logSearch.searchPosition(Long.MAX_VALUE);
+
+    // then
+    assertThat(record).isNull();
   }
 }
