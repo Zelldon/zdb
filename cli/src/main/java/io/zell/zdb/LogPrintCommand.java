@@ -22,7 +22,7 @@ public class LogPrintCommand implements Callable<Integer> {
   @Override
   public Integer call() {
     final Path partitionPath = spec.findOption("-p").getValue();
-    final var logContent = new LogContentReader(partitionPath).toString();
+    final var logContent = new LogContentReader(partitionPath).content();
     System.out.println(logContent);
     return 0;
   }
