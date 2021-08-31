@@ -8,6 +8,7 @@
   </Appenders>
 
   <Loggers>
+    <Logger name="org.camunda.feel.FeelEngine" level="debug"/>
     <Root level="info">
       <AppenderRef ref="Console"/>
     </Root>
