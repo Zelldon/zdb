@@ -7,7 +7,6 @@
  */
 package io.zell.zdb;
 
-import io.camunda.zeebe.protocol.record.Record;
 import io.zell.zdb.log.LogSearch;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -27,28 +26,17 @@ public class LogSearchCommand implements Callable<Integer> {
 
   @Override
   public Integer call() {
-        final Path logPath = spec.findOption("-p").getValue();
+    final Path logPath = spec.findOption("-p").getValue();
 
-        final String result;
-        if (exclusive.index == 0) {
-          final var record = new LogSearch(logPath).searchPosition(exclusive.position);
-          if (record == null) {
-            result = "{}";
-          }
-          else
-          {
-            result = record.toJson();
-          }
-        } else {
-          var logContent = new LogSearch(logPath).searchIndex(exclusive.index);
-          if (logContent == null) {
-            result = "{}";
-          }
-          else {
-            result = logContent.toString();
-          }
-        }
-        System.out.println(result);
+    final String result;
+    if (exclusive.index == 0) {
+      final var record = new LogSearch(logPath).searchPosition(exclusive.position);
+      result = record == null ? "{}" : record.toJson();
+    } else {
+      final var logContent = new LogSearch(logPath).searchIndex(exclusive.index);
+      result = logContent == null ? "{}" : logContent.toString();
+    }
+    System.out.println(result);
     return 0;
   }
 
