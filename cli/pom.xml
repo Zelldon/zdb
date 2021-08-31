@@ -215,6 +215,7 @@
               <archive>
                 <manifest>
                   <mainClass>io.zell.zdb.ZeebeDebugger</mainClass>
+                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                 </manifest>
               </archive>
               <descriptorRefs>
