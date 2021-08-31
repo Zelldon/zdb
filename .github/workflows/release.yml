@@ -1,0 +1,70 @@
+name: Release Action
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+  steps:
+    - uses: actions/checkout@v2
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+    - name: Set up Java environment
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Initialize
+      run: |-
+        git config --global user.name "Release Bot"
+        git config --global user.email actions@github.com
+      shell: bash
+    - name: Run maven
+      run: |-
+        test -z "${{ inputs.run-tests }}" && SKIP_TESTS="-DskipTests"
+        mvn -B ${{ inputs.maven-additional-options }} ${{ inputs.maven-build-options }} package ${SKIP_TESTS}
+      shell: bash
+    - name: Prepare next development version
+      run: |
+        git fetch --no-tags
+        git checkout "${DEFAULT_BRANCH}"
+
+        [ "$(git rev-list -n1 "${RELEASE_VERSION}")" != "$(git rev-list -n1 "${DEFAULT_BRANCH}")" ] && echo "${RELEASE_VERSION} not pointing to tip of ${DEFAULT_BRANCH}" && exit 0
+
+        # Commit the release version change in the pom.xml
+        git add ./**pom.xml
+        git commit -am "release(v${RELEASE_VERSION})"
+
+        # Overwrite existing release tag that was created to trigger this function with release version in pom.xml
+        git tag -fa "${RELEASE_VERSION}" -m "release(v${RELEASE_VERSION})"
+        git push origin --tags -f
+
+        # shellcheck disable=SC2086 # don't use quotes because we do want argument splitting
+        mvn -B ${MAVEN_ADDITIONAL_OPTIONS} org.apache.maven.plugins:maven-release-plugin:update-versions -DgenerateBackupPoms=false
+
+        # Commit next version calculated by maven
+        # https://maven.apache.org/guides/getting-started/index.html#what-is-a-snapshot-version
+        git add ./**pom.xml
+        git commit -am "release(v${RELEASE_VERSION}): prepare for next development iteration"
+        git push
+
+      ${{ github.action_path }}/resources/prepare-next-development-version.sh "${{ github.event.repository.default_branch }}" "${{ inputs.release-version }}" "${{ inputs.maven-additional-options }}"
+      shell: bash
+      env:
+        RELEASE_VERSION: ${{ github.event.release.tag_name }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+    - name: Attach artifacts to GitHub Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ steps.release.outputs.artifacts_archive_path }}
+        asset_name: ${{ steps.release.outputs.artifacts_archive_path }}
+        asset_content_type: application/zip
