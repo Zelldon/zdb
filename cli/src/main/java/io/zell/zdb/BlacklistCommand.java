@@ -7,6 +7,9 @@
  */
 package io.zell.zdb;
 
+import io.zell.zdb.state.blacklist.BlacklistState;
+import io.zell.zdb.state.incident.IncidentState;
+import io.zell.zdb.state.instance.InstanceState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -40,9 +43,8 @@ public class BlacklistCommand implements Callable<Integer> {
 
   @Command(name = "list", description = "List all blacklisted workflow instances")
   public int list() {
-    //    final var partitionState = PartitionState.of(partitionPath);
-    //    final var outputLines = new BlacklistInspection().list(partitionState);
-    //    outputLines.forEach(System.out::println);
+    final var blacklistedInstances = new BlacklistState(partitionPath).listBlacklistedInstances();
+    System.out.println(blacklistedInstances);
     return 0;
   }
 
@@ -53,9 +55,8 @@ public class BlacklistCommand implements Callable<Integer> {
               description = "The key of the blacklisted workflow instance",
               arity = "1")
           final long key) {
-    //    final var partitionState = PartitionState.of(partitionPath);
-    //    final var output = new BlacklistInspection().entity(partitionState, key);
-    //    System.out.println(output);
+    final var instanceDetails = new InstanceState(partitionPath).instanceDetails(key);
+    System.out.println(instanceDetails);
     return 0;
   }
 }

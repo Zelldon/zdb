@@ -11,6 +11,7 @@ import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
+import io.zell.zdb.state.blacklist.BlacklistState;
 import io.zell.zdb.state.general.GeneralState;
 import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceDetails;
@@ -399,6 +400,20 @@ public class ZeebeStateTest {
         .contains("" + returnedProcessInstance.getProcessDefinitionKey())
         .contains(ErrorType.IO_MAPPING_ERROR.toString())
         .contains("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
+  }
+
+
+  @Test
+  public void shouldReturnEmptyListOnNonExistingBlacklistedInstances() {
+    // given
+    final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
+    final var blacklistState = new BlacklistState(runtimePath);
+
+    // when
+    final var blacklisted = blacklistState.listBlacklistedInstances();
+
+    // then
+    assertThat(blacklisted).isNotNull().isEmpty();
   }
 
   @Test
