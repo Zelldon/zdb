@@ -43,7 +43,7 @@
     <version.guava>30.0-jre</version.guava>
     <version.jackson-dataformat-msgpack>0.8.21</version.jackson-dataformat-msgpack>
     <version.kryo>4.0.2</version.kryo>
-    <version.log4j>2.13.3</version.log4j>
+    <version.log4j>2.14.1</version.log4j>
     <version.picocli>4.5.0</version.picocli>
     <zeebe-bpmn-model.version>1.0.0</zeebe-bpmn-model.version>
     <zeebe-client-java.version>1.0.0</zeebe-client-java.version>
