@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>io.zell</groupId>
     <artifactId>zdb</artifactId>
-    <version>1.0.0-alpha1</version>
+    <version>1.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>cli</artifactId>
-  <version>1.0.0-alpha1</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>ZDB CLI</name>
   <packaging>jar</packaging>
 
@@ -42,7 +41,7 @@
     <dependency>
       <groupId>io.zell</groupId>
       <artifactId>backend</artifactId>
-      <version>1.0.0-alpha1</version>
+      <version>1.0.0-SNAPSHOT</version>
 <!--      <scope>compile</scope>-->
     </dependency>
   </dependencies>
@@ -152,7 +151,7 @@
 <!--            </goals>-->
 <!--            <configuration>-->
 <!--              <rules>-->
-<!--                <dependencyConvergence/>-->
+<!--                <dependencyConvergence />-->
 <!--              </rules>-->
 <!--            </configuration>-->
 <!--          </execution>-->
@@ -163,7 +162,7 @@
 <!--            </goals>-->
 <!--            <configuration>-->
 <!--              <rules>-->
-<!--                <banDuplicatePomDependencyVersions/>-->
+<!--                <banDuplicatePomDependencyVersions />-->
 <!--              </rules>-->
 <!--            </configuration>-->
 <!--          </execution>-->
