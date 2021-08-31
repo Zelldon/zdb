@@ -8,7 +8,6 @@
 package io.zell.zdb;
 
 import io.zell.zdb.state.blacklist.BlacklistState;
-import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
