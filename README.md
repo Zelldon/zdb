@@ -11,8 +11,8 @@ It was created during the Camunda Summer Hackdays in 2020.
   * [State Inspection](#state-inspection)
     * [Inspect Zeebe Partition Status](#inspect-zeebe-partition-status)
     * [Inspect Incidents](#inspect-incidents)
-    * [Inspect Blacklisted Workflow Instances](#inspect-blacklisted-workflow-instances)
-    * [Inspect Workflows](#inspect-workflows)
+    * [Inspect Blacklisted Process Instances](#inspect-blacklisted-process-instances)
+    * [Inspect Processes](#inspect-processes)
     * [Inspect Instances](#inspect-instances)
   * [Log Inspection](#log-inspection)
     * [Inspect Log Status](#inspect-log-status)
@@ -50,7 +50,7 @@ Using `zdb` you can inspect the internal state or the partition log.
 ### State Inspection
 
 Using `zdb` you can inspect the internal `runtime` data or a snapshot.
-It shows some information about the current state, incidents, workflows and so on from a single partition.
+It shows some information about the current state, incidents, processes and so on from a single partition.
 To inspect the database you should provide the path to the `raft-partition/partitions/../runtime/` folder in a partition or one of the snapshot folders `raft-partition/partitions/../snapshot/<snapshot-folder>`
 
 You then can run several commands to inspect the given state.
@@ -79,11 +79,11 @@ Returns details to a specific incident:
 zdb incident entity <IncidentKey> --path=<pathToDatabase>
 ```
 
-#### Inspect Blacklisted Workflow Instances
+#### Inspect Blacklisted Process Instances
 
-You can check if there are any workflows stuck due to blacklisting using the following commands.
+You can check if there are any processes stuck due to blacklisting using the following commands.
 
-List all blacklisted workflow instances in this partition:
+List all blacklisted process instances in this partition:
 
 ```sh
 zdb blacklist list --path=<pathToDatabase>
@@ -92,27 +92,27 @@ zdb blacklist list --path=<pathToDatabase>
 Returns details to a specific blacklisted instance:
 
 ```sh
-zdb blacklist entity <WorkflowInstanceKey> --path=<pathToDatabase>
+zdb blacklist entity <ProcessInstanceKey> --path=<pathToDatabase>
 ```
 
-#### Inspect Workflows
-You can inspect all deployed workflows and get the resources of a specific workflow.
+#### Inspect Processes
+You can inspect all deployed processes and get the resources of a specific process.
 
-List all deployed workflows in this partition:
+List all deployed processes in this partition:
 
 ```sh
-zdb workflow list --path=<pathToDatabase>
+zdb process list --path=<pathToDatabase>
 ```
 
-Returns details to a specific workflow:
+Returns details to a specific process:
 ```sh
-zdb workflow entity <WorkflowKey> --path=<pathToDatabase>
+zdb process entity <ProcessKey> --path=<pathToDatabase>
 ```
 
-List all element instances for the given workflow:
+List all element instances for the given process:
 
 ```sh
-zdb workflow --path=<pathToDatabase> instances <WorkflowKey>
+zdb process --path=<pathToDatabase> instances <ProcessKey>
 ```
 
 #### Inspect Instances
