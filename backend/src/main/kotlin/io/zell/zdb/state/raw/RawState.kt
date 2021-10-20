@@ -16,6 +16,18 @@ class RawState(private val readonlyTransactionDb: ReadonlyTransactionDb) {
         elementInstanceKeyColumnFamily.acceptWhileTrue(printIt())
     }
 
+    fun checkConsistencyElementInstanceKeyColumnFamily() {
+        println("-----")
+        println("Checking consistency of ZbColumnFamilies.ELEMENT_INSTANCE_KEY")
+        println("-----")
+        val elementInstanceKeyColumnFamily = ElementInstanceKeyColumnFamily(
+            readonlyTransactionDb,
+            readonlyTransactionDb.createContext()
+        )
+
+        elementInstanceKeyColumnFamily.findOrphans().forEach(System.out::println)
+    }
+
 
     fun exportMessageKeyColumnFamily() {
         val messageKeyColumnFamily =

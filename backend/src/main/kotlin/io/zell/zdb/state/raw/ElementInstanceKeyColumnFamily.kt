@@ -70,10 +70,43 @@ class ElementInstanceKeyColumnFamily(
         }
     }
 
+    fun findOrphans(): Collection<ElementInstanceKeyOrphanEntry> {
+        val orphans = mutableListOf<ElementInstanceKeyOrphanEntry>()
+        elementInstanceColumnFamily.forEach { elementInstanceKey, elementInstance ->
+
+            val parentKey = elementInstance.parentKey
+
+            if (parentKey != -1L) {
+                val parent = get(parentKey)
+                if (parent == null) {
+                    orphans.add(
+                        ElementInstanceKeyOrphanEntry(
+                            elementInstanceKey.value,
+                            copyElementInstance(elementInstance),
+                            parentKey
+                        )
+                    )
+                }
+            }
+
+        }
+        return orphans
+    }
+
     data class ElementInstanceKeyEntry(
         val elementInstanceKey: Long,
         val elementInstance: ElementInstance
     )
+
+    /**
+     * Represents an orphaned entry, i.e. one that points to a parent, but the parent is gone
+     */
+    data class ElementInstanceKeyOrphanEntry(
+        val elementInstanceKey: Long,
+        val elementInstance: ElementInstance,
+        val parentKey: Long
+    )
+
 
     fun interface Visitor {
         fun visit(entry: ElementInstanceKeyEntry): Boolean
