@@ -28,6 +28,14 @@ class RawState(private val readonlyTransactionDb: ReadonlyTransactionDb) {
         elementInstanceKeyColumnFamily.findOrphans().forEach(System.out::println)
     }
 
+    fun exportElementInstanceParentChildColumnFamily() {
+        val elementInstanceParentChildColumnFamily = ElementInstanceParentChildColumnFamily(
+            readonlyTransactionDb,
+            readonlyTransactionDb.createContext()
+        )
+
+        elementInstanceParentChildColumnFamily.acceptWhileTrue(printIt())
+    }
 
     fun exportMessageKeyColumnFamily() {
         val messageKeyColumnFamily =

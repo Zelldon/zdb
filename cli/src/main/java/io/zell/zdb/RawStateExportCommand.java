@@ -33,6 +33,7 @@ public class RawStateExportCommand implements Callable<Integer> {
     }
 
     elementInstanceKeyColumnFamily();
+    elementInstanceParentChildColumnFamily();
     messageKeyColumnFamily();
     messageDeadlineColumnFamily();
     return 0;
@@ -41,6 +42,11 @@ public class RawStateExportCommand implements Callable<Integer> {
   @Command(name = "elementInstanceKeyColumnFamily", description = "Exports the ZbColumnFamilies.ELEMENT_INSTANCE_KEY column family")
   public int elementInstanceKeyColumnFamily() {
     return export(RawState::exportElementInstanceKeyColumnFamily);
+  }
+
+  @Command(name = "elementInstanceParentChildColumnFamily", description = "Exports the ZbColumnFamilies.ELEMENT_INSTANCE_PARENT_CHILD column family")
+  public int elementInstanceParentChildColumnFamily() {
+    return export(RawState::exportElementInstanceParentChildColumnFamily);
   }
 
   @Command(name = "messageKeyColumnFamily", description = "Exports the ZbColumnFamilies.MESSAGE_KEY column family")
