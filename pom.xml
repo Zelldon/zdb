@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.zell</groupId>
   <artifactId>zdb</artifactId>
@@ -48,7 +50,7 @@
     <zeebe-test-container.version>3.0.0</zeebe-test-container.version>
     <zeebe-test-util.version>1.0.0</zeebe-test-util.version>
     <zeebe-util.version>1.0.0</zeebe-util.version>
-    <zeebe.version>1.1.3</zeebe.version>
+    <zeebe.version>1.2.1</zeebe.version>
 
     <sonar.organization>zelldon-github</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
