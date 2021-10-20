@@ -21,15 +21,17 @@ import picocli.CommandLine.RunLast;
     versionProvider = VersionProvider.class,
     description = "Zeebe debug and inspection tool",
     subcommands = {
-      GenerateCompletion.class, // to generate auto completion
-      StatusCommand.class,
-      BlacklistCommand.class,
-      IncidentCommand.class,
-      ProcessCommand.class,
-      LogCommand.class,
-      InstanceCommand.class
+        GenerateCompletion.class, // to generate auto completion
+        StatusCommand.class,
+        BlacklistCommand.class,
+        IncidentCommand.class,
+        ProcessCommand.class,
+        LogCommand.class,
+        InstanceCommand.class,
+        RawStateCommand.class,
     })
 public class ZeebeDebugger implements Callable<Integer> {
+
   private static CommandLine cli;
 
   /**
@@ -42,7 +44,7 @@ public class ZeebeDebugger implements Callable<Integer> {
     System.setErr(System.out);
   }
 
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
     disableWarning();
     cli =
         new CommandLine(new ZeebeDebugger())
@@ -59,8 +61,10 @@ public class ZeebeDebugger implements Callable<Integer> {
   }
 
   static class VersionProvider implements IVersionProvider {
+
+    @Override
     public String[] getVersion() {
-      return new String[] {"zdb v" + ZeebeDebugger.class.getPackage().getImplementationVersion()};
+      return new String[]{"zdb v" + ZeebeDebugger.class.getPackage().getImplementationVersion()};
     }
   }
 }
