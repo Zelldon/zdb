@@ -7,6 +7,42 @@ class RawState(private val readonlyTransactionDb: ReadonlyTransactionDb) {
 
     constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
 
+    fun exportElementInstanceKeyColumnFamily() {
+        val elementInstanceKeyColumnFamily = ElementInstanceKeyColumnFamily(
+            readonlyTransactionDb,
+            readonlyTransactionDb.createContext()
+        )
+
+        elementInstanceKeyColumnFamily.acceptWhileTrue(printIt())
+    }
+
+
+    fun exportMessageKeyColumnFamily() {
+        val messageKeyColumnFamily =
+            MessageKeyColumnFamily(
+                readonlyTransactionDb,
+                readonlyTransactionDb.createContext()
+            )
+
+        messageKeyColumnFamily.acceptWhileTrue(printIt())
+    }
+
+    fun exportMessageDeadlineColumnFamily() {
+        val messageDeadlinesColumnFamily =
+            MessageDeadlinesColumnFamily(
+                readonlyTransactionDb,
+                readonlyTransactionDb.createContext()
+            )
+
+        messageDeadlinesColumnFamily.acceptWhileTrue(printIt())
+    }
+
+    private fun printIt(): (entry: Any) -> Boolean =
+        {
+            println(it)
+            true
+        }
+
     fun checkConsistencyMessageDeadlineColumnFamily() {
         println("-----")
         println("Checking consistency of ZbColumnFamilies.MESSAGE_DEADLINES")
@@ -29,32 +65,6 @@ class RawState(private val readonlyTransactionDb: ReadonlyTransactionDb) {
             if (messageKeyEntry == null) {
                 println("$it references messageKey: ${it.messageKey} which no longer exists")
             }
-            true
-        }
-    }
-
-    fun exportMessageKeyColumnFamily() {
-        val messageKeyColumnFamily =
-            MessageKeyColumnFamily(
-                readonlyTransactionDb,
-                readonlyTransactionDb.createContext()
-            )
-
-        messageKeyColumnFamily.acceptWhileTrue {
-            println(it)
-            true
-        }
-    }
-
-    fun exportMessageDeadlineColumnFamily() {
-        val messageDeadlinesColumnFamily =
-            MessageDeadlinesColumnFamily(
-                readonlyTransactionDb,
-                readonlyTransactionDb.createContext()
-            )
-
-        messageDeadlinesColumnFamily.acceptWhileTrue {
-            println(it)
             true
         }
     }
