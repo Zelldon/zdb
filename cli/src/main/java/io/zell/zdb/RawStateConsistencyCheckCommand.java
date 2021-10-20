@@ -33,6 +33,7 @@ public class RawStateConsistencyCheckCommand implements Callable<Integer> {
     }
 
     elementInstanceKeyColumnFamily();
+    elementInstanceParentChildColumnFamily();
     messageDeadlineColumnFamily();
     return 0;
   }
@@ -40,6 +41,11 @@ public class RawStateConsistencyCheckCommand implements Callable<Integer> {
   @Command(name = "elementInstanceKeyColumnFamily", description = "Checks whether the element instance key family has orphaned entries, i.e. entries which point to parents which no longer exist")
   public int elementInstanceKeyColumnFamily() {
     return check(RawState::checkConsistencyElementInstanceKeyColumnFamily);
+  }
+
+  @Command(name = "elementInstanceParentChildColumnFamily", description = "Checks whether the element instance parent child table contains entries where either the child or the parent are missing")
+  public int elementInstanceParentChildColumnFamily() {
+    return check(RawState::checkConsistencyElementInstanceParentChildColumnFamily);
   }
 
   @Command(name = "messageDeadlineColumnFamily", description = "Checks whether the message deadline column contains invalid entries")

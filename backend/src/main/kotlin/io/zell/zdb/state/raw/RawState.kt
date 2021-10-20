@@ -37,6 +37,43 @@ class RawState(private val readonlyTransactionDb: ReadonlyTransactionDb) {
         elementInstanceParentChildColumnFamily.acceptWhileTrue(printIt())
     }
 
+    fun checkConsistencyElementInstanceParentChildColumnFamily() {
+        println("-----")
+        println("Checking consistency of ZbColumnFamilies.ELEMENT_INSTANCE_PARENT_CHILD")
+        println("-----")
+        val elementInstanceParentChildColumnFamily = ElementInstanceParentChildColumnFamily(
+            readonlyTransactionDb,
+            readonlyTransactionDb.createContext()
+        )
+
+        val elementInstanceKeyColumnFamily = ElementInstanceKeyColumnFamily(
+            readonlyTransactionDb,
+            readonlyTransactionDb.createContext()
+        )
+
+        elementInstanceParentChildColumnFamily.acceptWhileTrue {
+            val parentKey = it.parentKey
+            if (parentKey != -1L) {
+                val parent = elementInstanceKeyColumnFamily.get(parentKey)
+
+                if (parent == null) {
+                    println("$it is referencing parent: $parentKey which does not exist")
+                }
+            }
+
+            val elementInstanceKey = it.elementInstanceKey
+            val child = elementInstanceKeyColumnFamily.get(elementInstanceKey)
+
+            if (child == null) {
+                println("$it is referencing child: $elementInstanceKey which does not exist")
+            } else if (child.elementInstance.parentKey != parentKey) {
+                println("$it is referencing child: $elementInstanceKey which does exist, but points to a different parent: ${child.elementInstance.parentKey}")
+            }
+
+            true
+        }
+    }
+
     fun exportMessageKeyColumnFamily() {
         val messageKeyColumnFamily =
             MessageKeyColumnFamily(
