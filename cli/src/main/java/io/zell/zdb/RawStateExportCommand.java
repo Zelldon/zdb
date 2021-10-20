@@ -15,13 +15,13 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Spec;
 
-@Command(name = "check", description = "Check data integrity and consistency")
-public class RawStateConsistencyCheckCommand implements Callable<Integer> {
+@Command(name = "export", description = "Export raw state")
+public class RawStateExportCommand implements Callable<Integer> {
 
   @Spec
   private CommandSpec spec;
 
-  @Command(name = "all", description = "Run all implemented consistency checks")
+  @Command(name = "all", description = "Export all table column families (for which export has been implemented)")
   public int all() {
     final boolean yolo = spec.findOption("-y").getValue();
 
@@ -32,16 +32,22 @@ public class RawStateConsistencyCheckCommand implements Callable<Integer> {
       return 0;
     }
 
+    messageKeyColumnFamily();
     messageDeadlineColumnFamily();
     return 0;
   }
 
-  @Command(name = "messageDeadlineColumnFamily", description = "Checks whether the message deadline column contains invalid entries")
-  public int messageDeadlineColumnFamily() {
-    return check(RawState::checkConsistencyMessageDeadlineColumnFamily);
+  @Command(name = "messageKeyColumnFamily", description = "Exports the ZbColumnFamilies.MESSAGE_KEY column family")
+  public int messageKeyColumnFamily() {
+    return export(RawState::exportMessageKeyColumnFamily);
   }
 
-  public int check(final Consumer<RawState> methodToCall) {
+  @Command(name = "messageDeadlineColumnFamily", description = "Exports the ZbColumnFamilies.MESSAGE_DEADLINES column family")
+  public int messageDeadlineColumnFamily() {
+    return export(RawState::exportMessageDeadlineColumnFamily);
+  }
+
+  public int export(final Consumer<RawState> methodToCall) {
     final boolean yolo = spec.findOption("-y").getValue();
 
     if (!yolo) {
@@ -58,6 +64,7 @@ public class RawStateConsistencyCheckCommand implements Callable<Integer> {
     methodToCall.accept(rawState);
     return 0;
   }
+
 
   @Override
   public Integer call() {

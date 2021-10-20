@@ -18,7 +18,7 @@ import picocli.CommandLine.Spec;
 @Command(
     name = "rawstate",
     mixinStandardHelpOptions = true,
-    subcommands = {RawStateConsistencyCheckCommand.class},
+    subcommands = {RawStateConsistencyCheckCommand.class, RawStateExportCommand.class},
     description = "Allows to inspect the raw state with subcommands")
 public class RawStateCommand implements Callable<Integer> {
 
