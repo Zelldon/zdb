@@ -22,7 +22,7 @@ class LogFactory {
                 .withName(partitionName)
                 .withMaxSegmentSize(MAX_SEGMENT_SIZE).build()
 
-            return raftLog.openReader(RaftLogReader.Mode.ALL)
+            return raftLog.openUncommittedReader()
         }
 
         private fun extractPartitionNameFromPath(logPath: Path): String {
