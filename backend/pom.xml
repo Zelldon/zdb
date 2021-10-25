@@ -31,7 +31,7 @@
     <zeebe-test-container.version>3.0.0</zeebe-test-container.version>
     <zeebe.version>1.2.1</zeebe.version>
     <version.slf4j>1.7.32</version.slf4j>
-    <version.awaitility>4.1.0</version.awaitility>
+    <version.awaitility>4.1.1</version.awaitility>
     <jackson-databind.version>2.13.0</jackson-databind.version>
   </properties>
 
