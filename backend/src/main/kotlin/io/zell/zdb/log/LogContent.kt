@@ -23,11 +23,12 @@ class LogContent {
                 val applicationEntry = entry.applicationEntry
 
                 val readBuffer = UnsafeBuffer(applicationEntry.data());
-                val loggedEvent = LoggedEventImpl();
-                val metadata = RecordMetadata();
 
                 var offset = 0;
                 do {
+                    val loggedEvent = LoggedEventImpl();
+                    val metadata = RecordMetadata();
+
                     loggedEvent.wrap(readBuffer, offset)
                     loggedEvent.readMetadata(metadata)
 
