@@ -155,9 +155,9 @@ public class ZeebeLogTest {
     assertThat(status.getHighestRecordPosition()).isEqualTo(Long.MIN_VALUE);
     assertThat(status.getLowestIndex()).isEqualTo(Long.MAX_VALUE);
     assertThat(status.getLowestRecordPosition()).isEqualTo(Long.MAX_VALUE);
-    assertThat(status.getMinEntrySize()).isEqualTo(Integer.MAX_VALUE);
-    assertThat(status.getMaxEntrySize()).isEqualTo(Integer.MIN_VALUE);
-    assertThat(status.getAvgEntrySize()).isZero();
+    assertThat(status.getMinEntrySizeBytes()).isEqualTo(Integer.MAX_VALUE);
+    assertThat(status.getMinEntrySizeBytes()).isEqualTo(Integer.MIN_VALUE);
+    assertThat(status.getMinEntrySizeBytes()).isZero();
 
     assertThat(status).hasToString("{}");
   }
