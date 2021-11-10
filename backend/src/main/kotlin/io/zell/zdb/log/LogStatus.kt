@@ -30,14 +30,14 @@ class LogStatus(logPath: Path) {
             }
 
             val approxEntrySize = persistedRaftRecord.approximateSize()
-            if (logStatusDetails.maxEntrySize < approxEntrySize) {
-                logStatusDetails.maxEntrySize = approxEntrySize
+            if (logStatusDetails.maxEntrySizeBytes < approxEntrySize) {
+                logStatusDetails.maxEntrySizeBytes = approxEntrySize
             }
 
-            if (logStatusDetails.minEntrySize > approxEntrySize) {
-                logStatusDetails.minEntrySize = approxEntrySize
+            if (logStatusDetails.minEntrySizeBytes > approxEntrySize) {
+                logStatusDetails.minEntrySizeBytes = approxEntrySize
             }
-            logStatusDetails.avgEntrySize += approxEntrySize
+            logStatusDetails.avgEntrySizeBytes += approxEntrySize
 
             if (it.isApplicationEntry) {
                 val applicationEntry = it.applicationEntry
@@ -51,7 +51,7 @@ class LogStatus(logPath: Path) {
             }
         }
 
-        logStatusDetails.avgEntrySize /= logStatusDetails.scannedEntries
+        logStatusDetails.avgEntrySizeBytes /= logStatusDetails.scannedEntries
 
         return logStatusDetails
     }

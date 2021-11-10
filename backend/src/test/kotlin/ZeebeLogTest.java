@@ -1,16 +1,11 @@
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.client.api.response.DeploymentEvent;
-import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.client.api.worker.JobWorker;
 import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
-import io.camunda.zeebe.protocol.Protocol;
 import io.camunda.zeebe.protocol.record.Record;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
@@ -25,10 +20,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
-import kotlinx.serialization.DeserializationStrategy;
-import kotlinx.serialization.internal.MapLikeDescriptor;
-import kotlinx.serialization.internal.MapLikeSerializer;
-import kotlinx.serialization.json.Json;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import scala.App;
 
 @Testcontainers
 public class ZeebeLogTest {
@@ -126,15 +116,15 @@ public class ZeebeLogTest {
     assertThat(status.getLowestIndex()).isEqualTo(1);
     assertThat(status.getLowestRecordPosition()).isEqualTo(1);
 
-    assertThat(status.getMinEntrySize()).isNotZero();
-    assertThat(status.getMinEntrySize()).isLessThan(status.getMaxEntrySize());
+    assertThat(status.getMinEntrySizeBytes()).isNotZero();
+    assertThat(status.getMinEntrySizeBytes()).isLessThan(status.getMaxEntrySizeBytes());
 
-    assertThat(status.getMaxEntrySize()).isNotZero();
-    assertThat(status.getMaxEntrySize()).isGreaterThan(status.getMinEntrySize());
+    assertThat(status.getMaxEntrySizeBytes()).isNotZero();
+    assertThat(status.getMaxEntrySizeBytes()).isGreaterThan(status.getMinEntrySizeBytes());
 
-    assertThat(status.getAvgEntrySize()).isNotZero();
-    assertThat(status.getAvgEntrySize()).isGreaterThan(status.getMinEntrySize());
-    assertThat(status.getAvgEntrySize()).isLessThan(status.getMaxEntrySize());
+    assertThat(status.getAvgEntrySizeBytes()).isNotZero();
+    assertThat(status.getAvgEntrySizeBytes()).isGreaterThan(status.getMinEntrySizeBytes());
+    assertThat(status.getAvgEntrySizeBytes()).isLessThan(status.getMaxEntrySizeBytes());
 
     assertThat(status.toString())
         .contains("lowestRecordPosition")
@@ -143,9 +133,9 @@ public class ZeebeLogTest {
         .contains("highestIndex")
         .contains("lowestIndex")
         .contains("scannedEntries")
-        .contains("maxEntrySize")
-        .contains("minEntrySize")
-        .contains("avgEntrySize");
+        .contains("maxEntrySizeBytes")
+        .contains("minEntrySizeBytes")
+        .contains("avgEntrySizeBytes");
   }
 
 
