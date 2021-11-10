@@ -34,4 +34,5 @@ git commit -am "build: prepare for next version"
 
 cp cli/target/cli-*-jar-with-dependencies.jar zdb.jar
 
-
+git push origin master
+git push origin "$version"
