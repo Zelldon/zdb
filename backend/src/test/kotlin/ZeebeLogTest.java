@@ -32,35 +32,31 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class ZeebeLogTest {
 
   private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
-
-  static {
-    tempDir.mkdirs();
-  }
-
   private static final BpmnModelInstance process =
       Bpmn.createExecutableProcess("process")
           .startEvent()
           .parallelGateway("gw")
-            .serviceTask("task")
-            .zeebeJobType("type")
-            .endEvent()
+          .serviceTask("task")
+          .zeebeJobType("type")
+          .endEvent()
           .moveToLastGateway()
-            .serviceTask("incidentTask")
-            .zeebeInputExpression("=foo", "bar")
-            .zeebeJobType("type")
-            .endEvent()
+          .serviceTask("incidentTask")
+          .zeebeInputExpression("=foo", "bar")
+          .zeebeJobType("type")
+          .endEvent()
           .done();
-
   private static final String CONTAINER_PATH = "/usr/local/zeebe/data/";
-
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
       /* run the container with the current user, in order to access the data and delete it later */
       .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
       .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);
-
   private static CountDownLatch jobLatch;
   private static final AtomicLong jobKey = new AtomicLong();
+
+  static {
+    tempDir.mkdirs();
+  }
 
   @BeforeAll
   public static void setup() throws Exception {
@@ -79,17 +75,21 @@ public class ZeebeLogTest {
         .send()
         .join();
 
-    client.newPublishMessageCommand().messageName("msg").correlationKey("123").timeToLive(Duration.ofSeconds(1)).send().join();
-    client.newPublishMessageCommand().messageName("msg12").correlationKey("123").timeToLive(Duration.ofHours(1)).send().join();
+    client.newPublishMessageCommand().messageName("msg").correlationKey("123")
+        .timeToLive(Duration.ofSeconds(1)).send().join();
+    client.newPublishMessageCommand().messageName("msg12").correlationKey("123")
+        .timeToLive(Duration.ofHours(1)).send().join();
 
-    jobLatch = new CountDownLatch(1);
-    final var jobWorker = client.newWorker().jobType("type").handler((jobClient, job) -> {
-      jobKey.set(job.getKey());
-      jobLatch.countDown();
-    }).open();
-    jobLatch.await();
+    var responseJobKey = 0L;
+    do {
+        final var activateJobsResponse = client.newActivateJobsCommand().jobType("type")
+            .maxJobsToActivate(1).send()
+            .join();
+        if (activateJobsResponse != null && !activateJobsResponse.getJobs().isEmpty()) {
+          responseJobKey = activateJobsResponse.getJobs().get(0).getKey();
+        }
+    } while (responseJobKey <= 0);
 
-    jobWorker.close();
     client.close();
   }
 
