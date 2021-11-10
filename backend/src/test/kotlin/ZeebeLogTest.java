@@ -140,6 +140,30 @@ public class ZeebeLogTest {
 
 
   @Test
+  public void shouldReturnDefaultsWhenReadStatusFromNonExistingLog() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(new File("/tmp/doesntExist"), "1");
+    var logStatus = new LogStatus(logPath);
+
+    // when
+    final var status = logStatus.status();
+
+    // then
+    assertThat(status.getHighestIndex()).isEqualTo(Long.MIN_VALUE);
+    assertThat(status.getScannedEntries()).isZero();
+    assertThat(status.getHighestTerm()).isEqualTo(Long.MIN_VALUE);
+    assertThat(status.getHighestRecordPosition()).isEqualTo(Long.MIN_VALUE);
+    assertThat(status.getLowestIndex()).isEqualTo(Long.MAX_VALUE);
+    assertThat(status.getLowestRecordPosition()).isEqualTo(Long.MAX_VALUE);
+    assertThat(status.getMinEntrySize()).isEqualTo(Integer.MAX_VALUE);
+    assertThat(status.getMaxEntrySize()).isEqualTo(Integer.MIN_VALUE);
+    assertThat(status.getAvgEntrySize()).isZero();
+
+    assertThat(status).hasToString("{}");
+  }
+
+
+  @Test
   public void shouldBuildLogContent() throws JsonProcessingException {
     // given
     final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");

@@ -15,6 +15,8 @@ jobs:
         uses: actions/setup-java@v2.3.1
         with:
           java-version: 11
+          distribution: 'temurin'
+          cache: 'maven'
       - name: Cache SonarCloud packages
         uses: actions/cache@v2.1.6
         with:

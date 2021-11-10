@@ -6,6 +6,7 @@ import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.client.api.worker.JobWorker;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
+import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent;
 import io.camunda.zeebe.protocol.record.value.BpmnElementType;
 import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.camunda.zeebe.util.FileUtil;
@@ -180,6 +181,7 @@ public class ZeebeStateTest {
     // then
     assertThat(actualInstanceDetails).isNotNull();
     assertThat(actualInstanceDetails.getKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(actualInstanceDetails.getState()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
     assertThat(actualInstanceDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
     assertThat(actualInstanceDetails.getProcessDefinitionKey())
         .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
@@ -214,6 +216,7 @@ public class ZeebeStateTest {
 
     // then
     assertThat(actualElementInstance).isNotNull();
+    assertThat(actualElementInstance.getState()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
     assertThat(actualElementInstance.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
     assertThat(actualElementInstance.getProcessDefinitionKey())
         .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());

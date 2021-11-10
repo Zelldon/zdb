@@ -51,7 +51,9 @@ class LogStatus(logPath: Path) {
             }
         }
 
-        logStatusDetails.avgEntrySizeBytes /= logStatusDetails.scannedEntries
+        if (logStatusDetails.scannedEntries > 0) {
+            logStatusDetails.avgEntrySizeBytes /= logStatusDetails.scannedEntries
+        }
 
         return logStatusDetails
     }
