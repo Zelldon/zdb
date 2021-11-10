@@ -7,6 +7,7 @@ import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.client.api.worker.JobWorker;
+import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.Protocol;
@@ -14,6 +15,7 @@ import io.camunda.zeebe.protocol.record.Record;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
+import io.zell.zdb.log.ApplicationRecord;
 import io.zell.zdb.log.LogContentReader;
 import io.zell.zdb.log.LogSearch;
 import io.zell.zdb.log.LogStatus;
@@ -27,12 +29,14 @@ import kotlinx.serialization.DeserializationStrategy;
 import kotlinx.serialization.internal.MapLikeDescriptor;
 import kotlinx.serialization.internal.MapLikeSerializer;
 import kotlinx.serialization.json.Json;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import scala.App;
 
 @Testcontainers
 public class ZeebeLogTest {
@@ -65,8 +69,6 @@ public class ZeebeLogTest {
       .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
       .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);
 
-  private static DeploymentEvent deploymentEvent;
-  private static ProcessInstanceEvent returnedProcessInstance;
   private static CountDownLatch jobLatch;
   private static final AtomicLong jobKey = new AtomicLong();
 
@@ -77,9 +79,9 @@ public class ZeebeLogTest {
             .gatewayAddress(zeebeContainer.getExternalGatewayAddress())
             .usePlaintext()
             .build();
-    deploymentEvent = client.newDeployCommand().addProcessModel(process, "process.bpmn").send().join();
+    client.newDeployCommand().addProcessModel(process, "process.bpmn").send().join();
 
-    returnedProcessInstance = client
+    client
         .newCreateInstanceCommand()
         .bpmnProcessId("process")
         .latestVersion()
@@ -158,10 +160,30 @@ public class ZeebeLogTest {
 
     // then
     assertThat(content.getRecords()).hasSize(17);
-    final var objectMapper = new ObjectMapper();
 
+    final var objectMapper = new ObjectMapper();
     final var jsonNode = objectMapper.readTree(content.toString());
     assertThat(jsonNode).isNotNull(); // is valid json
+  }
+
+
+  @Test
+  public void shouldContainNoDuplicatesInLogContent() throws JsonProcessingException {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+
+    // when
+    final var content = logContentReader.content();
+
+    // then
+    // validate that records are not duplicated in LogContent
+    assertThat(content.getRecords())
+        .filteredOn(ApplicationRecord.class::isInstance)
+        .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
+        .flatExtracting(ApplicationRecord::getEntries)
+        .extracting(TypedEventImpl::getPosition)
+        .doesNotHaveDuplicates();
   }
 
   @Test
@@ -210,7 +232,7 @@ public class ZeebeLogTest {
     // given
     final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
     var logSearch = new LogSearch(logPath);
-    final var index = 2;
+    final var index = 7;
 
     // when
     final var logContent = logSearch.searchIndex(index);
@@ -218,6 +240,26 @@ public class ZeebeLogTest {
     // then
     assertThat(logContent).isNotNull();
     assertThat(logContent.getRecords()).hasSize(1);
+  }
+
+  @Test
+  public void shouldNotReturnDuplicatesWhenSearchForIndexInLog() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logSearch = new LogSearch(logPath);
+    final var index = 7;
+
+    // when
+    final var logContent = logSearch.searchIndex(index);
+
+    // then
+    // validate that records are not duplicated in LogContent
+    assertThat(logContent.getRecords())
+        .filteredOn(ApplicationRecord.class::isInstance)
+        .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
+        .flatExtracting(ApplicationRecord::getEntries)
+        .extracting(TypedEventImpl::getPosition)
+        .doesNotHaveDuplicates();
   }
 
   @Test
