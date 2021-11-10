@@ -10,6 +10,7 @@ import kotlinx.serialization.json.Json
 
 @Serializable
 class InstanceDetails private constructor(val key : Long,
+                                          val state : String,
                                           val bpmnProcessId : String,
                                           val processDefinitionKey : Long,
                                           val version : Int,
@@ -24,6 +25,7 @@ class InstanceDetails private constructor(val key : Long,
 
     constructor(elementInstance: ElementInstance, children: List<ElementInstance>?) :
             this (elementInstance.key,
+                elementInstance.state.name,
                 elementInstance.value.bpmnProcessId,
                 elementInstance.value.processDefinitionKey,
                 elementInstance.value.version,
