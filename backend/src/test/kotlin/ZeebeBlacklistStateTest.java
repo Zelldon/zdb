@@ -72,7 +72,7 @@ public class ZeebeBlacklistStateTest {
             .build();
     client.newDeployCommand().addProcessModel(process, "process.bpmn").send().join();
 
-    final var items = IntStream.range(1, 100_000).boxed().collect(Collectors.toList());
+    final var items = IntStream.range(1, 250_000).boxed().collect(Collectors.toList());
 
     returnedProcessInstance = client
         .newCreateInstanceCommand()
@@ -82,6 +82,8 @@ public class ZeebeBlacklistStateTest {
         .send()
         .join();
 
+
+    client.newActivateJobsCommand().jobType("task").maxJobsToActivate(1000).send().join();
     try {
       Thread.sleep(1000); // give time to reach the multi instance
     } catch (InterruptedException e) {
