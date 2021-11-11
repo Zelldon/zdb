@@ -178,24 +178,6 @@
       <artifactId>zeebe-workflow-engine</artifactId>
       <version>${zeebe.version}</version>
       <exclusions>
-<!--        State writes into prometheus metrics -->
-<!--        <exclusion>-->
-<!--          <groupId>io.prometheus</groupId>-->
-<!--          <artifactId>simpleclient</artifactId>-->
-<!--        </exclusion>-->
-        <exclusion>
-          <groupId>io.camunda</groupId>
-          <artifactId>zeebe-bpmn-model</artifactId>
-        </exclusion>
-<!--        State needs expression eval framework on start -->
-<!--        <exclusion>-->
-<!--          <groupId>io.camunda</groupId>-->
-<!--          <artifactId>zeebe-expression-language</artifactId>-->
-<!--        </exclusion>-->
-        <exclusion>
-          <groupId>io.camunda</groupId>
-          <artifactId>zeebe-snapshots</artifactId>
-        </exclusion>
         <exclusion>
           <groupId>io.netty</groupId>
           <artifactId>netty-codec</artifactId>
@@ -217,20 +199,8 @@
           <artifactId>netty-buffer</artifactId>
         </exclusion>
         <exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-math3</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-        <exclusion>
           <groupId>com.netflix.concurrency-limits</groupId>
           <artifactId>concurrency-limits-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.camunda.bpm.model</groupId>
-          <artifactId>camunda-xml-model</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
