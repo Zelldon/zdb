@@ -15,7 +15,7 @@
   <name>ZDB Backend</name>
 
   <properties>
-    <assertj-core.version>3.21.0</assertj-core.version>
+    <assertj-core.version>3.22.0</assertj-core.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <junit-jupiter-api.version>5.8.2</junit-jupiter-api.version>
     <junit-jupiter-engine.version>5.8.2</junit-jupiter-engine.version>
