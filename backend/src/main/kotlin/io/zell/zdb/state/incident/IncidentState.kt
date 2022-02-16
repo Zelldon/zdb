@@ -31,7 +31,7 @@ class IncidentState(readonlyDb: ReadonlyTransactionDb) {
         val incidentState = zeebeDbState.incidentState
         val incidentRecord = incidentState.getIncidentRecord(incidentKey)
 
-        return IncidentDetails(incidentRecord)
+        return IncidentDetails(incidentKey, incidentRecord)
     }
 
     fun listIncidents(): List<IncidentDetails> {
