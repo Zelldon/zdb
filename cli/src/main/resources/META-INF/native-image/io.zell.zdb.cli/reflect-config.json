@@ -240,6 +240,12 @@
       {
         "name": "<init>",
         "parameterTypes": []
+      },
+      {
+        "name": "entity",
+        "parameterTypes": [
+          "long"
+        ]
       }
     ]
   },
@@ -342,6 +348,15 @@
     ]
   },
   {
+    "name": "java.lang.invoke.VarHandle",
+    "methods": [
+      {
+        "name": "releaseFence",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
     "name": "java.lang.reflect.Executable",
     "methods": [
       {
@@ -395,6 +410,12 @@
         ]
       }
     ]
+  },
+  {
+    "name": "java.security.MessageDigestSpi"
+  },
+  {
+    "name": "java.security.SecureRandomParameters"
   },
   {
     "name": "java.sql.Connection"
@@ -596,6 +617,42 @@
     ]
   },
   {
+    "name": "org.rocksdb.RocksDB",
+    "methods": [
+      {
+        "name": "get",
+        "parameterTypes": [
+          "long",
+          "long",
+          "byte[]",
+          "int",
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.rocksdb.RocksIterator",
+    "queriedMethods": [
+      {
+        "name": "seek0",
+        "parameterTypes": [
+          "long",
+          "byte[]",
+          "int"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.rocksdb.RocksObject",
+    "fields": [
+      {
+        "name": "nativeHandle_"
+      }
+    ]
+  },
+  {
     "name": "picocli.AutoComplete$GenerateCompletion",
     "allDeclaredFields": true,
     "queryAllDeclaredMethods": true,
@@ -624,6 +681,24 @@
         "parameterTypes": [
           "java.nio.ByteBuffer"
         ]
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.NativePRNG",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "name": "sun.security.provider.SHA",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
       }
     ]
   }

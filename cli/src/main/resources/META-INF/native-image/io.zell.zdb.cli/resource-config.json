@@ -2,6 +2,9 @@
   "resources": {
     "includes": [
       {
+        "pattern": "\\Qlibrocksdbjni-linux64.so\\E"
+      },
+      {
         "pattern": "\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
       },
       {
