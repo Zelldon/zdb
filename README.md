@@ -185,12 +185,6 @@ zdb log print --path=<pathToPartition> > output.log
 ```
 The `output.log` file will contain all records as json. Zeebe entries are written as json, RAFT entries unfortunately not.
 
-If the log is quite big or you want to search for a specific order of ZeebeRecord then a compact view of the log is helpful. You can specify the format of the log output (per default it is json).
-
-```sh
-zdb log print  --path=<pathToPartition> --format compact
-```
-
 ## Examples
 
 ```sh
