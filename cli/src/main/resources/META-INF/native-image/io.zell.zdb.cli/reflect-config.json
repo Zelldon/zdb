@@ -1,705 +1,470 @@
 [
-  {
-    "name": "com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "com.fasterxml.jackson.databind.ext.Java7SupportImpl",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true,
-    "methods": [
-      {
-        "name": "getBrokerVersion",
-        "parameterTypes": []
-      },
-      {
-        "name": "getIntent",
-        "parameterTypes": []
-      },
-      {
-        "name": "getKey",
-        "parameterTypes": []
-      },
-      {
-        "name": "getPartitionId",
-        "parameterTypes": []
-      },
-      {
-        "name": "getPosition",
-        "parameterTypes": []
-      },
-      {
-        "name": "getRecordType",
-        "parameterTypes": []
-      },
-      {
-        "name": "getRejectionReason",
-        "parameterTypes": []
-      },
-      {
-        "name": "getRejectionType",
-        "parameterTypes": []
-      },
-      {
-        "name": "getSourceRecordPosition",
-        "parameterTypes": []
-      },
-      {
-        "name": "getTimestamp",
-        "parameterTypes": []
-      },
-      {
-        "name": "getValue",
-        "parameterTypes": []
-      },
-      {
-        "name": "getValueType",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.camunda.zeebe.engine.processing.streamprocessor.TypedRecord",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.msgpack.Recyclable",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.msgpack.UnpackedObject",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.msgpack.value.BaseValue",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.msgpack.value.ObjectValue",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.impl.record.UnifiedRecordValue",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "queryAllDeclaredConstructors": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "getBpmnElementType",
-        "parameterTypes": []
-      },
-      {
-        "name": "getBpmnProcessId",
-        "parameterTypes": []
-      },
-      {
-        "name": "getElementId",
-        "parameterTypes": []
-      },
-      {
-        "name": "getFlowScopeKey",
-        "parameterTypes": []
-      },
-      {
-        "name": "getParentElementInstanceKey",
-        "parameterTypes": []
-      },
-      {
-        "name": "getParentProcessInstanceKey",
-        "parameterTypes": []
-      },
-      {
-        "name": "getProcessDefinitionKey",
-        "parameterTypes": []
-      },
-      {
-        "name": "getProcessInstanceKey",
-        "parameterTypes": []
-      },
-      {
-        "name": "getVersion",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.JsonSerializable",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.Record",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.RecordType",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.RecordValue",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.RejectionType",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.ValueType",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.intent.Intent",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.intent.ProcessInstanceRelatedIntent",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.value.BpmnElementType",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.value.ProcessInstanceRecordValue",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.util.buffer.BufferReader",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.camunda.zeebe.util.buffer.BufferWriter",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.zell.zdb.BlacklistCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.IncidentCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.InstanceCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      },
-      {
-        "name": "entity",
-        "parameterTypes": [
-          "long"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.LogCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.LogPrintCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.LogSearchCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.LogSearchCommand$Exclusive",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.ProcessCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "io.zell.zdb.StatusCommand",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.zell.zdb.ZeebeDebugger",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "io.zell.zdb.ZeebeDebugger$VersionProvider",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.lang.Cloneable",
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "java.lang.Object",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "java.lang.ProcessHandle",
-    "methods": [
-      {
-        "name": "current",
-        "parameterTypes": []
-      },
-      {
-        "name": "pid",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.lang.invoke.VarHandle",
-    "methods": [
-      {
-        "name": "releaseFence",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.lang.reflect.Executable",
-    "methods": [
-      {
-        "name": "getParameters",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.lang.reflect.Method"
-  },
-  {
-    "name": "java.lang.reflect.Parameter",
-    "methods": [
-      {
-        "name": "getName",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "java.nio.Buffer",
-    "fields": [
-      {
-        "name": "address"
-      }
-    ]
-  },
-  {
-    "name": "java.nio.ByteBuffer",
-    "fields": [
-      {
-        "name": "hb"
-      },
-      {
-        "name": "offset"
-      }
-    ]
-  },
-  {
-    "name": "java.nio.file.Path"
-  },
-  {
-    "name": "java.nio.file.Paths",
-    "methods": [
-      {
-        "name": "get",
-        "parameterTypes": [
-          "java.lang.String",
-          "java.lang.String[]"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.security.MessageDigestSpi"
-  },
-  {
-    "name": "java.security.SecureRandomParameters"
-  },
-  {
-    "name": "java.sql.Connection"
-  },
-  {
-    "name": "java.sql.Driver"
-  },
-  {
-    "name": "java.sql.DriverManager",
-    "queriedMethods": [
-      {
-        "name": "getConnection",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      },
-      {
-        "name": "getDriver",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.sql.Time",
-    "queriedMethods": [
-      {
-        "name": "<init>",
-        "parameterTypes": [
-          "long"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.sql.Timestamp",
-    "queriedMethods": [
-      {
-        "name": "valueOf",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.Duration",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.Instant",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.LocalDate",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.LocalDateTime",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.LocalTime",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.MonthDay",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.OffsetDateTime",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.OffsetTime",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.Period",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.Year",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.YearMonth",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.ZoneId",
-    "queriedMethods": [
-      {
-        "name": "of",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.ZoneOffset",
-    "queriedMethods": [
-      {
-        "name": "of",
-        "parameterTypes": [
-          "java.lang.String"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "java.time.ZonedDateTime",
-    "queriedMethods": [
-      {
-        "name": "parse",
-        "parameterTypes": [
-          "java.lang.CharSequence"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "org.rocksdb.RocksDB",
-    "methods": [
-      {
-        "name": "get",
-        "parameterTypes": [
-          "long",
-          "long",
-          "byte[]",
-          "int",
-          "int"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "org.rocksdb.RocksIterator",
-    "queriedMethods": [
-      {
-        "name": "seek0",
-        "parameterTypes": [
-          "long",
-          "byte[]",
-          "int"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "org.rocksdb.RocksObject",
-    "fields": [
-      {
-        "name": "nativeHandle_"
-      }
-    ]
-  },
-  {
-    "name": "picocli.AutoComplete$GenerateCompletion",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true,
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "picocli.CommandLine$AutoHelpMixin",
-    "allDeclaredFields": true,
-    "queryAllDeclaredMethods": true
-  },
-  {
-    "name": "sun.misc.Unsafe",
-    "fields": [
-      {
-        "name": "theUnsafe"
-      }
-    ],
-    "methods": [
-      {
-        "name": "invokeCleaner",
-        "parameterTypes": [
-          "java.nio.ByteBuffer"
-        ]
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.NativePRNG",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  },
-  {
-    "name": "sun.security.provider.SHA",
-    "methods": [
-      {
-        "name": "<init>",
-        "parameterTypes": []
-      }
-    ]
-  }
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7HandlersImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.org.apache.xerces.internal.impl.dv.xs.ExtendedSchemaDVFactoryImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.org.apache.xerces.internal.impl.dv.xs.SchemaDVFactoryImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"getBrokerVersion","parameterTypes":[] }, 
+    {"name":"getIntent","parameterTypes":[] }, 
+    {"name":"getKey","parameterTypes":[] }, 
+    {"name":"getPartitionId","parameterTypes":[] }, 
+    {"name":"getPosition","parameterTypes":[] }, 
+    {"name":"getRecordType","parameterTypes":[] }, 
+    {"name":"getRejectionReason","parameterTypes":[] }, 
+    {"name":"getRejectionType","parameterTypes":[] }, 
+    {"name":"getSourceRecordPosition","parameterTypes":[] }, 
+    {"name":"getTimestamp","parameterTypes":[] }, 
+    {"name":"getValue","parameterTypes":[] }, 
+    {"name":"getValueType","parameterTypes":[] }
+  ]
+},
+{
+  "name":"io.camunda.zeebe.engine.processing.streamprocessor.TypedRecord",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.msgpack.Recyclable",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.msgpack.UnpackedObject",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.msgpack.value.BaseValue",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.msgpack.value.ObjectValue",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.impl.record.UnifiedRecordValue",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.impl.record.value.job.JobBatchRecord",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.camunda.zeebe.protocol.impl.record.value.job.JobRecord",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"getBpmnProcessId","parameterTypes":[] }, 
+    {"name":"getCustomHeaders","parameterTypes":[] }, 
+    {"name":"getDeadline","parameterTypes":[] }, 
+    {"name":"getElementId","parameterTypes":[] }, 
+    {"name":"getElementInstanceKey","parameterTypes":[] }, 
+    {"name":"getErrorCode","parameterTypes":[] }, 
+    {"name":"getErrorMessage","parameterTypes":[] }, 
+    {"name":"getProcessDefinitionKey","parameterTypes":[] }, 
+    {"name":"getProcessDefinitionVersion","parameterTypes":[] }, 
+    {"name":"getProcessInstanceKey","parameterTypes":[] }, 
+    {"name":"getRetries","parameterTypes":[] }, 
+    {"name":"getType","parameterTypes":[] }, 
+    {"name":"getVariables","parameterTypes":[] }, 
+    {"name":"getWorker","parameterTypes":[] }
+  ]
+},
+{
+  "name":"io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessEventRecord",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceCreationRecord",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.camunda.zeebe.protocol.impl.record.value.variable.VariableRecord",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.JsonSerializable",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.Record",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.RecordType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.RecordValue",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.RecordValueWithVariables",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.RejectionType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.ValueType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.intent.Intent",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.intent.JobIntent",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.intent.ProcessInstanceRelatedIntent",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.value.JobRecordValue",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.util.buffer.BufferReader",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.util.buffer.BufferWriter",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.camunda.zeebe.util.sched.ActorThread",
+  "fields":[{"name":"state"}]
+},
+{
+  "name":"io.zell.zdb.BlacklistCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"entity","parameterTypes":["long"] }, 
+    {"name":"list","parameterTypes":[] }
+  ]
+},
+{
+  "name":"io.zell.zdb.IncidentCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"entity","parameterTypes":["long"] }, 
+    {"name":"list","parameterTypes":[] }
+  ]
+},
+{
+  "name":"io.zell.zdb.InstanceCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"entity","parameterTypes":["long"] }
+  ]
+},
+{
+  "name":"io.zell.zdb.LogCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"status","parameterTypes":[] }
+  ]
+},
+{
+  "name":"io.zell.zdb.LogPrintCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.LogSearchCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.LogSearchCommand$Exclusive",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.ProcessCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[
+    {"name":"<init>","parameterTypes":[] }, 
+    {"name":"entity","parameterTypes":["long"] }, 
+    {"name":"instances","parameterTypes":["long"] }, 
+    {"name":"list","parameterTypes":[] }
+  ]
+},
+{
+  "name":"io.zell.zdb.StatusCommand",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.ZeebeDebugger",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"io.zell.zdb.ZeebeDebugger$VersionProvider",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.log.LogStatusDetails",
+  "fields":[{"name":"Companion"}]
+},
+{
+  "name":"io.zell.zdb.log.LogStatusDetails$Companion",
+  "methods":[{"name":"serializer","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.state.general.GeneralDetails",
+  "fields":[{"name":"Companion"}]
+},
+{
+  "name":"io.zell.zdb.state.general.GeneralDetails$Companion",
+  "methods":[{"name":"serializer","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.state.instance.InstanceDetails",
+  "fields":[{"name":"Companion"}]
+},
+{
+  "name":"io.zell.zdb.state.instance.InstanceDetails$Companion",
+  "methods":[{"name":"serializer","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.state.process.ProcessDetails",
+  "fields":[{"name":"Companion"}]
+},
+{
+  "name":"io.zell.zdb.state.process.ProcessDetails$Companion",
+  "methods":[{"name":"serializer","parameterTypes":[] }]
+},
+{
+  "name":"io.zell.zdb.state.process.ProcessMeta",
+  "fields":[{"name":"Companion"}]
+},
+{
+  "name":"io.zell.zdb.state.process.ProcessMeta$Companion",
+  "methods":[{"name":"serializer","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.Cloneable",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.Object",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"java.lang.ProcessHandle",
+  "methods":[
+    {"name":"current","parameterTypes":[] }, 
+    {"name":"pid","parameterTypes":[] }
+  ]
+},
+{
+  "name":"java.lang.System",
+  "methods":[{"name":"console","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.invoke.VarHandle",
+  "methods":[{"name":"releaseFence","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.Executable",
+  "methods":[{"name":"getParameters","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.Method"
+},
+{
+  "name":"java.lang.reflect.Parameter",
+  "methods":[{"name":"getName","parameterTypes":[] }]
+},
+{
+  "name":"java.nio.Buffer",
+  "fields":[{"name":"address"}]
+},
+{
+  "name":"java.nio.ByteBuffer",
+  "fields":[
+    {"name":"hb"}, 
+    {"name":"offset"}
+  ]
+},
+{
+  "name":"java.nio.file.Path"
+},
+{
+  "name":"java.nio.file.Paths",
+  "methods":[{"name":"get","parameterTypes":["java.lang.String","java.lang.String[]"] }]
+},
+{
+  "name":"java.security.SecureRandomParameters"
+},
+{
+  "name":"java.sql.Connection"
+},
+{
+  "name":"java.sql.Driver"
+},
+{
+  "name":"java.sql.DriverManager",
+  "queriedMethods":[
+    {"name":"getConnection","parameterTypes":["java.lang.String"] }, 
+    {"name":"getDriver","parameterTypes":["java.lang.String"] }
+  ]
+},
+{
+  "name":"java.sql.Time",
+  "queriedMethods":[{"name":"<init>","parameterTypes":["long"] }]
+},
+{
+  "name":"java.sql.Timestamp",
+  "queriedMethods":[{"name":"valueOf","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.time.Duration",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.Instant",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.LocalDate",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.LocalDateTime",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.LocalTime",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.MonthDay",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.OffsetDateTime",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.OffsetTime",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.Period",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.Year",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.YearMonth",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"java.time.ZoneId",
+  "queriedMethods":[{"name":"of","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.time.ZoneOffset",
+  "queriedMethods":[{"name":"of","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.time.ZonedDateTime",
+  "queriedMethods":[{"name":"parse","parameterTypes":["java.lang.CharSequence"] }]
+},
+{
+  "name":"org.rocksdb.RocksDB",
+  "methods":[{"name":"get","parameterTypes":["long","long","byte[]","int","int"] }]
+},
+{
+  "name":"org.rocksdb.RocksIterator",
+  "methods":[{"name":"seek0","parameterTypes":["long","byte[]","int"] }]
+},
+{
+  "name":"org.rocksdb.RocksObject",
+  "fields":[{"name":"nativeHandle_"}]
+},
+{
+  "name":"picocli.AutoComplete$GenerateCompletion",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"picocli.CommandLine$AutoHelpMixin",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"sun.misc.Unsafe",
+  "fields":[{"name":"theUnsafe"}],
+  "methods":[{"name":"invokeCleaner","parameterTypes":["java.nio.ByteBuffer"] }]
+},
+{
+  "name":"sun.security.provider.NativePRNG",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.SHA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+}
 ]

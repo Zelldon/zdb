@@ -1,16 +1,21 @@
 {
-  "resources": {
-    "includes": [
-      {
-        "pattern": "\\Qlibrocksdbjni-linux64.so\\E"
-      },
-      {
-        "pattern": "\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
-      },
-      {
-        "pattern": "\\Qzeebe-util.properties\\E"
-      }
-    ]
-  },
-  "bundles": []
+  "resources":{
+  "includes":[
+    {
+      "pattern":"\\QBPMN20.xsd\\E"
+    }, 
+    {
+      "pattern":"\\Qlibrocksdbjni-linux64.so\\E"
+    }, 
+    {
+      "pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
+    }, 
+    {
+      "pattern":"\\Qzeebe-util.properties\\E"
+    }
+  ]},
+  "bundles":[{
+      "name":"com.sun.org.apache.xerces.internal.impl.xpath.regex.message",
+      "locales":["und"]
+    }]
 }
