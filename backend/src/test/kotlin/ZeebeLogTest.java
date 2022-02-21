@@ -32,7 +32,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public class ZeebeLogTest {
 
   private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
-  private static final BpmnModelInstance process =
+  private static final BpmnModelInstance PROCESS =
       Bpmn.createExecutableProcess("process")
           .startEvent()
           .parallelGateway("gw")
@@ -43,6 +43,11 @@ public class ZeebeLogTest {
           .serviceTask("incidentTask")
           .zeebeInputExpression("=foo", "bar")
           .zeebeJobType("type")
+          .endEvent()
+          .done();
+  private static final BpmnModelInstance SIMPLE_PROCESS =
+      Bpmn.createExecutableProcess("simple")
+          .startEvent()
           .endEvent()
           .done();
   private static final String CONTAINER_PATH = "/usr/local/zeebe/data/";
@@ -65,7 +70,12 @@ public class ZeebeLogTest {
             .gatewayAddress(zeebeContainer.getExternalGatewayAddress())
             .usePlaintext()
             .build();
-    client.newDeployCommand().addProcessModel(process, "process.bpmn").send().join();
+
+    client.newDeployCommand()
+        .addProcessModel(PROCESS, "process.bpmn")
+        .addProcessModel(SIMPLE_PROCESS, "simple.bpmn")
+        .send()
+        .join();
 
     client
         .newCreateInstanceCommand()
@@ -79,6 +89,17 @@ public class ZeebeLogTest {
         .timeToLive(Duration.ofSeconds(1)).send().join();
     client.newPublishMessageCommand().messageName("msg12").correlationKey("123")
         .timeToLive(Duration.ofHours(1)).send().join();
+
+    // Small hack to ensure we reached the task and job of the previous PI
+    // If the process instance we start after, ended we can be sure that
+    // we reached also the wait-state in the other PI.
+    client
+        .newCreateInstanceCommand()
+        .bpmnProcessId("simple")
+        .latestVersion()
+        .withResult()
+        .send()
+        .join();
 
     var responseJobKey = 0L;
     do {
@@ -108,10 +129,10 @@ public class ZeebeLogTest {
     final var status = logStatus.status();
 
     // then
-    assertThat(status.getHighestIndex()).isEqualTo(17);
-    assertThat(status.getScannedEntries()).isEqualTo(17);
+    assertThat(status.getHighestIndex()).isEqualTo(24);
+    assertThat(status.getScannedEntries()).isEqualTo(24);
     assertThat(status.getHighestTerm()).isEqualTo(1);
-    assertThat(status.getHighestRecordPosition()).isEqualTo(39);
+    assertThat(status.getHighestRecordPosition()).isEqualTo(60);
 
     assertThat(status.getLowestIndex()).isEqualTo(1);
     assertThat(status.getLowestRecordPosition()).isEqualTo(1);
@@ -173,7 +194,7 @@ public class ZeebeLogTest {
     final var content = logContentReader.content();
 
     // then
-    assertThat(content.getRecords()).hasSize(17);
+    assertThat(content.getRecords()).hasSize(24);
 
     final var objectMapper = new ObjectMapper();
     final var jsonNode = objectMapper.readTree(content.toString());
