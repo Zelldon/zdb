@@ -14,8 +14,16 @@
       "pattern":"\\Qzeebe-util.properties\\E"
     }
   ]},
-  "bundles":[{
+  "bundles":[
+    {
+      "name":"com.sun.org.apache.xerces.internal.impl.msg.XMLMessages"
+    }, 
+    {
       "name":"com.sun.org.apache.xerces.internal.impl.xpath.regex.message",
-      "locales":["und"]
-    }]
+      "locales":[
+        "", 
+        "und"
+      ]
+    }
+  ]
 }
