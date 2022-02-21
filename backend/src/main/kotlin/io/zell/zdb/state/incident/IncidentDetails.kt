@@ -7,7 +7,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 @Serializable
-class IncidentDetails private constructor(val bpmnProcessId : String,
+class IncidentDetails private constructor(val key : Long,
+                                          val bpmnProcessId : String,
                                           val processDefinitionKey : Long,
                                           val processInstanceKey : Long,
                                           val elementInstanceKey : Long,
@@ -17,8 +18,10 @@ class IncidentDetails private constructor(val bpmnProcessId : String,
                                           val errorType: ErrorType,
                                           val errorMessage : String) {
 
-    constructor(incident: IncidentRecord) :
-            this(incident.bpmnProcessId,
+    constructor(key: Long, incident: IncidentRecord) :
+            this(
+                key,
+                incident.bpmnProcessId,
                 incident.processDefinitionKey,
                 incident.processInstanceKey,
                 incident.elementInstanceKey,

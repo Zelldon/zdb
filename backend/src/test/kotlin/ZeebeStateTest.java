@@ -347,6 +347,7 @@ public class ZeebeStateTest {
 
     // then
     assertThat(incidentDetails).isNotNull();
+    assertThat(incidentDetails.getKey()).isEqualTo(incidentKey);
     assertThat(incidentDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
     assertThat(incidentDetails.getProcessDefinitionKey())
         .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
@@ -386,6 +387,7 @@ public class ZeebeStateTest {
 
     final var incidentDetails = incidents.get(0);
     assertThat(incidentDetails).isNotNull();
+    assertThat(incidentDetails.getKey()).isEqualTo(incidentKey);
     assertThat(incidentDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
     assertThat(incidentDetails.getProcessDefinitionKey())
         .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
