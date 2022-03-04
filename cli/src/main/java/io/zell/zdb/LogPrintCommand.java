@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
 @Command(name = "print", description = "Print's the complete log to standard out")
@@ -19,11 +20,22 @@ public class LogPrintCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
+  @Option(
+      names = {"-d", "--dot"},
+      description = "Print's the complete log in dot format, which can be consumed by graphviz")
+  private boolean dotToggle;
+
   @Override
   public Integer call() {
     final Path partitionPath = spec.findOption("-p").getValue();
-    final var logContent = new LogContentReader(partitionPath).content();
-    System.out.println(logContent);
+    final var logContentReader = new LogContentReader(partitionPath);
+    final var logContent = logContentReader.content();
+    if (dotToggle) {
+      System.out.println(logContent.asDotFile());
+    } else {
+      System.out.println(logContent);
+    }
+
     return 0;
   }
 }
