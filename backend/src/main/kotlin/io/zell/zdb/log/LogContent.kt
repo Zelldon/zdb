@@ -57,6 +57,8 @@ class LogContent {
 
     fun asDotFile(): String {
         val content = StringBuilder("digraph log {\n")
+            .append("rankdir=\"RL\"")
+            .append(";\n")
 
         for (record in records) {
             if (record is ApplicationRecord) {
@@ -64,20 +66,20 @@ class LogContent {
 
                     content.append(entry.position)
                         .append(" [label=\"")
-                        .append("\n").append(entry.recordType)
-                        .append("\n").append(entry.valueType.name)
-                        .append("\n").append(entry.intent.name())
+                        .append("\\n").append(entry.recordType)
+                        .append("\\n").append(entry.valueType.name)
+                        .append("\\n").append(entry.intent.name())
 
                     if (entry.valueType == ValueType.PROCESS_INSTANCE) {
                         val processInstanceRecord = entry as TypedRecord<ProcessInstanceRecord>
                         val processInstanceValue = processInstanceRecord.value
-                        content.append("\n").append(processInstanceValue.bpmnElementType)
-                        content.append("\nPI Key: ").append(processInstanceValue.processInstanceKey)
-                        content.append("\nPD Key: ").append(processInstanceValue.processDefinitionKey)
+                        content.append("\\n").append(processInstanceValue.bpmnElementType)
+                        content.append("\\nPI Key: ").append(processInstanceValue.processInstanceKey)
+                        content.append("\\nPD Key: ").append(processInstanceValue.processDefinitionKey)
                     }
 
                     content
-                        .append("\nKey: ").append(entry.key)
+                        .append("\\nKey: ").append(entry.key)
                         .append("\"]").append(";\n")
                     if (entry.sourceRecordPosition != -1L) {
                         content.append(entry.position).append(" -> ").append(entry.sourceRecordPosition).append(";\n")
