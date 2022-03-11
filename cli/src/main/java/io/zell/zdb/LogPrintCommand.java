@@ -18,19 +18,26 @@ import picocli.CommandLine.Spec;
 @Command(name = "print", description = "Print's the complete log to standard out")
 public class LogPrintCommand implements Callable<Integer> {
 
+  public enum Format {
+    JSON,
+    DOT,
+  }
+
   @Spec private CommandSpec spec;
 
   @Option(
-      names = {"-d", "--dot"},
-      description = "Print's the complete log in dot format, which can be consumed by graphviz")
-  private boolean dotToggle;
+      names = {"-f", "--format"},
+      description =
+          "Print's the complete log in the specified format, defaults to json. Possible values: [ ${COMPLETION-CANDIDATES} ]",
+      defaultValue = "JSON")
+  private Format format;
 
   @Override
   public Integer call() {
     final Path partitionPath = spec.findOption("-p").getValue();
     final var logContentReader = new LogContentReader(partitionPath);
     final var logContent = logContentReader.content();
-    if (dotToggle) {
+    if (format == Format.DOT) {
       System.out.println(logContent.asDotFile());
     } else {
       System.out.println(logContent);
