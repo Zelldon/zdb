@@ -1,14 +1,12 @@
 package io.zell.zdb.log
 
 import io.atomix.raft.storage.log.IndexedRaftLogEntry
-import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl
-import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventRegistry
+import io.camunda.zeebe.engine.processing.streamprocessor.*
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
+import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
+import io.camunda.zeebe.protocol.record.ValueType
 import io.camunda.zeebe.util.ReflectUtil
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.agrona.concurrent.UnsafeBuffer
 
 class LogContent {
@@ -55,5 +53,55 @@ class LogContent {
 
     override fun toString(): String {
         return "{ \"records\": [${records.joinToString()}] } "
+    }
+
+    fun asDotFile(): String {
+        val content = StringBuilder("digraph log {")
+            .append(System.lineSeparator())
+            .append("rankdir=\"RL\"")
+            .append(";")
+            .append(System.lineSeparator())
+
+        records
+            .filterIsInstance<ApplicationRecord>()
+            .flatMap { it.entries }
+            .forEach{
+                addEventAsDotNode(it, content)
+            }
+        content.append(System.lineSeparator())
+            .append("}")
+        return content.toString()
+    }
+
+    private fun addEventAsDotNode(
+        entry: TypedEventImpl,
+        content: java.lang.StringBuilder
+    ) {
+        content.append(entry.position)
+            .append(" [label=\"")
+            .append("\\n").append(entry.recordType)
+            .append("\\n").append(entry.valueType.name)
+            .append("\\n").append(entry.intent.name())
+
+        if (entry.valueType == ValueType.PROCESS_INSTANCE) {
+            val processInstanceRecord = entry as TypedRecord<ProcessInstanceRecord>
+            val processInstanceValue = processInstanceRecord.value
+            content.append("\\n").append(processInstanceValue.bpmnElementType)
+            content.append("\\nPI Key: ").append(processInstanceValue.processInstanceKey)
+            content.append("\\nPD Key: ").append(processInstanceValue.processDefinitionKey)
+        }
+
+        content
+            .append("\\nKey: ").append(entry.key)
+            .append("\"]")
+            .append(";")
+            .append(System.lineSeparator())
+        if (entry.sourceRecordPosition != -1L) {
+            content.append(entry.position)
+                .append(" -> ")
+                .append(entry.sourceRecordPosition)
+                .append(";")
+                .append(System.lineSeparator())
+        }
     }
 }

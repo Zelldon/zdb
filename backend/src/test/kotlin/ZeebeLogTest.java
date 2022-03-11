@@ -201,6 +201,19 @@ public class ZeebeLogTest {
     assertThat(jsonNode).isNotNull(); // is valid json
   }
 
+  @Test
+  public void shouldReturnLogContentAsDotFile() throws JsonProcessingException {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var content = logContentReader.content();
+
+    // when
+    final var dotFileContent = content.asDotFile();
+
+    // then
+    assertThat(dotFileContent).startsWith("digraph log {").endsWith("}");
+  }
 
   @Test
   public void shouldContainNoDuplicatesInLogContent() throws JsonProcessingException {
