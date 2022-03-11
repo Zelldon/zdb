@@ -62,42 +62,46 @@ class LogContent {
             .append(";")
             .append(System.lineSeparator())
 
-        for (record in records) {
-            if (record is ApplicationRecord) {
-                for (entry in record.entries) {
-
-                    content.append(entry.position)
-                        .append(" [label=\"")
-                        .append("\\n").append(entry.recordType)
-                        .append("\\n").append(entry.valueType.name)
-                        .append("\\n").append(entry.intent.name())
-
-                    if (entry.valueType == ValueType.PROCESS_INSTANCE) {
-                        val processInstanceRecord = entry as TypedRecord<ProcessInstanceRecord>
-                        val processInstanceValue = processInstanceRecord.value
-                        content.append("\\n").append(processInstanceValue.bpmnElementType)
-                        content.append("\\nPI Key: ").append(processInstanceValue.processInstanceKey)
-                        content.append("\\nPD Key: ").append(processInstanceValue.processDefinitionKey)
-                    }
-
-                    content
-                        .append("\\nKey: ").append(entry.key)
-                        .append("\"]")
-                        .append(";")
-                        .append(System.lineSeparator())
-                    if (entry.sourceRecordPosition != -1L) {
-                        content.append(entry.position)
-                            .append(" -> ")
-                            .append(entry.sourceRecordPosition)
-                            .append(";")
-                            .append(System.lineSeparator())
-                    }
-
-                }
+        records
+            .filterIsInstance<ApplicationRecord>()
+            .flatMap { it.entries }
+            .forEach{
+                addEventAsDotNode(it, content)
             }
-        }
         content.append(System.lineSeparator())
             .append("}")
         return content.toString()
+    }
+
+    private fun addEventAsDotNode(
+        entry: TypedEventImpl,
+        content: java.lang.StringBuilder
+    ) {
+        content.append(entry.position)
+            .append(" [label=\"")
+            .append("\\n").append(entry.recordType)
+            .append("\\n").append(entry.valueType.name)
+            .append("\\n").append(entry.intent.name())
+
+        if (entry.valueType == ValueType.PROCESS_INSTANCE) {
+            val processInstanceRecord = entry as TypedRecord<ProcessInstanceRecord>
+            val processInstanceValue = processInstanceRecord.value
+            content.append("\\n").append(processInstanceValue.bpmnElementType)
+            content.append("\\nPI Key: ").append(processInstanceValue.processInstanceKey)
+            content.append("\\nPD Key: ").append(processInstanceValue.processDefinitionKey)
+        }
+
+        content
+            .append("\\nKey: ").append(entry.key)
+            .append("\"]")
+            .append(";")
+            .append(System.lineSeparator())
+        if (entry.sourceRecordPosition != -1L) {
+            content.append(entry.position)
+                .append(" -> ")
+                .append(entry.sourceRecordPosition)
+                .append(";")
+                .append(System.lineSeparator())
+        }
     }
 }
