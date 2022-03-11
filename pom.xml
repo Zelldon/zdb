@@ -34,7 +34,7 @@
     <license.header>
       https://raw.githubusercontent.com/zeebe-io/zeebe/develop/parent/COPYING-HEADER.txt
     </license.header>
-    <maven-compiler-plugin.version>3.10.0</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven.compiler.release>11</maven.compiler.release>
     <plugin.version.checkstyle>3.1.2</plugin.version.checkstyle>
     <plugin.version.fmt>2.13</plugin.version.fmt>
