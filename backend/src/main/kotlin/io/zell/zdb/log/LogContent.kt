@@ -56,9 +56,11 @@ class LogContent {
     }
 
     fun asDotFile(): String {
-        val content = StringBuilder("digraph log {\n")
+        val content = StringBuilder("digraph log {")
+            .append(System.lineSeparator())
             .append("rankdir=\"RL\"")
-            .append(";\n")
+            .append(";")
+            .append(System.lineSeparator())
 
         for (record in records) {
             if (record is ApplicationRecord) {
@@ -80,15 +82,22 @@ class LogContent {
 
                     content
                         .append("\\nKey: ").append(entry.key)
-                        .append("\"]").append(";\n")
+                        .append("\"]")
+                        .append(";")
+                        .append(System.lineSeparator())
                     if (entry.sourceRecordPosition != -1L) {
-                        content.append(entry.position).append(" -> ").append(entry.sourceRecordPosition).append(";\n")
+                        content.append(entry.position)
+                            .append(" -> ")
+                            .append(entry.sourceRecordPosition)
+                            .append(";")
+                            .append(System.lineSeparator())
                     }
 
                 }
             }
         }
-        content.append("\n}")
+        content.append(System.lineSeparator())
+            .append("}")
         return content.toString()
     }
 }
