@@ -170,7 +170,7 @@ It will print a details to the specific index, when it exists in the log.
 
 #### Print Log
 
-It is possible to print the complete log to standard out. This is can be quite helpful if you want to track down some records, which might have caused some issues.
+It is possible to print the complete log to standard out. This is can be quite helpful if you want to track down some records, which might have caused some issues. 
 
 To print the log:
 
@@ -178,12 +178,40 @@ To print the log:
 zdb log print --path=<pathToPartition>
 ```
 
+Per default the log is printed in json format.
 To pipe it to a file:
 
 ```sh
 zdb log print --path=<pathToPartition> > output.log
 ```
-The `output.log` file will contain all records as json. Zeebe entries are written as json, RAFT entries unfortunately not.
+The `output.log` file will contain all records as json.
+
+##### Format
+
+We support different formats to print the log, like json or dot. The json format is used per default. Can be set via `-f` or `--format`
+
+**Dot**
+
+```
+zdb log print -f dot -p=<pathToPartition>
+```
+
+The `dot` format will print the complete log as graph in [dot language](https://graphviz.org/doc/info/lang.html). This can be consumed by [graphviz](https://graphviz.org/doc/info/command.html) to generate a visual graph of the log.
+
+
+Generate dot file via:
+`zdb log print -d -p <pathToPartition> > output.dot`
+
+Generate svg:
+`dot -Tsvg -o test.svg test.dot`
+
+![test](https://user-images.githubusercontent.com/2758593/156778874-1c1fb44a-e18c-4cac-b226-6052241ebdc8.svg)
+
+
+
+
+
+
 
 ## Examples
 
