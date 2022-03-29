@@ -37,7 +37,7 @@ Log into your Zeebe broker machine/container: e.g. `docker exec -it <container_i
 cd /usr/bin
 curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb
 curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb.jar
-sed -i 's/target\/// zdb
+sed -i 's/target\///' zdb
 chmod u+x zdb
 zdb --version
 ```
