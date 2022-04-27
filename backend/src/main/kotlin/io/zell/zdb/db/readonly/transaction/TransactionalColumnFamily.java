@@ -54,7 +54,17 @@ class TransactionalColumnFamily<
   }
 
   @Override
-  public void put(final KeyType key, final ValueType value) {
+  public void insert(final KeyType key, final ValueType value) {
+    throw new UnsupportedOperationException("not supported");
+  }
+
+  @Override
+  public void update(final KeyType key, final ValueType value) {
+    throw new UnsupportedOperationException("not supported");
+  }
+
+  @Override
+  public void upsert(final KeyType key, final ValueType value) {
     throw new UnsupportedOperationException("not supported");
   }
 
@@ -113,7 +123,12 @@ class TransactionalColumnFamily<
   }
 
   @Override
-  public void delete(final KeyType key) {
+  public void deleteExisting(final KeyType key) {
+    throw new UnsupportedOperationException("not supported");
+  }
+
+  @Override
+  public void deleteIfExists(final KeyType key) {
     throw new UnsupportedOperationException("not supported");
   }
 
