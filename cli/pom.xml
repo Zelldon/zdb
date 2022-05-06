@@ -104,7 +104,7 @@
     <plugins>
       <!-- Google code format plugin -->
       <plugin>
-        <groupId>com.coveo</groupId>
+        <groupId>com.spotify.fmt</groupId>
         <artifactId>fmt-maven-plugin</artifactId>
         <version>${plugin.version.fmt}</version>
         <executions>
