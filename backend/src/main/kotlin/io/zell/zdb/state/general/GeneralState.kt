@@ -159,7 +159,7 @@ class GeneralState(statePath: Path) {
         var lastDeadline = 0L
         deadlineColumnFamily.forEach { key, msg ->
             messageCount++
-            val deadline = key.first.value
+            val deadline = key.first().value
 
             if (firstDeadline > deadline)
             {

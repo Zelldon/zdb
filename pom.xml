@@ -37,7 +37,7 @@
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven.compiler.release>11</maven.compiler.release>
     <plugin.version.checkstyle>3.1.2</plugin.version.checkstyle>
-    <plugin.version.fmt>2.13</plugin.version.fmt>
+    <plugin.version.fmt>2.18</plugin.version.fmt>
     <plugin.version.license>4.1</plugin.version.license>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <version.guava>30.0-jre</version.guava>
@@ -51,7 +51,6 @@
     <zeebe-test-util.version>1.0.0</zeebe-test-util.version>
     <zeebe-util.version>1.0.0</zeebe-util.version>
     <zeebe.version>8.0.2</zeebe.version>
-
     <sonar.organization>zelldon-github</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
