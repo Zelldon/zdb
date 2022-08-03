@@ -28,14 +28,14 @@
     <kotlin-stdlib-jdk8.version>1.4.10</kotlin-stdlib-jdk8.version>
     <kotlin-test-junit5.version>1.4.10</kotlin-test-junit5.version>
     <kotlin.code.style>official</kotlin.code.style>
-    <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
+    <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
     <kotlin.serialization.version>1.2.1</kotlin.serialization.version>
-    <kotlin.version>1.5.0</kotlin.version>
+    <kotlin.version>1.7.10</kotlin.version>
     <license.header>
       https://raw.githubusercontent.com/zeebe-io/zeebe/develop/parent/COPYING-HEADER.txt
     </license.header>
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.release>17</maven.compiler.release>
     <plugin.version.checkstyle>3.1.2</plugin.version.checkstyle>
     <plugin.version.fmt>2.19</plugin.version.fmt>
     <plugin.version.license>4.1</plugin.version.license>
