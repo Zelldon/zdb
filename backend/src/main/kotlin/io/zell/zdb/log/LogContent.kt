@@ -1,12 +1,12 @@
 package io.zell.zdb.log
 
 import io.atomix.raft.storage.log.IndexedRaftLogEntry
-import io.camunda.zeebe.engine.processing.streamprocessor.*
+import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl
+import io.camunda.zeebe.engine.processing.streamprocessor.TypedRecord
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
 import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
 import io.camunda.zeebe.protocol.record.ValueType
-import io.camunda.zeebe.util.ReflectUtil
 import org.agrona.concurrent.UnsafeBuffer
 
 class LogContent {
@@ -30,12 +30,7 @@ class LogContent {
                     loggedEvent.wrap(readBuffer, offset)
                     loggedEvent.readMetadata(metadata)
 
-                    val unifiedRecordValue =
-                        ReflectUtil.newInstance(TypedEventRegistry.EVENT_REGISTRY.get(metadata.getValueType()))
-                    loggedEvent.readValue(unifiedRecordValue)
-
-                    val typedEvent = TypedEventImpl(1)
-                    typedEvent.wrap(loggedEvent, metadata, unifiedRecordValue)
+                    val typedEvent = convertToTypedEvent(loggedEvent, metadata)
 
                     applicationRecord.entries.add(typedEvent)
 
