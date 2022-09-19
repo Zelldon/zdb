@@ -18,7 +18,7 @@ jobs:
     - run: docker pull camunda/zeebe:8.0.4
     - uses: actions/checkout@v3
     - name: Set up JDK 17
-      uses: actions/setup-java@v3.4.1
+      uses: actions/setup-java@v3.5.0
       with:
         java-version: '17'
         distribution: 'adopt'
