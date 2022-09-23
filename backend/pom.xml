@@ -18,7 +18,7 @@
     <assertj-core.version>3.23.1</assertj-core.version>
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <junit-jupiter-api.version>5.9.1</junit-jupiter-api.version>
-    <junit-jupiter-engine.version>5.9.0</junit-jupiter-engine.version>
+    <junit-jupiter-engine.version>5.9.1</junit-jupiter-engine.version>
     <junit-jupiter.version>1.17.3</junit-jupiter.version>
     <kotlin.code.style>official</kotlin.code.style>
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
