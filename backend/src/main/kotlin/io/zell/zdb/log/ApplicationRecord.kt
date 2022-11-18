@@ -4,7 +4,7 @@ import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl
 import kotlinx.serialization.json.Json
 
 class ApplicationRecord(val index: Long, val term : Long) : PersistedRecord {
-    val entries = mutableListOf<TypedEventImpl>()
+    val entries = mutableListOf<ZeebeRecord>()
 
     override fun index(): Long {
         return index;

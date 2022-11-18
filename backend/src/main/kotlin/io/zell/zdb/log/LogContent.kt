@@ -1,11 +1,15 @@
 package io.zell.zdb.log
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.atomix.raft.storage.log.IndexedRaftLogEntry
 import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl
 import io.camunda.zeebe.engine.processing.streamprocessor.TypedRecord
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
+import io.camunda.zeebe.protocol.Protocol
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
 import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
+import io.camunda.zeebe.protocol.jackson.ZeebeProtocolModule
 import io.camunda.zeebe.protocol.record.ValueType
 import org.agrona.concurrent.UnsafeBuffer
 
@@ -30,9 +34,8 @@ class LogContent {
                     loggedEvent.wrap(readBuffer, offset)
                     loggedEvent.readMetadata(metadata)
 
-                    val typedEvent = convertToTypedEvent(loggedEvent, metadata)
-
-                    applicationRecord.entries.add(typedEvent)
+                    val zeebeRecord = ZeebeRecord(Protocol.decodePartitionId(loggedEvent.key), loggedEvent, metadata)
+                    applicationRecord.entries.add(zeebeRecord)
 
                     offset += loggedEvent.getLength();
                 } while (offset < readBuffer.capacity());
@@ -69,32 +72,34 @@ class LogContent {
     }
 
     private fun addEventAsDotNode(
-        entry: TypedEventImpl,
+        entry: ZeebeRecord,
         content: java.lang.StringBuilder
     ) {
-        content.append(entry.position)
+        content.append(entry.getPosition())
             .append(" [label=\"")
-            .append("\\n").append(entry.recordType)
-            .append("\\n").append(entry.valueType.name)
-            .append("\\n").append(entry.intent.name())
+            .append("\\n").append(entry.getRecordType())
+            .append("\\n").append(entry.getValueType().name)
+            .append("\\n").append(entry.getIntent().name())
 
-        if (entry.valueType == ValueType.PROCESS_INSTANCE) {
-            val processInstanceRecord = entry as TypedRecord<ProcessInstanceRecord>
-            val processInstanceValue = processInstanceRecord.value
-            content.append("\\n").append(processInstanceValue.bpmnElementType)
-            content.append("\\nPI Key: ").append(processInstanceValue.processInstanceKey)
-            content.append("\\nPD Key: ").append(processInstanceValue.processDefinitionKey)
+        if (entry.getValueType() == ValueType.PROCESS_INSTANCE) {
+            // todo potential fix
+//            val mapper = ObjectMapper().registerModule(ZeebeProtocolModule());
+//            val processInstanceRecord = mapper.readValue(entry.getValue().toString(), object: TypeReference<io.camunda.zeebe.protocol.record.Record<ProcessInstanceRecord>>() {});
+//            val processInstanceValue = processInstanceRecord.value
+//            content.append("\\n").append(processInstanceValue.bpmnElementType)
+//            content.append("\\nPI Key: ").append(processInstanceValue.processInstanceKey)
+//            content.append("\\nPD Key: ").append(processInstanceValue.processDefinitionKey)
         }
 
         content
-            .append("\\nKey: ").append(entry.key)
+            .append("\\nKey: ").append(entry.getKey())
             .append("\"]")
             .append(";")
             .append(System.lineSeparator())
-        if (entry.sourceRecordPosition != -1L) {
-            content.append(entry.position)
+        if (entry.getSourceRecordPosition() != -1L) {
+            content.append(entry.getPosition())
                 .append(" -> ")
-                .append(entry.sourceRecordPosition)
+                .append(entry.getSourceRecordPosition())
                 .append(";")
                 .append(System.lineSeparator())
         }

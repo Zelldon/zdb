@@ -14,6 +14,7 @@ import io.zell.zdb.log.ApplicationRecord;
 import io.zell.zdb.log.LogContentReader;
 import io.zell.zdb.log.LogSearch;
 import io.zell.zdb.log.LogStatus;
+import io.zell.zdb.log.ZeebeRecord;
 import java.io.File;
 import java.time.Duration;
 import java.util.Map;
@@ -230,7 +231,7 @@ public class ZeebeLogTest {
         .filteredOn(ApplicationRecord.class::isInstance)
         .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
         .flatExtracting(ApplicationRecord::getEntries)
-        .extracting(TypedEventImpl::getPosition)
+        .extracting(ZeebeRecord::getPosition)
         .doesNotHaveDuplicates();
   }
 
@@ -306,7 +307,7 @@ public class ZeebeLogTest {
         .filteredOn(ApplicationRecord.class::isInstance)
         .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
         .flatExtracting(ApplicationRecord::getEntries)
-        .extracting(TypedEventImpl::getPosition)
+        .extracting(ZeebeRecord::getPosition)
         .doesNotHaveDuplicates();
   }
 
