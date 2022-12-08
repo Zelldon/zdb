@@ -35,8 +35,8 @@ In order to shed some more light in the dark we build a tool called zdb - Zeebe 
 Log into your Zeebe broker machine/container: e.g. `docker exec -it <container_id> /bin/bash`. Then run the following commands (requires `curl` to be installed):
 ```bash
 cd /usr/bin
-curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb
-curl -O -L https://github.com/Zelldon/zdb/releases/download/<version>/zdb.jar
+curl -O -L https://github.com/Zelldon/zdb/releases/download/1.4.1/zdb
+curl -O -L https://github.com/Zelldon/zdb/releases/download/1.4.1/zdb.jar
 sed -i 's/target\///' zdb
 chmod u+x zdb
 zdb --version
