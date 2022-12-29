@@ -23,7 +23,7 @@
     <kotlin.code.style>official</kotlin.code.style>
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
     <kotlin.serialization.version>1.4.1</kotlin.serialization.version>
-    <kotlin.version>1.7.22</kotlin.version>
+    <kotlin.version>1.8.0</kotlin.version>
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
