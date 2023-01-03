@@ -1,10 +1,10 @@
 package io.zell.zdb.log
 
-import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl
 import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventRegistry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.Protocol
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
+import io.camunda.zeebe.streamprocessor.TypedRecordImpl
 import io.camunda.zeebe.util.ReflectUtil
 
 
@@ -18,8 +18,8 @@ import io.camunda.zeebe.util.ReflectUtil
 fun convertToTypedEvent(
     loggedEvent: LoggedEventImpl,
     metadata: RecordMetadata
-): TypedEventImpl {
-    val typedEvent = TypedEventImpl(Protocol.decodePartitionId(loggedEvent.key))
+): TypedRecordImpl {
+    val typedEvent = TypedRecordImpl(Protocol.decodePartitionId(loggedEvent.key))
 
     val recordValueClass = TypedEventRegistry.EVENT_REGISTRY.get(metadata.getValueType())
     if (recordValueClass == null) {

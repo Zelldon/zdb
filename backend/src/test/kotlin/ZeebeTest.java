@@ -5,6 +5,7 @@ import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceResult;
 import io.camunda.zeebe.db.ZeebeDb;
 import io.camunda.zeebe.db.impl.rocksdb.transaction.ZeebeTransactionDb;
+import io.camunda.zeebe.engine.state.KeyGenerator;
 import io.camunda.zeebe.engine.state.ZbColumnFamilies;
 import io.camunda.zeebe.engine.state.ZeebeDbState;
 import io.camunda.zeebe.engine.state.deployment.DeployedProcess;
@@ -97,7 +98,7 @@ public class ZeebeTest {
     // when
     final var readonlyTransactionDb = ReadonlyTransactionDb.Companion
         .openReadonlyDb(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-    var zeebeState = new ZeebeDbState(readonlyTransactionDb, readonlyTransactionDb.createContext());
+    var zeebeState = new ZeebeDbState(1, readonlyTransactionDb, readonlyTransactionDb.createContext(), () -> 1);
 
     // then
     final var processState = zeebeState.getProcessState();
