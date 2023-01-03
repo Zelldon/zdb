@@ -1,5 +1,6 @@
 package io.zell.zdb.state.process
 
+import io.camunda.zeebe.engine.state.KeyGenerator
 import io.camunda.zeebe.engine.state.ZeebeDbState
 import io.camunda.zeebe.engine.state.deployment.DeployedProcess
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
@@ -11,7 +12,7 @@ class ProcessState(statePath: Path) {
 
     init {
         val readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ZeebeDbState(readonlyDb, readonlyDb.createContext())
+        zeebeDbState = ZeebeDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
     }
 
     fun listProcesses(): List<ProcessMeta> {

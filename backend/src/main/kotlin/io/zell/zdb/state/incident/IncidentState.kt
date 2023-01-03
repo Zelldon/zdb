@@ -14,7 +14,7 @@ class IncidentState(readonlyDb: ReadonlyTransactionDb) {
 
     init {
         this.readonlyDb = readonlyDb
-        zeebeDbState = ZeebeDbState(readonlyDb, readonlyDb.createContext())
+        zeebeDbState = ZeebeDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
     }
 
     constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))

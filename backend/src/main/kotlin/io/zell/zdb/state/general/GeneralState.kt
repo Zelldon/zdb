@@ -7,6 +7,8 @@ import io.camunda.zeebe.db.impl.DbString
 import io.camunda.zeebe.engine.state.ZbColumnFamilies
 import io.camunda.zeebe.engine.state.ZeebeDbState
 import io.camunda.zeebe.engine.state.variable.VariableInstance
+import io.camunda.zeebe.streamprocessor.state.DbLastProcessedPositionState
+import io.camunda.zeebe.streamprocessor.state.LastProcessedPositionState
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import io.zell.zdb.state.incident.IncidentState
 import io.zell.zdb.state.instance.InstanceState
@@ -19,7 +21,7 @@ class GeneralState(statePath: Path) {
 
     init {
         readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ZeebeDbState(readonlyDb, readonlyDb.createContext())
+        zeebeDbState = ZeebeDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
     }
 
     fun generalDetails(): GeneralDetails {
@@ -63,7 +65,7 @@ class GeneralState(statePath: Path) {
     }
 
     private fun processingDetails(): ProcessingDetails {
-        return ProcessingDetails(zeebeDbState.lastProcessedPositionState.lastSuccessfulProcessedRecordPosition)
+        return ProcessingDetails(DbLastProcessedPositionState(readonlyDb, readonlyDb.createContext()).lastSuccessfulProcessedRecordPosition)
     }
 
     private fun incidentDetails(): IncidentDetails {

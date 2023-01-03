@@ -1,12 +1,10 @@
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventImpl;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.record.Record;
+import io.camunda.zeebe.streamprocessor.TypedRecordImpl;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
@@ -14,12 +12,6 @@ import io.zell.zdb.log.ApplicationRecord;
 import io.zell.zdb.log.LogContentReader;
 import io.zell.zdb.log.LogSearch;
 import io.zell.zdb.log.LogStatus;
-import java.io.File;
-import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicLong;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,6 +19,15 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.io.File;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class ZeebeLogTest {
@@ -230,7 +231,7 @@ public class ZeebeLogTest {
         .filteredOn(ApplicationRecord.class::isInstance)
         .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
         .flatExtracting(ApplicationRecord::getEntries)
-        .extracting(TypedEventImpl::getPosition)
+        .extracting(TypedRecordImpl::getPosition)
         .doesNotHaveDuplicates();
   }
 
@@ -306,7 +307,7 @@ public class ZeebeLogTest {
         .filteredOn(ApplicationRecord.class::isInstance)
         .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
         .flatExtracting(ApplicationRecord::getEntries)
-        .extracting(TypedEventImpl::getPosition)
+        .extracting(TypedRecordImpl::getPosition)
         .doesNotHaveDuplicates();
   }
 
