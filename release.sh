@@ -19,8 +19,8 @@ fi
 version=$1
 nextVersion=$2
 
-git checkout master
-git pull origin master
+git checkout main
+git pull origin main
 
 mvn versions:set "-DnewVersion=$version" -DgenerateBackupPoms=false
 mvn clean install -DskipTests
@@ -34,5 +34,5 @@ git commit -am "build: prepare for next version"
 
 cp cli/target/cli-*-jar-with-dependencies.jar zdb.jar
 
-git push origin master
+git push origin main
 git push origin "$version"
