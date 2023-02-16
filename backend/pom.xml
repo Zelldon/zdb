@@ -29,7 +29,7 @@
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <zeebe-test-container.version>3.5.2</zeebe-test-container.version>
-    <zeebe.version>8.1.7</zeebe.version>
+    <zeebe.version>8.1.8</zeebe.version>
     <version.slf4j>2.0.6</version.slf4j>
     <version.awaitility>4.2.0</version.awaitility>
     <jackson-databind.version>2.13.0</jackson-databind.version>
