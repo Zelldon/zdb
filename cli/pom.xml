@@ -17,7 +17,7 @@
 
   <properties>
     <version.picocli>4.7.1</version.picocli>
-    <version.slf4j>2.0.6</version.slf4j>
+    <version.slf4j>2.0.7</version.slf4j>
   </properties>
 
   <dependencies>
