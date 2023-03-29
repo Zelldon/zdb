@@ -8,7 +8,7 @@ import org.rocksdb.RocksDB
 import java.io.File
 import java.nio.file.Path
 
-class ReadonlyTransactionDb : ZeebeTransactionDb<ZbColumnFamilies> {
+public class ReadonlyTransactionDb : ZeebeTransactionDb<ZbColumnFamilies> {
 
     constructor(
         defaultHandle: ColumnFamilyHandle?,

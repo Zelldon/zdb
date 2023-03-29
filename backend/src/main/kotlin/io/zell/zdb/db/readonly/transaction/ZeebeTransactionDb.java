@@ -38,7 +38,7 @@ public class ZeebeTransactionDb<ColumnFamilyNames extends Enum<ColumnFamilyNames
   private static final Logger LOG = Loggers.DB_LOGGER;
   private static final String ERROR_MESSAGE_CLOSE_RESOURCE =
       "Expected to close RocksDB resource successfully, but exception was thrown. Will continue to close remaining resources.";
-  private final RocksDB rocksDB;
+  public final RocksDB rocksDB;
   private final List<AutoCloseable> closables;
   private final ReadOptions prefixReadOptions;
   private final ReadOptions defaultReadOptions;
@@ -80,7 +80,7 @@ public class ZeebeTransactionDb<ColumnFamilyNames extends Enum<ColumnFamilyNames
     return prefixReadOptions;
   }
 
-  protected ColumnFamilyHandle getDefaultHandle() {
+  public ColumnFamilyHandle getDefaultHandle() {
     return defaultHandle;
   }
 
