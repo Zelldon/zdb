@@ -1,14 +1,9 @@
-import static io.camunda.zeebe.util.buffer.BufferUtil.startsWith;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.client.api.worker.JobWorker;
-import io.camunda.zeebe.db.impl.ZeebeDbConstants;
 import io.camunda.zeebe.engine.state.ZbColumnFamilies;
-import io.camunda.zeebe.engine.state.ZeebeDbState;
-import io.camunda.zeebe.engine.state.deployment.DeployedProcess;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent;
@@ -17,9 +12,7 @@ import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb;
-import io.zell.zdb.db.readonly.transaction.RocksDbInternal;
-import io.zell.zdb.db.readonly.transaction.ZeebeTransactionDb;
+import io.zell.zdb.state.Experimental;
 import io.zell.zdb.state.blacklist.BlacklistState;
 import io.zell.zdb.state.general.GeneralState;
 import io.zell.zdb.state.incident.IncidentState;
@@ -28,21 +21,14 @@ import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.io.File;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.agrona.concurrent.UnsafeBuffer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.rocksdb.ColumnFamilyHandle;
-import org.rocksdb.ReadOptions;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksIterator;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -121,30 +107,33 @@ public class ZeebeStateTest {
   }
 
   @Test
+  public void shouldCreateStatsForCompleteState() {
+    // given
+    final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+
+    // when
+    final var cfMap = experimental.stateStatistics();
+
+    // then
+    assertThat(cfMap).containsEntry(ZbColumnFamilies.JOBS, 1)
+            .containsEntry(ZbColumnFamilies.VARIABLES, 3)
+            .containsEntry(ZbColumnFamilies.INCIDENTS, 1)
+            .containsEntry(ZbColumnFamilies.ELEMENT_INSTANCE_KEY, 3);
+  }
+
+  @Test
   public void shouldListProcesses() {
     // given
 
-    var readonlyDb = ReadonlyTransactionDb.Companion.openReadonlyDb(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-    RocksDB rocksDB = readonlyDb.rocksDB;
+    Experimental experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
 
-    try (final RocksIterator iterator = rocksDB.newIterator(rocksDB.getDefaultColumnFamily(), new ReadOptions())) {
-      iterator.seekToFirst();
-      for (;
-           iterator.isValid();
-           iterator.next()) {
-        final byte[] key = iterator.key();
-        byte[] value = iterator.value();
+    experimental.visitDB(((cf, key, value) ->
+    {
 
-        UnsafeBuffer unsafeBuffer = new UnsafeBuffer(key);
-        long enumValue = unsafeBuffer.getLong(0, ZeebeDbConstants.ZB_DB_BYTE_ORDER);
-        var cf = ZbColumnFamilies.values()[(int) enumValue];
-
-        System.out.printf("\nColumnFamily?: '%s'", cf);
-        System.out.printf("\nKey: '%s'", new String(key));
-        System.out.printf("\nValue: '%s'", new String(value));
-      }
-    }
-
+      System.out.printf("\nColumnFamily?: '%s'", cf);
+      System.out.printf("\nKey: '%s'", new String(key));
+      System.out.printf("\nValue: '%s'", new String(value));
+    }));
   }
 
   @Test
