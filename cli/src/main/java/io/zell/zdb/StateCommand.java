@@ -8,17 +8,17 @@
 package io.zell.zdb;
 
 import io.zell.zdb.state.Experimental;
-import io.zell.zdb.state.general.GeneralState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
+// THIS IS IN ALPHA STATE
 @Command(
-    name = "status",
+    name = "state",
     mixinStandardHelpOptions = true,
     description = "Prints general information of the internal state")
-public class StatusCommand implements Callable<Integer> {
+public class StateCommand implements Callable<Integer> {
 
   @Option(
       names = {"-p", "--path"},
@@ -27,22 +27,36 @@ public class StatusCommand implements Callable<Integer> {
       required = true)
   private Path partitionPath;
 
-  @Override
-  public Integer call() {
-    final var generalDetails = new GeneralState(partitionPath).generalDetails();
-    System.out.println(generalDetails);
-    return 0;
-  }
-
   /**
    * Alpha feature: Planned to replace old status call
    *
    * @return the status code of the call
    */
-  @Command(name = "details", description = "Print for all column families the detailed statistics")
-  public int list() {
+  @Override
+  public Integer call() {
     final var jsonString = new Experimental(partitionPath).stateStatisticsAsJsonString();
     System.out.println(jsonString);
+    return 0;
+  }
+
+  /** Alpha feature: Planned to replace old specific status calls */
+  @Command(name = "list", description = "List column families and the values as json")
+  public int list(
+      @Option(
+              names = {"-cf", "--columnFamily"},
+              paramLabel = "COLUMNFAMILY",
+              description = "The column family name to filter for")
+          final String columnFamilyName) {
+    System.out.print("ColumnFamily,Key,Value");
+    final var experimental = new Experimental(partitionPath);
+    experimental.visitDBWithJsonValues(
+        ((cf, key, valueJson) -> {
+          if (columnFamilyName == null
+              || columnFamilyName.isEmpty()
+              || cf.toString().equals(columnFamilyName)) {
+            System.out.printf("\n%s,%s,%s", cf, new String(key), valueJson);
+          }
+        }));
     return 0;
   }
 }

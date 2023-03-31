@@ -27,7 +27,8 @@ import picocli.CommandLine.RunLast;
       IncidentCommand.class,
       ProcessCommand.class,
       LogCommand.class,
-      InstanceCommand.class
+      InstanceCommand.class,
+      StateCommand.class
     })
 public class ZeebeDebugger implements Callable<Integer> {
   private static CommandLine cli;

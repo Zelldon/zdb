@@ -3,7 +3,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.client.api.worker.JobWorker;
+import io.camunda.zeebe.engine.state.ZbColumnFamilies;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent;
@@ -12,6 +12,7 @@ import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
+import io.zell.zdb.state.Experimental;
 import io.zell.zdb.state.blacklist.BlacklistState;
 import io.zell.zdb.state.general.GeneralState;
 import io.zell.zdb.state.incident.IncidentState;
@@ -20,14 +21,15 @@ import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.io.File;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -106,27 +108,51 @@ public class ZeebeStateTest {
   }
 
   @Test
+  public void shouldCreateStatsForCompleteState() {
+    // given
+    final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+
+    // when
+    final var cfMap = experimental.stateStatistics();
+
+    // then
+    assertThat(cfMap).containsEntry(ZbColumnFamilies.JOBS, 1)
+            .containsEntry(ZbColumnFamilies.VARIABLES, 3)
+            .containsEntry(ZbColumnFamilies.INCIDENTS, 1)
+            .containsEntry(ZbColumnFamilies.ELEMENT_INSTANCE_KEY, 3);
+  }
+
+  @Test
+  public void shouldVisitValuesAsJson() {
+    // given
+    final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+    final var incidentMap = new HashMap<String, String>();
+    Experimental.JsonVisitor jsonVisitor = (cf, k, v) -> {
+      if (cf == ZbColumnFamilies.INCIDENTS) {
+        incidentMap.put(new String(k), v);
+      }
+    };
+
+    // when
+    experimental.visitDBWithJsonValues(jsonVisitor);
+
+    // then
+    assertThat(incidentMap).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685251,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685261,\"jobKey\":-1,\"variableScopeKey\":2251799813685261}}");
+  }
+
+  @Test
   public void shouldListProcesses() {
     // given
 
-    // when
-    final var processState = new ProcessState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-    final var processes = processState.listProcesses();
+    Experimental experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
 
-    // then
-    final var processMeta = processes.get(0);
-    final var returnedProcess = deploymentEvent.getProcesses().get(0);
-    assertThat(processMeta.getBpmnProcessId()).isEqualTo(returnedProcess.getBpmnProcessId());
-    assertThat(processMeta.getProcessDefinitionKey())
-        .isEqualTo(returnedProcess.getProcessDefinitionKey());
-    assertThat(processMeta.getResourceName()).isEqualTo(returnedProcess.getResourceName());
-    assertThat(processMeta.getVersion()).isEqualTo(returnedProcess.getVersion());
+    experimental.visitDB(((cf, key, value) ->
+    {
 
-    assertThat(processMeta.toString())
-        .contains(returnedProcess.getBpmnProcessId())
-        .contains(returnedProcess.getResourceName())
-        .contains("" + returnedProcess.getVersion())
-        .contains("" + returnedProcess.getProcessDefinitionKey());
+      System.out.printf("\nColumnFamily?: '%s'", cf);
+      System.out.printf("\nKey: '%s'", new String(key));
+      System.out.printf("\nValue: '%s'", new String(value));
+    }));
   }
 
   @Test
