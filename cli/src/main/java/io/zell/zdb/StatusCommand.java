@@ -7,6 +7,7 @@
  */
 package io.zell.zdb;
 
+import io.zell.zdb.state.Experimental;
 import io.zell.zdb.state.general.GeneralState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -30,6 +31,18 @@ public class StatusCommand implements Callable<Integer> {
   public Integer call() {
     final var generalDetails = new GeneralState(partitionPath).generalDetails();
     System.out.println(generalDetails);
+    return 0;
+  }
+
+  /**
+   * Alpha feature: Planned to replace old status call
+   *
+   * @return the status code of the call
+   */
+  @Command(name = "details", description = "Print for all column families the detailed statistics")
+  public int list() {
+    final var jsonString = new Experimental(partitionPath).stateStatisticsAsJsonString();
+    System.out.println(jsonString);
     return 0;
   }
 }

@@ -2,6 +2,8 @@ package io.zell.zdb.state
 
 import io.camunda.zeebe.db.impl.ZeebeDbConstants
 import io.camunda.zeebe.engine.state.ZbColumnFamilies
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.agrona.concurrent.UnsafeBuffer
 import org.rocksdb.OptimisticTransactionDB
 import org.rocksdb.ReadOptions
@@ -40,5 +42,10 @@ class Experimental(private var rocksDb: RocksDB) {
             countMap[cf] = count + 1
         }
         return countMap
+    }
+
+    fun stateStatisticsAsJsonString() : String {
+        val stateStatistics = stateStatistics()
+        return Json.encodeToString(stateStatistics)
     }
 }
