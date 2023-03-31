@@ -41,10 +41,22 @@ public class StateCommand implements Callable<Integer> {
 
   /** Alpha feature: Planned to replace old specific status calls */
   @Command(name = "list", description = "List column families and the values as json")
-  public int list() {
+  public int list(
+      @Option(
+              names = {"-cf", "--columnFamily"},
+              paramLabel = "COLUMNFAMILY",
+              description = "The column family name to filter for")
+          final String columnFamilyName) {
+    System.out.print("ColumnFamily,Key,Value");
     final var experimental = new Experimental(partitionPath);
     experimental.visitDBWithJsonValues(
-        ((cf, key, valueJson) -> System.out.printf("%s,%s,%s", cf, new String(key), valueJson)));
+        ((cf, key, valueJson) -> {
+          if (columnFamilyName == null
+              || columnFamilyName.isEmpty()
+              || cf.toString().equals(columnFamilyName)) {
+            System.out.printf("\n%s,%s,%s", cf, new String(key), valueJson);
+          }
+        }));
     return 0;
   }
 }
