@@ -2,6 +2,8 @@ package io.zell.zdb.state
 
 import io.camunda.zeebe.db.impl.ZeebeDbConstants
 import io.camunda.zeebe.engine.state.ZbColumnFamilies
+import io.camunda.zeebe.msgpack.spec.MsgPackHelper
+import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.agrona.concurrent.UnsafeBuffer
@@ -19,6 +21,11 @@ class Experimental(private var rocksDb: RocksDB) {
     fun interface Visitor {
         fun visit(cf: ZbColumnFamilies, key: ByteArray, value: ByteArray)
     }
+
+    fun interface JsonVisitor {
+        fun visit(cf: ZbColumnFamilies, key: ByteArray, valueJson: String)
+    }
+
     fun visitDB(visitor: Visitor) {
        rocksDb.newIterator(rocksDb.defaultColumnFamily, ReadOptions()).use {
            it.seekToFirst()
@@ -32,6 +39,13 @@ class Experimental(private var rocksDb: RocksDB) {
                it.next()
            }
        }
+    }
+
+    fun visitDBWithJsonValues(visitor: JsonVisitor) {
+        visitDB { cf, key, value ->
+            val jsonValue = MsgPackConverter.convertToJson(value)
+            visitor.visit(cf, key, jsonValue)
+        }
     }
 
     fun stateStatistics() : Map<ZbColumnFamilies, Int> {

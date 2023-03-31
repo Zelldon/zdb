@@ -21,6 +21,7 @@ import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.io.File;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
@@ -119,6 +120,24 @@ public class ZeebeStateTest {
             .containsEntry(ZbColumnFamilies.VARIABLES, 3)
             .containsEntry(ZbColumnFamilies.INCIDENTS, 1)
             .containsEntry(ZbColumnFamilies.ELEMENT_INSTANCE_KEY, 3);
+  }
+
+  @Test
+  public void shouldVisitValuesAsJson() {
+    // given
+    final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+    final var incidentMap = new HashMap<String, String>();
+    Experimental.JsonVisitor jsonVisitor = (cf, k, v) -> {
+      if (cf == ZbColumnFamilies.INCIDENTS) {
+        incidentMap.put(new String(k), v);
+      }
+    };
+
+    // when
+    experimental.visitDBWithJsonValues(jsonVisitor);
+
+    // then
+    assertThat(incidentMap).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685251,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685261,\"jobKey\":-1,\"variableScopeKey\":2251799813685261}}");
   }
 
   @Test
