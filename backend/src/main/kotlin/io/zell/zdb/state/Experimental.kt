@@ -10,6 +10,7 @@ import org.agrona.concurrent.UnsafeBuffer
 import org.rocksdb.OptimisticTransactionDB
 import org.rocksdb.ReadOptions
 import org.rocksdb.RocksDB
+import java.nio.ByteOrder
 import java.nio.file.Path
 import java.util.EnumMap
 import java.util.function.Function
