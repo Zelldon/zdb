@@ -49,6 +49,7 @@ public class StateCommand implements Callable<Integer> {
               paramLabel = "COLUMNFAMILY",
               description = "The column family name to filter for")
           final String columnFamilyName) {
+    // we print incrementally in order to avoid to build up big state in the application
     System.out.print("{\"data\":[");
     final var experimental = new Experimental(partitionPath);
     final var counter = new AtomicInteger(0);
@@ -58,7 +59,7 @@ public class StateCommand implements Callable<Integer> {
               || columnFamilyName.isEmpty()
               || cf.toString().equals(columnFamilyName)) {
             if (counter.getAndIncrement() >= 1) {
-              System.out.printf(",");
+              System.out.print(',');
             }
             System.out.printf(
                 "\n{\"cf\":\"%s\",\"key\":\"%s\",\"value\":%s}",
