@@ -75,7 +75,6 @@ public class StateCommand implements Callable<Integer> {
   }
 
   private static boolean noColumnFamilyGiven(String columnFamilyName) {
-    return columnFamilyName == null
-            || columnFamilyName.isEmpty();
+    return columnFamilyName == null || columnFamilyName.isEmpty();
   }
 }
