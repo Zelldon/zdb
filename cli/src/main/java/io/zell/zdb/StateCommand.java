@@ -7,6 +7,7 @@
  */
 package io.zell.zdb;
 
+import io.camunda.zeebe.engine.state.ZbColumnFamilies;
 import io.zell.zdb.state.Experimental;
 import java.nio.file.Path;
 import java.util.HexFormat;
@@ -55,9 +56,8 @@ public class StateCommand implements Callable<Integer> {
     final var counter = new AtomicInteger(0);
     experimental.visitDBWithJsonValues(
         ((cf, key, valueJson) -> {
-          if (columnFamilyName == null
-              || columnFamilyName.isEmpty()
-              || cf.toString().equals(columnFamilyName)) {
+          if (noColumnFamilyGiven(columnFamilyName)
+              || isMatchingColumnFamily(columnFamilyName, cf)) {
             if (counter.getAndIncrement() >= 1) {
               System.out.print(',');
             }
@@ -68,5 +68,14 @@ public class StateCommand implements Callable<Integer> {
         }));
     System.out.print("]}");
     return 0;
+  }
+
+  private static boolean isMatchingColumnFamily(String columnFamilyName, ZbColumnFamilies cf) {
+    return cf.toString().equalsIgnoreCase(columnFamilyName);
+  }
+
+  private static boolean noColumnFamilyGiven(String columnFamilyName) {
+    return columnFamilyName == null
+            || columnFamilyName.isEmpty();
   }
 }
