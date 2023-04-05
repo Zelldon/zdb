@@ -19,7 +19,7 @@
     <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
     <junit-jupiter-api.version>5.9.2</junit-jupiter-api.version>
     <junit-jupiter-engine.version>5.9.2</junit-jupiter-engine.version>
-    <junit-jupiter.version>1.17.6</junit-jupiter.version>
+    <junit-jupiter.version>1.18.0</junit-jupiter.version>
     <kotlin.code.style>official</kotlin.code.style>
     <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
     <kotlin.serialization.version>1.5.0</kotlin.serialization.version>
