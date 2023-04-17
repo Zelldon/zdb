@@ -62,6 +62,8 @@ public class ZeebeStateTest {
 
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
+      /* Enable WAL to ensure tests can read from open RocksDB */
+      .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
       /* run the container with the current user, in order to access the data and delete it later */
       .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
       .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);

@@ -26,7 +26,9 @@ public class ZeebeTest {
   public File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
 
   @Container
-  public ZeebeContainer zeebeContainer = new ZeebeContainer().withFileSystemBind(tempDir.getPath(), "/usr/local/zeebe/data/", BindMode.READ_WRITE);
+  public ZeebeContainer zeebeContainer = new ZeebeContainer()
+          .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
+          .withFileSystemBind(tempDir.getPath(), "/usr/local/zeebe/data/", BindMode.READ_WRITE);
 
   /**
    * Just ot verify whether test container works with Zeebe Client.
