@@ -130,8 +130,8 @@ public class ZeebeLogTest {
     final var status = logStatus.status();
 
     // then
-    assertThat(status.getHighestIndex()).isEqualTo(24);
-    assertThat(status.getScannedEntries()).isEqualTo(24);
+    assertThat(status.getHighestIndex()).isEqualTo(13);
+    assertThat(status.getScannedEntries()).isEqualTo(13);
     assertThat(status.getHighestTerm()).isEqualTo(1);
     assertThat(status.getHighestRecordPosition()).isEqualTo(60);
 
@@ -195,7 +195,7 @@ public class ZeebeLogTest {
     final var content = logContentReader.content();
 
     // then
-    assertThat(content.getRecords()).hasSize(24);
+    assertThat(content.getRecords()).hasSize(13);
 
     final var objectMapper = new ObjectMapper();
     final var jsonNode = objectMapper.readTree(content.toString());
