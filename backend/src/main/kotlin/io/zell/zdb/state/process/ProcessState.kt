@@ -1,18 +1,18 @@
 package io.zell.zdb.state.process
 
-import io.camunda.zeebe.engine.state.KeyGenerator
-import io.camunda.zeebe.engine.state.ZeebeDbState
+import io.camunda.zeebe.engine.state.ProcessingDbState
 import io.camunda.zeebe.engine.state.deployment.DeployedProcess
+import io.camunda.zeebe.engine.state.immutable.ProcessingState
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
 class ProcessState(statePath: Path) {
 
-    private var zeebeDbState: ZeebeDbState
+    private var zeebeDbState: ProcessingState
 
     init {
         val readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ZeebeDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
+        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
     }
 
     fun listProcesses(): List<ProcessMeta> {

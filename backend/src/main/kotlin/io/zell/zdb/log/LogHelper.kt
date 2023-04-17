@@ -1,10 +1,10 @@
 package io.zell.zdb.log
 
-import io.camunda.zeebe.engine.processing.streamprocessor.TypedEventRegistry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.Protocol
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
-import io.camunda.zeebe.streamprocessor.TypedRecordImpl
+import io.camunda.zeebe.stream.impl.TypedEventRegistry
+import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
 import io.camunda.zeebe.util.ReflectUtil
 
 

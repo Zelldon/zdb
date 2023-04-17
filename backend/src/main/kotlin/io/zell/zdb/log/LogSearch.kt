@@ -1,6 +1,7 @@
 package io.zell.zdb.log
 
 import io.atomix.raft.storage.log.RaftLogReader
+import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
 import io.camunda.zeebe.protocol.record.Record
@@ -23,7 +24,7 @@ class LogSearch (logPath: Path) {
             val entry = reader.next()
 
             if (entry.isApplicationEntry) {
-                val applicationEntry = entry.applicationEntry
+                val applicationEntry = entry.applicationEntry as SerializedApplicationEntry
 
                 val readBuffer = UnsafeBuffer(applicationEntry.data());
                 val loggedEvent = LoggedEventImpl();

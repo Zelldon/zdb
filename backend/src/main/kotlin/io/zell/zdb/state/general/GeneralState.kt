@@ -4,11 +4,11 @@ import io.camunda.zeebe.db.impl.DbCompositeKey
 import io.camunda.zeebe.db.impl.DbLong
 import io.camunda.zeebe.db.impl.DbNil
 import io.camunda.zeebe.db.impl.DbString
-import io.camunda.zeebe.engine.state.ZbColumnFamilies
-import io.camunda.zeebe.engine.state.ZeebeDbState
+import io.camunda.zeebe.engine.state.ProcessingDbState
+import io.camunda.zeebe.engine.state.immutable.ProcessingState
 import io.camunda.zeebe.engine.state.variable.VariableInstance
-import io.camunda.zeebe.streamprocessor.state.DbLastProcessedPositionState
-import io.camunda.zeebe.streamprocessor.state.LastProcessedPositionState
+import io.camunda.zeebe.protocol.ZbColumnFamilies
+import io.camunda.zeebe.stream.impl.state.DbLastProcessedPositionState
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import io.zell.zdb.state.incident.IncidentState
 import io.zell.zdb.state.instance.InstanceState
@@ -16,12 +16,12 @@ import java.nio.file.Path
 
 class GeneralState(statePath: Path) {
 
-    private var zeebeDbState: ZeebeDbState
+    private var zeebeDbState: ProcessingState
     private var readonlyDb: ReadonlyTransactionDb
 
     init {
         readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ZeebeDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
+        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
     }
 
     fun generalDetails(): GeneralDetails {
