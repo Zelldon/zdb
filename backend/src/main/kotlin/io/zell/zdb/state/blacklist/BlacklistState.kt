@@ -2,8 +2,7 @@ package io.zell.zdb.state.blacklist
 
 import io.camunda.zeebe.db.impl.DbLong
 import io.camunda.zeebe.db.impl.DbNil
-import io.camunda.zeebe.engine.state.ZbColumnFamilies
-import io.camunda.zeebe.engine.state.ZeebeDbState
+import io.camunda.zeebe.protocol.ZbColumnFamilies
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
@@ -16,7 +15,8 @@ class BlacklistState(private var readonlyDb: ReadonlyTransactionDb) {
 
         val processInstanceKey = DbLong()
         val blackListColumnFamily =
-            readonlyDb.createColumnFamily(ZbColumnFamilies.BLACKLIST,
+            readonlyDb.createColumnFamily(
+                ZbColumnFamilies.BLACKLIST,
                 readonlyDb.createContext(),
                 processInstanceKey,
                 DbNil.INSTANCE)

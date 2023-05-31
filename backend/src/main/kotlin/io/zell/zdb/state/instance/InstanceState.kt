@@ -1,9 +1,10 @@
 package io.zell.zdb.state.instance
 
 import io.camunda.zeebe.db.impl.DbLong
-import io.camunda.zeebe.engine.state.ZbColumnFamilies
-import io.camunda.zeebe.engine.state.ZeebeDbState
+import io.camunda.zeebe.engine.state.ProcessingDbState
+import io.camunda.zeebe.engine.state.immutable.ProcessingState
 import io.camunda.zeebe.engine.state.instance.ElementInstance
+import io.camunda.zeebe.protocol.ZbColumnFamilies
 import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
 import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
@@ -11,12 +12,12 @@ import java.nio.file.Path
 
 class InstanceState(readonlyTransactionDb: ReadonlyTransactionDb) {
 
-    private var zeebeDbState: ZeebeDbState
+    private var zeebeDbState: ProcessingState
     private var readonlyDb : ReadonlyTransactionDb
 
     init {
         readonlyDb = readonlyTransactionDb
-        zeebeDbState = ZeebeDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
+        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
     }
 
     constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))

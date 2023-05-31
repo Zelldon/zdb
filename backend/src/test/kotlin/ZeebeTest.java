@@ -1,36 +1,24 @@
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceResult;
-import io.camunda.zeebe.db.ZeebeDb;
-import io.camunda.zeebe.db.impl.rocksdb.transaction.ZeebeTransactionDb;
-import io.camunda.zeebe.engine.state.KeyGenerator;
-import io.camunda.zeebe.engine.state.ZbColumnFamilies;
-import io.camunda.zeebe.engine.state.ZeebeDbState;
+import io.camunda.zeebe.engine.state.ProcessingDbState;
 import io.camunda.zeebe.engine.state.deployment.DeployedProcess;
-import io.camunda.zeebe.engine.state.immutable.ZeebeState;
-import io.camunda.zeebe.engine.state.mutable.MutableDeploymentState;
-import io.camunda.zeebe.engine.state.mutable.MutableProcessState;
-import io.camunda.zeebe.engine.state.mutable.MutableZeebeState;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.util.buffer.BufferUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.Test;
-import org.rocksdb.DBOptions;
-import org.rocksdb.OptimisticTransactionDB;
-import org.rocksdb.RocksDB;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class ZeebeTest {
@@ -38,7 +26,9 @@ public class ZeebeTest {
   public File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
 
   @Container
-  public ZeebeContainer zeebeContainer = new ZeebeContainer().withFileSystemBind(tempDir.getPath(), "/usr/local/zeebe/data/", BindMode.READ_WRITE);
+  public ZeebeContainer zeebeContainer = new ZeebeContainer()
+          .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
+          .withFileSystemBind(tempDir.getPath(), "/usr/local/zeebe/data/", BindMode.READ_WRITE);
 
   /**
    * Just ot verify whether test container works with Zeebe Client.
@@ -98,7 +88,7 @@ public class ZeebeTest {
     // when
     final var readonlyTransactionDb = ReadonlyTransactionDb.Companion
         .openReadonlyDb(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-    var zeebeState = new ZeebeDbState(1, readonlyTransactionDb, readonlyTransactionDb.createContext(), () -> 1);
+    var zeebeState = new ProcessingDbState(1, readonlyTransactionDb, readonlyTransactionDb.createContext(), () -> 1);
 
     // then
     final var processState = zeebeState.getProcessState();

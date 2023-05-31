@@ -20,7 +20,9 @@ class LogFactory {
             val raftLog = RaftLog.builder()
                 .withDirectory(logPath.toFile())
                 .withName(partitionName)
-                .withMaxSegmentSize(MAX_SEGMENT_SIZE).build()
+                .withMaxSegmentSize(MAX_SEGMENT_SIZE)
+                .withMetaStore(NoopMetaStore)
+                .build()
 
             return raftLog.openUncommittedReader()
         }

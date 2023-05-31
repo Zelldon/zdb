@@ -1,11 +1,9 @@
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.engine.state.ZbColumnFamilies;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
+import io.camunda.zeebe.protocol.ZbColumnFamilies;
 import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent;
 import io.camunda.zeebe.protocol.record.value.BpmnElementType;
 import io.camunda.zeebe.protocol.record.value.ErrorType;
@@ -19,6 +17,13 @@ import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceDetails;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.BindMode;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
 import java.io.File;
 import java.time.Duration;
 import java.util.HashMap;
@@ -27,12 +32,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.BindMode;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class ZeebeStateTest {
@@ -62,6 +62,8 @@ public class ZeebeStateTest {
 
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
+      /* Enable WAL to ensure tests can read from open RocksDB */
+      .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
       /* run the container with the current user, in order to access the data and delete it later */
       .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
       .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);
@@ -137,7 +139,7 @@ public class ZeebeStateTest {
     experimental.visitDBWithJsonValues(jsonVisitor);
 
     // then
-    assertThat(incidentMap).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685251,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685262,\"jobKey\":-1,\"variableScopeKey\":2251799813685262}}");
+    assertThat(incidentMap).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685251,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685260,\"jobKey\":-1,\"variableScopeKey\":2251799813685260}}");
   }
 
   @Test

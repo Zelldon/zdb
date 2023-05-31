@@ -7,19 +7,16 @@
  */
 package io.zell.zdb.db.readonly.transaction;
 
-import static io.camunda.zeebe.util.buffer.BufferUtil.startsWith;
-
-import io.camunda.zeebe.db.ColumnFamily;
-import io.camunda.zeebe.db.DbKey;
-import io.camunda.zeebe.db.DbValue;
-import io.camunda.zeebe.db.KeyValuePairVisitor;
-import io.camunda.zeebe.db.TransactionContext;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import io.camunda.zeebe.db.*;
 import org.agrona.DirectBuffer;
 import org.rocksdb.ReadOptions;
 import org.rocksdb.RocksIterator;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import static io.camunda.zeebe.util.buffer.BufferUtil.startsWith;
 
 class TransactionalColumnFamily<
         ColumnFamilyNames extends Enum<ColumnFamilyNames>,
@@ -103,6 +100,11 @@ class TransactionalColumnFamily<
   @Override
   public void forEach(final BiConsumer<KeyType, ValueType> consumer) {
     forEach(context, consumer);
+  }
+
+  @Override
+  public void whileTrue(KeyType startAtKey, KeyValuePairVisitor<KeyType, ValueType> visitor) {
+    whileEqualPrefix(context, new DbNullKey(), visitor);
   }
 
   @Override
@@ -267,7 +269,6 @@ class TransactionalColumnFamily<
                 transaction -> {
                   try (final RocksIterator iterator =
                       newIterator(context, transactionDb.getPrefixReadOptions())) {
-
                     boolean shouldVisitNext = true;
 
                     for (RocksDbInternal.seek(

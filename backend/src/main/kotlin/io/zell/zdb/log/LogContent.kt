@@ -1,12 +1,13 @@
 package io.zell.zdb.log
 
 import io.atomix.raft.storage.log.IndexedRaftLogEntry
-import io.camunda.zeebe.engine.api.TypedRecord
+import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
 import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
 import io.camunda.zeebe.protocol.record.ValueType
-import io.camunda.zeebe.streamprocessor.TypedRecordImpl
+import io.camunda.zeebe.stream.api.records.TypedRecord
+import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
 import org.agrona.concurrent.UnsafeBuffer
 
 class LogContent {
@@ -18,7 +19,7 @@ class LogContent {
         ) {
             if (entry.isApplicationEntry) {
                 val applicationRecord = ApplicationRecord(entry.index(), entry.term())
-                val applicationEntry = entry.applicationEntry
+                val applicationEntry = entry.applicationEntry as SerializedApplicationEntry
 
                 val readBuffer = UnsafeBuffer(applicationEntry.data());
 

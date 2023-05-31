@@ -1,7 +1,6 @@
 package io.zell.zdb.log
 
-import io.camunda.zeebe.streamprocessor.TypedRecordImpl
-import kotlinx.serialization.json.Json
+import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
 
 class ApplicationRecord(val index: Long, val term : Long) : PersistedRecord {
     val entries = mutableListOf<TypedRecordImpl>()

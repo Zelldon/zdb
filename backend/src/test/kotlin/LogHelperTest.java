@@ -1,14 +1,14 @@
-import static org.assertj.core.api.Assertions.assertThat;
-
-import io.camunda.zeebe.dispatcher.impl.log.DataFrameDescriptor;
 import io.camunda.zeebe.logstreams.impl.log.LogEntryDescriptor;
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl;
+import io.camunda.zeebe.logstreams.impl.serializer.DataFrameDescriptor;
 import io.camunda.zeebe.protocol.Protocol;
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata;
 import io.camunda.zeebe.protocol.record.ValueType;
 import io.zell.zdb.log.LogHelperKt;
 import org.agrona.ExpandableArrayBuffer;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LogHelperTest {
 

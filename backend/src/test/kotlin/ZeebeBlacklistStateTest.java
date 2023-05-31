@@ -1,31 +1,11 @@
-import static org.assertj.core.api.Assertions.assertThat;
-
 import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
-import io.camunda.zeebe.protocol.record.value.BpmnElementType;
-import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.log.LogContentReader;
 import io.zell.zdb.state.blacklist.BlacklistState;
-import io.zell.zdb.state.general.GeneralState;
-import io.zell.zdb.state.incident.IncidentState;
-import io.zell.zdb.state.instance.InstanceDetails;
-import io.zell.zdb.state.instance.InstanceState;
-import io.zell.zdb.state.process.ProcessState;
-import java.io.File;
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,6 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.io.File;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 public class ZeebeBlacklistStateTest {
@@ -57,6 +45,7 @@ public class ZeebeBlacklistStateTest {
 
   @Container
   public static ZeebeContainer zeebeContainer = new ZeebeContainer()
+      .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
       /* run the container with the current user, in order to access the data and delete it later */
       .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
       .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);

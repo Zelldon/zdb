@@ -1,20 +1,21 @@
 package io.zell.zdb.state.incident
 
 import io.camunda.zeebe.db.impl.DbLong
-import io.camunda.zeebe.engine.state.ZbColumnFamilies
-import io.camunda.zeebe.engine.state.ZeebeDbState
+import io.camunda.zeebe.engine.state.ProcessingDbState
+import io.camunda.zeebe.engine.state.immutable.ProcessingState
 import io.camunda.zeebe.engine.state.instance.Incident
+import io.camunda.zeebe.protocol.ZbColumnFamilies
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
 class IncidentState(readonlyDb: ReadonlyTransactionDb) {
 
-    private var zeebeDbState: ZeebeDbState
+    private var zeebeDbState: ProcessingState
     private var readonlyDb: ReadonlyTransactionDb
 
     init {
         this.readonlyDb = readonlyDb
-        zeebeDbState = ZeebeDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
+        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
     }
 
     constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
