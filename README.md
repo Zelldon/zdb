@@ -79,6 +79,12 @@ Returns details to a specific incident:
 zdb incident entity <IncidentKey> --path=<pathToDatabase>
 ```
 
+Find incidents for a given processInstanceKey
+
+```sh
+zdb incident list --path=<pathToDatabase> | jq '. | map(select(.processInstanceKey==<PI_KEY>))'
+```
+
 #### Inspect Blacklisted Process Instances
 
 You can check if there are any processes stuck due to blacklisting using the following commands.
