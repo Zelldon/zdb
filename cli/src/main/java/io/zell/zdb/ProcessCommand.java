@@ -63,9 +63,7 @@ public class ProcessCommand implements Callable<Integer> {
           final long key) {
     final var instances =
         new InstanceState(partitionPath)
-            .listInstances().stream()
-                .filter(instanceDetails -> instanceDetails.getProcessDefinitionKey() == key)
-                .collect(Collectors.toList());
+            .listProcessInstances(instanceDetails -> instanceDetails.getProcessDefinitionKey() == key);
     System.out.println(instances);
     return 0;
   }
