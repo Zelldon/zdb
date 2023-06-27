@@ -11,7 +11,6 @@ import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -63,7 +62,8 @@ public class ProcessCommand implements Callable<Integer> {
           final long key) {
     final var instances =
         new InstanceState(partitionPath)
-            .listProcessInstances(instanceDetails -> instanceDetails.getProcessDefinitionKey() == key);
+            .listProcessInstances(
+                instanceDetails -> instanceDetails.getProcessDefinitionKey() == key);
     System.out.println(instances);
     return 0;
   }

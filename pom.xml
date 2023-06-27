@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.zell</groupId>
   <artifactId>zdb</artifactId>
-  <version>1.6.0-SNAPSHOT</version>
+  <version>1.6.0-alpha4</version>
   <packaging>pom</packaging>
   <name>ZDB</name>
   <inceptionYear>2021</inceptionYear>
@@ -53,6 +53,7 @@
     <zeebe.version>8.2.3</zeebe.version>
     <sonar.organization>zelldon-github</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <version.jib>3.3.2</version.jib>
   </properties>
 
   <dependencyManagement>
@@ -73,6 +74,16 @@
   </modules>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.google.cloud.tools</groupId>
+          <artifactId>jib-maven-plugin</artifactId>
+          <version>${version.jib}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -80,6 +91,33 @@
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <release>17</release>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>com.google.cloud.tools</groupId>
+        <artifactId>jib-maven-plugin</artifactId>
+        <version>${version.jib}</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>build</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <to>
+            <image>ghcr.io/zelldon/zdb</image>
+            <tags>${project.version}</tags>
+          </to>
+          <container>
+            <mainClass>io.zell.zdb.ZeebeDebugger</mainClass>
+<!--            <ports>-->
+<!--              <port>8080</port>-->
+<!--              <port>26500</port>-->
+<!--            </ports>-->
+          </container>
         </configuration>
       </plugin>
     </plugins>
