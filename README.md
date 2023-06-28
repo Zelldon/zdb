@@ -131,6 +131,17 @@ Print all information to a given element instance:
 zdb instance --path=<pathToDatabase> entity <elementInstanceKey>
 ```
 
+#### Inspect state (generic)
+
+There is a new (experimental) feature to inspect the state on a generic way with the `state` subcommand. You can either 
+print the complete state as json or specify a specific column family (used in Zeebe).
+
+Example to see all processes
+
+```
+$ zdb state --path=<pathToDatabase> list -cf PROCESS_CACHE
+```
+
 ### Log Inspection
 
 You can also inspect the log stream using the command `zdb log` and his subcommands.
@@ -221,6 +232,7 @@ Generate svg:
 
 ## Examples
 
+Status of the current state:
 ```sh
 > zdb status --path=data/raft-partition/partitions/1/runtime/
 
@@ -245,6 +257,8 @@ Variables: 158
 	avg size: 27.158228
 ```
 
+List incidents
+
 ```sh
 > zdb incident list --path=data/raft-partition/partitions/1/runtime/
 
@@ -254,6 +268,7 @@ Incident[key: 2251799813685567, workflow-instance-key: 2251799813685560, BPMN-pr
 Incident[key: 2251799813685575, workflow-instance-key: 2251799813685568, BPMN-process-id: "failing-job-workflow", error-type: JOB_NO_RETRIES]
 ```
 
+Status of the log
 ```sh
 > zdb log status --path=data/raft-partition/partitions/1/
 Scan log...
@@ -272,6 +287,12 @@ HighestRecordPosition: 204621183
 HighestIndex: 123186388
 LowestIndex: 123178900
 InitialEntries: [Indexed{index=123186138, entry=InitializeEntry{term=2971, timestamp=2021-02-10 03:15:59,934}}, Indexed{index=123186139, entry=InitializeEntry{term=2973, timestamp=2021-02-10 03:18:56,289}}, Indexed{index=123186140, entry=InitializeEntry{term=2975, timestamp=2021-02-10 03:19:09,022}}, Indexed{index=123186141, entry=InitializeEntry{term=2977, timestamp=2021-02-10 03:22:09,518}}, Indexed{index=123186142, entry=InitializeEntry{term=2979, timestamp=2021-02-10 03:22:22,408}}, Indexed{index=123186143, entry=InitializeEntry{term=2981, timestamp=2021-02-10 03:24:38,394}}, Indexed{index=123186144, entry=InitializeEntry{term=2983, timestamp=2021-02-10 03:27:30,906}}, Indexed{index=123186145, entry=InitializeEntry{term=2984, timestamp=2021-02-10 03:31:03,999}}, Indexed{index=123186295, entry=InitializeEntry{term=2972, timestamp=2021-02-10 03:18:51,044}}, Indexed{index=123186297, entry=InitializeEntry{term=2974, timestamp=2021-02-10 03:19:01,392}}, Indexed{index=123186298, entry=InitializeEntry{term=2976, timestamp=2021-02-10 03:22:03,033}}, Indexed{index=123186299, entry=InitializeEntry{term=2978, timestamp=2021-02-10 03:22:14,059}}, Indexed{index=123186300, entry=InitializeEntry{term=2980, timestamp=2021-02-10 03:24:20,144}}, Indexed{index=123186301, entry=InitializeEntry{term=2982, timestamp=2021-02-10 03:26:48,999}}, Indexed{index=123186302, entry=InitializeEntry{term=2985, timestamp=2021-02-10 03:38:03,701}}, Indexed{index=123186303, entry=InitializeEntry{term=2987, timestamp=2021-02-10 03:40:38,517}}, Indexed{index=123186304, entry=InitializeEntry{term=2989, timestamp=2021-02-10 03:42:07,966}}, Indexed{index=123186305, entry=InitializeEntry{term=2991, timestamp=2021-02-10 03:44:47,562}}, Indexed{index=123186306, entry=InitializeEntry{term=2993, timestamp=2021-02-10 03:46:54,454}}, Indexed{index=123186307, entry=InitializeEntry{term=2995, timestamp=2021-02-10 03:49:20,204}}, Indexed{index=123186308, entry=InitializeEntry{term=2997, timestamp=2021-02-10 03:52:26,666}}, Indexed{index=123186309, entry=InitializeEntry{term=2999, timestamp=2021-02-10 03:55:19,408}}, Indexed{index=123186310, entry=InitializeEntry{term=3001, timestamp=2021-02-10 03:57:26,688}}, Indexed{index=123186311, entry=InitializeEntry{term=3003, timestamp=2021-02-10 03:58:48,385}}, Indexed{index=123186312, entry=InitializeEntry{term=3005, timestamp=2021-02-10 04:01:16,230}}, Indexed{index=123186313, entry=InitializeEntry{term=3007, timestamp=2021-02-10 04:03:07,766}}, Indexed{index=123186314, entry=InitializeEntry{term=3009, timestamp=2021-02-10 04:05:49,928}}, Indexed{index=123186315, entry=InitializeEntry{term=3011, timestamp=2021-02-10 04:07:32,429}}, Indexed{index=123186316, entry=InitializeEntry{term=3013, timestamp=2021-02-10 04:10:10,244}}, Indexed{index=123186317, entry=InitializeEntry{term=3015, timestamp=2021-02-10 04:11:50,673}}, Indexed{index=123186318, entry=InitializeEntry{term=3017, timestamp=2021-02-10 04:13:17,654}}, Indexed{index=123186319, entry=InitializeEntry{term=3019, timestamp=2021-02-10 04:14:40,159}}, Indexed{index=123186320, entry=InitializeEntry{term=3021, timestamp=2021-02-10 04:16:03,563}}, Indexed{index=123186321, entry=InitializeEntry{term=3023, timestamp=2021-02-10 04:16:15,409}}, Indexed{index=123186334, entry=InitializeEntry{term=3024, timestamp=2021-02-10 05:07:36,169}}, Indexed{index=123186346, entry=InitializeEntry{term=3025, timestamp=2021-02-10 07:53:34,548}}, Indexed{index=123186359, entry=InitializeEntry{term=3026, timestamp=2021-02-10 08:48:12,638}}, Indexed{index=123186371, entry=InitializeEntry{term=3027, timestamp=2021-02-11 01:41:24,250}}, Indexed{index=123186372, entry=InitializeEntry{term=3028, timestamp=2021-02-11 01:42:43,666}}]
+```
+
+Retrieve a process models
+
+```
+$ zdb state --path=<pathToDatabase> list -cf PROCESS_CACHE | jq --raw-output '.data[0].value.resource' | base64 -d > model.bpmn
 ```
 
 ## Autocompletion
