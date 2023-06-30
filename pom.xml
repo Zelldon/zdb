@@ -100,7 +100,7 @@
         <version>${version.jib}</version>
         <executions>
           <execution>
-            <phase>deploy</phase>
+            <phase>package</phase>
             <goals>
               <goal>build</goal>
             </goals>
@@ -113,10 +113,6 @@
           </to>
           <container>
             <mainClass>io.zell.zdb.ZeebeDebugger</mainClass>
-<!--            <ports>-->
-<!--              <port>8080</port>-->
-<!--              <port>26500</port>-->
-<!--            </ports>-->
           </container>
         </configuration>
       </plugin>
