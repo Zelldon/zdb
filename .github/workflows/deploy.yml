@@ -22,4 +22,4 @@ jobs:
         # new login with new container registry url and PAT
         echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
     - name: Build docker image with Maven
-      run: mvn -B deploy -DskipTests
+      run: mvn -B compile jib:build -DskipTests
