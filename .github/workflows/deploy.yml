@@ -16,9 +16,11 @@ jobs:
       with:
         java-version: '17'
         distribution: 'adopt'
-    - name: Login to Docker
-      run: |
-        # new login with new container registry url and PAT
-        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+    - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build docker image with Maven
       run: mvn -B compile jib:build -DskipTests
