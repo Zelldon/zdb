@@ -36,7 +36,7 @@
     </license.header>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     <maven.compiler.release>17</maven.compiler.release>
-    <plugin.version.checkstyle>3.2.2</plugin.version.checkstyle>
+    <plugin.version.checkstyle>3.3.0</plugin.version.checkstyle>
     <plugin.version.fmt>2.20</plugin.version.fmt>
     <plugin.version.license>4.2</plugin.version.license>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
