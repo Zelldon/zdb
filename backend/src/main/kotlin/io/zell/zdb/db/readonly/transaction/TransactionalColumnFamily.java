@@ -125,6 +125,11 @@ class TransactionalColumnFamily<
   }
 
   @Override
+  public void whileEqualPrefix(DbKey keyPrefix, KeyType startAtKey, KeyValuePairVisitor<KeyType, ValueType> visitor) {
+    throw new UnsupportedOperationException("not supported");
+  }
+
+  @Override
   public void deleteExisting(final KeyType key) {
     throw new UnsupportedOperationException("not supported");
   }
