@@ -11,7 +11,7 @@ import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
 import io.zell.zdb.state.Experimental;
-import io.zell.zdb.state.blacklist.BlacklistState;
+import io.zell.zdb.state.banned.BannedInstanceState;
 import io.zell.zdb.state.general.GeneralState;
 import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceDetails;
@@ -437,16 +437,16 @@ public class ZeebeStateTest {
 
 
   @Test
-  public void shouldReturnEmptyListOnNonExistingBlacklistedInstances() {
+  public void shouldReturnEmptyListOnNonExistingBannedInstances() {
     // given
     final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
-    final var blacklistState = new BlacklistState(runtimePath);
+    final var bannedInstanceState = new BannedInstanceState(runtimePath);
 
     // when
-    final var blacklisted = blacklistState.listBlacklistedInstances();
+    final var bannedInstances = bannedInstanceState.listBannedInstances();
 
     // then
-    assertThat(blacklisted).isNotNull().isEmpty();
+    assertThat(bannedInstances).isNotNull().isEmpty();
   }
 
   @Test
@@ -473,7 +473,7 @@ public class ZeebeStateTest {
     final var incidentDetails = generalDetails.getIncidentDetails();
     assertThat(incidentDetails).isNotNull();
     assertThat(incidentDetails.getIncidents()).isEqualTo(1);
-    assertThat(incidentDetails.getBlacklistedInstances()).isZero();
+    assertThat(incidentDetails.getBannedInstances()).isZero();
 
     final var processInstancesDetails = generalDetails.getProcessInstancesDetails();
     assertThat(processInstancesDetails).isNotNull();

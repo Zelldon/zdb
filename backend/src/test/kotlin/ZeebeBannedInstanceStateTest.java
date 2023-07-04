@@ -5,7 +5,7 @@ import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.state.blacklist.BlacklistState;
+import io.zell.zdb.state.banned.BannedInstanceState;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-public class ZeebeBlacklistStateTest {
+public class ZeebeBannedInstanceStateTest {
 
   private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
 
@@ -89,19 +89,19 @@ public class ZeebeBlacklistStateTest {
   }
 
   @Test
-  public void shouldListBlacklistedInstances() {
+  public void shouldListBannedInstances() {
     // given
     final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
-    final var blacklistState = new BlacklistState(runtimePath);
+    final var bannedInstanceState = new BannedInstanceState(runtimePath);
 
     // when
-    final var blacklisted = Awaitility
-        .await("should find blacklisted instances").until(blacklistState::listBlacklistedInstances,
+    final var bannedInstances = Awaitility
+        .await("should find banned instances").until(bannedInstanceState::listBannedInstances,
             listed -> !listed.isEmpty());
 
     // then
-    assertThat(blacklisted).isNotNull().isNotEmpty();
-    assertThat(blacklisted.get(0)).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
+    assertThat(bannedInstances).isNotNull().isNotEmpty();
+    assertThat(bannedInstances.get(0)).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
   }
 
 }

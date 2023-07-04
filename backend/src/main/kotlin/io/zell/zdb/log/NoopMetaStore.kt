@@ -7,4 +7,11 @@ object NoopMetaStore : JournalMetaStore {
     override fun loadLastFlushedIndex(): Long {
         return 0
     }
+
+    override fun resetLastFlushedIndex() {
+    }
+
+    override fun hasLastFlushedIndex(): Boolean {
+        return true;
+    }
 }

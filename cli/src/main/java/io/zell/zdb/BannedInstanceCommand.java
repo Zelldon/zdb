@@ -7,7 +7,7 @@
  */
 package io.zell.zdb;
 
-import io.zell.zdb.state.blacklist.BlacklistState;
+import io.zell.zdb.state.banned.BannedInstanceState;
 import io.zell.zdb.state.instance.InstanceState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -19,10 +19,11 @@ import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 @Command(
-    name = "blacklist",
+    name = "banned",
+    aliases = "blacklist",
     mixinStandardHelpOptions = true,
-    description = "Print's information about blacklisted workflow instances")
-public class BlacklistCommand implements Callable<Integer> {
+    description = "Print's information about banned process instances")
+public class BannedInstanceCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -40,18 +41,18 @@ public class BlacklistCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "list", description = "List all blacklisted workflow instances")
+  @Command(name = "list", description = "List all banned process instances")
   public int list() {
-    final var blacklistedInstances = new BlacklistState(partitionPath).listBlacklistedInstances();
+    final var blacklistedInstances = new BannedInstanceState(partitionPath).listBannedInstances();
     System.out.println(blacklistedInstances);
     return 0;
   }
 
-  @Command(name = "entity", description = "Show details about blacklisted workflow instance")
+  @Command(name = "entity", description = "Show details about banned process instance")
   public int entity(
       @Parameters(
               paramLabel = "KEY",
-              description = "The key of the blacklisted workflow instance",
+              description = "The key of the banned process instance",
               arity = "1")
           final long key) {
     final var instanceDetails = new InstanceState(partitionPath).instanceDetails(key);

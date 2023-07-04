@@ -23,7 +23,7 @@ import picocli.CommandLine.RunLast;
     subcommands = {
       GenerateCompletion.class, // to generate auto completion
       StatusCommand.class,
-      BlacklistCommand.class,
+      BannedInstanceCommand.class,
       IncidentCommand.class,
       ProcessCommand.class,
       LogCommand.class,
