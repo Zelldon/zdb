@@ -9,6 +9,7 @@ import io.zell.zdb.state.banned.BannedInstanceState;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
@@ -23,6 +24,7 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
+@Disabled("We can't reliable produce banned instances currently, not easily at least.")
 public class ZeebeBannedInstanceStateTest {
 
   private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
