@@ -1,4 +1,4 @@
-package io.zell.zdb.state.blacklist
+package io.zell.zdb.state.banned
 
 import io.camunda.zeebe.db.impl.DbLong
 import io.camunda.zeebe.db.impl.DbNil
@@ -6,25 +6,25 @@ import io.camunda.zeebe.protocol.ZbColumnFamilies
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import java.nio.file.Path
 
-class BlacklistState(private var readonlyDb: ReadonlyTransactionDb) {
+class BannedInstanceState(private var readonlyDb: ReadonlyTransactionDb) {
 
     constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
 
-    fun listBlacklistedInstances() : List<Long> {
-        val blacklistedInstances = mutableListOf<Long>()
+    fun listBannedInstances() : List<Long> {
+        val bannedInstances = mutableListOf<Long>()
 
         val processInstanceKey = DbLong()
-        val blackListColumnFamily =
+        val bannedInstanceColumnFamily =
             readonlyDb.createColumnFamily(
-                ZbColumnFamilies.BLACKLIST,
+                ZbColumnFamilies.BANNED_INSTANCE,
                 readonlyDb.createContext(),
                 processInstanceKey,
                 DbNil.INSTANCE)
 
-        blackListColumnFamily.forEach { key, _ -> blacklistedInstances.add(key.value) }
+        bannedInstanceColumnFamily.forEach { key, _ -> bannedInstances.add(key.value) }
 
 
-        return blacklistedInstances
+        return bannedInstances
     }
 
 }

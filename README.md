@@ -11,7 +11,7 @@ It was created during the Camunda Summer Hackdays in 2020.
   * [State Inspection](#state-inspection)
     * [Inspect Zeebe Partition Status](#inspect-zeebe-partition-status)
     * [Inspect Incidents](#inspect-incidents)
-    * [Inspect Blacklisted Process Instances](#inspect-blacklisted-process-instances)
+    * [Inspect Banned Process Instances](#inspect-blacklisted-process-instances)
     * [Inspect Processes](#inspect-processes)
     * [Inspect Instances](#inspect-instances)
   * [Log Inspection](#log-inspection)
@@ -85,20 +85,20 @@ Find incidents for a given processInstanceKey
 zdb incident list --path=<pathToDatabase> | jq '. | map(select(.processInstanceKey==<PI_KEY>))'
 ```
 
-#### Inspect Blacklisted Process Instances
+#### Inspect Banned Process Instances
 
-You can check if there are any processes stuck due to blacklisting using the following commands.
+You can check if there are any processes stuck due to banning using the following commands.
 
-List all blacklisted process instances in this partition:
+List all banned process instances in this partition:
 
 ```sh
-zdb blacklist list --path=<pathToDatabase>
+zdb banned list --path=<pathToDatabase>
 ```
 
-Returns details to a specific blacklisted instance:
+Returns details to a specific banned instance:
 
 ```sh
-zdb blacklist entity <ProcessInstanceKey> --path=<pathToDatabase>
+zdb banned entity <ProcessInstanceKey> --path=<pathToDatabase>
 ```
 
 #### Inspect Processes
@@ -243,7 +243,7 @@ Exporting:
 	MetricsExporter: position 141169122
 	Lowest exported position: 141169060
 Incident related:: 
-	Blacklisted instances: 0
+	Banned instances: 0
 	Incidents: 33
 Messages: : 3656965
 	Current Time: : 1610561195140

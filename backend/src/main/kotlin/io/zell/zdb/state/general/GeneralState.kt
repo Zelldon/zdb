@@ -71,18 +71,18 @@ class GeneralState(statePath: Path) {
     private fun incidentDetails(): IncidentDetails {
 
         val processInstanceKey = DbLong()
-        val blackListColumnFamily = readonlyDb.createColumnFamily(
-            ZbColumnFamilies.BLACKLIST,
+        val bannedInstanceCF = readonlyDb.createColumnFamily(
+            ZbColumnFamilies.BANNED_INSTANCE,
             readonlyDb.createContext(),
             processInstanceKey,
             DbNil.INSTANCE
         )
 
-        var blacklistedInstances = 0L
-        blackListColumnFamily.forEach { key -> blacklistedInstances++ }
+        var bannedInstances = 0L
+        bannedInstanceCF.forEach { key -> bannedInstances++ }
 
         return IncidentDetails(
-            blacklistedInstances,
+            bannedInstances,
             IncidentState(readonlyDb).listIncidents().count().toLong()
         )
     }
