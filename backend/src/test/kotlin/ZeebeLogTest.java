@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
 import java.time.Duration;
@@ -68,7 +69,7 @@ public class ZeebeLogTest {
           .done();
   private static final String CONTAINER_PATH = "/usr/local/zeebe/data/";
   @Container
-  public static ZeebeContainer zeebeContainer = new ZeebeContainer()
+  public static ZeebeContainer zeebeContainer = new ZeebeContainer(DockerImageName.parse("camunda/zeebe:8.0.3"))
       /* run the container with the current user, in order to access the data and delete it later */
       .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
       .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);

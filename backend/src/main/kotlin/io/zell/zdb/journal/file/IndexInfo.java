@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
+ * Copyright © 2017 camunda services GmbH (info@camunda.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb.log
+package io.zell.zdb.journal.file;
 
-import io.camunda.zeebe.journal.JournalMetaStore
-
-object NoopMetaStore : JournalMetaStore {
-    override fun storeLastFlushedIndex(index: Long) {}
-    override fun loadLastFlushedIndex(): Long {
-        return 0
-    }
-
-    override fun resetLastFlushedIndex() {
-    }
-
-    override fun hasLastFlushedIndex(): Boolean {
-        return true;
-    }
-}
+/** Indexing info stored by JournalIndex */
+record IndexInfo(long index, int position) {}
