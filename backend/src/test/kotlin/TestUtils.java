@@ -1,5 +1,5 @@
 /*
- * Copyright © 2019 camunda services GmbH (info@camunda.com)
+ * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

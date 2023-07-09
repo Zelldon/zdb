@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright © 2021 camunda services GmbH (info@camunda.com)
+    Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -251,39 +251,6 @@
                 <descriptorRef>jar-with-dependencies</descriptorRef>
               </descriptorRefs>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <!-- LICENSE PLUGIN -->
-      <plugin>
-        <groupId>com.mycila</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>${plugin.version.license}</version>
-        <configuration>
-          <header>${license.header}</header>
-          <properties>
-            <owner>camunda services GmbH</owner>
-            <email>info@camunda.com</email>
-          </properties>
-          <includes>
-            <include>**/*.java</include>
-            <include>**/*.scala</include>
-          </includes>
-          <excludes>
-            <exclude>benchmarks/project/**/*</exclude>
-          </excludes>
-          <mapping>
-            <java>SLASHSTAR_STYLE</java>
-          </mapping>
-        </configuration>
-        <executions>
-          <execution>
-            <id>add-license</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>format</goal>
-            </goals>
           </execution>
         </executions>
       </plugin>
