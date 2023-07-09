@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb.log
+package io.zell.zdb.journal.record;
 
-import io.atomix.raft.storage.log.RaftLogReader
-import io.zell.zdb.journal.JournalReader
-import java.nio.file.Path
+import org.agrona.DirectBuffer;
 
-class LogContentReader(logPath: Path) {
-
-    private val reader: RaftLogReader = LogFactory.newReader(logPath)
-
-    fun content(): LogContent {
-        val logContent = LogContent()
-        reader.forEach {
-            LogContent.addEntryToContent(it, logContent)
-        }
-        return logContent
-    }
-}
+public record RecordData(long index, long asqn, DirectBuffer data) {}

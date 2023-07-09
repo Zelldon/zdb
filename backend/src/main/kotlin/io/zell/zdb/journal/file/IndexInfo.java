@@ -13,20 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb.log
+package io.zell.zdb.journal.file;
 
-import io.camunda.zeebe.journal.JournalMetaStore
-
-object NoopMetaStore : JournalMetaStore {
-    override fun storeLastFlushedIndex(index: Long) {}
-    override fun loadLastFlushedIndex(): Long {
-        return 0
-    }
-
-    override fun resetLastFlushedIndex() {
-    }
-
-    override fun hasLastFlushedIndex(): Boolean {
-        return true;
-    }
-}
+/** Indexing info stored by JournalIndex */
+record IndexInfo(long index, int position) {}

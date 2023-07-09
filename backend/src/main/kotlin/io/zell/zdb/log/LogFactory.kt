@@ -17,6 +17,10 @@ package io.zell.zdb.log
 
 import io.atomix.raft.storage.log.RaftLog
 import io.atomix.raft.storage.log.RaftLogReader
+import io.camunda.zeebe.journal.file.SegmentedJournal
+import io.zell.zdb.journal.JournalReader
+import io.zell.zdb.journal.file.SegmentedJournalBuilder
+import io.zell.zdb.journal.file.SegmentedReadOnlyJournal
 import java.nio.file.Path
 
 class LogFactory {
@@ -32,14 +36,14 @@ class LogFactory {
         fun newReader(logPath: Path): RaftLogReader {
             val partitionName = extractPartitionNameFromPath(logPath)
 
-            val raftLog = RaftLog.builder()
+            val builder = SegmentedReadOnlyJournal.builder()
+            val readOnlyJournal = builder
                 .withDirectory(logPath.toFile())
                 .withName(partitionName)
                 .withMaxSegmentSize(MAX_SEGMENT_SIZE)
-                .withMetaStore(NoopMetaStore)
                 .build()
 
-            return raftLog.openUncommittedReader()
+            return RaftLogUncommittedReader(readOnlyJournal.openReader());
         }
 
         private fun extractPartitionNameFromPath(logPath: Path): String {

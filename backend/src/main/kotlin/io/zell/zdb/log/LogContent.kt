@@ -23,6 +23,7 @@ import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstan
 import io.camunda.zeebe.protocol.record.ValueType
 import io.camunda.zeebe.stream.api.records.TypedRecord
 import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
+import io.zell.zdb.journal.ReadOnlyJournalRecord
 import org.agrona.concurrent.UnsafeBuffer
 
 class LogContent {
