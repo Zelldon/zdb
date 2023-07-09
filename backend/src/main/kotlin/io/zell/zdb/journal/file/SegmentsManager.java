@@ -116,8 +116,6 @@ final class SegmentsManager implements AutoCloseable {
     // If a segment doesn't already exist, create an initial segment starting at index 1.
     if (!segments.isEmpty()) {
       currentSegment = segments.lastEntry().getValue();
-    } else {
-      throw new IllegalStateException("Expected to read segments, but there was nothing to read.");
     }
   }
 
