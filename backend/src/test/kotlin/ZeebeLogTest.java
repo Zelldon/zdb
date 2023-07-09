@@ -44,6 +44,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Testcontainers
 public class ZeebeLogTest {
@@ -178,26 +179,14 @@ public class ZeebeLogTest {
 
 
   @Test
-  public void shouldReturnDefaultsWhenReadStatusFromNonExistingLog() {
+  public void shouldThrowWhenReadStatusFromNonExistingLog() {
     // given
     final var logPath = ZeebePaths.Companion.getLogPath(new File("/tmp/doesntExist"), "1");
-    var logStatus = new LogStatus(logPath);
 
-    // when
-    final var status = logStatus.status();
-
-    // then
-    assertThat(status.getHighestIndex()).isEqualTo(Long.MIN_VALUE);
-    assertThat(status.getScannedEntries()).isZero();
-    assertThat(status.getHighestTerm()).isEqualTo(Long.MIN_VALUE);
-    assertThat(status.getHighestRecordPosition()).isEqualTo(Long.MIN_VALUE);
-    assertThat(status.getLowestIndex()).isEqualTo(Long.MAX_VALUE);
-    assertThat(status.getLowestRecordPosition()).isEqualTo(Long.MAX_VALUE);
-    assertThat(status.getMinEntrySizeBytes()).isEqualTo(Integer.MAX_VALUE);
-    assertThat(status.getMaxEntrySizeBytes()).isEqualTo(Integer.MIN_VALUE);
-    assertThat(status.getAvgEntrySizeBytes()).isZero();
-
-    assertThat(status).hasToString("{}");
+    // when - throw
+    assertThatThrownBy(() -> new LogStatus(logPath))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Expected to read segments, but there was nothing to read");
   }
 
 
