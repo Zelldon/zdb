@@ -242,15 +242,6 @@ final class SegmentDescriptor {
   }
 
   /**
-   * Returns a descriptor builder.
-   *
-   * @return The descriptor builder.
-   */
-  static Builder builder() {
-    return new Builder();
-  }
-
-  /**
    * Returns the segment identifier.
    *
    * <p>The segment ID is a monotonically increasing number within each log. Segments with
@@ -349,86 +340,7 @@ final class SegmentDescriptor {
         + '}';
   }
 
-  int lastPosition() {
-    return lastPosition;
-  }
-
-  void setLastPosition(final int lastPosition) {
-    this.lastPosition = lastPosition;
-  }
-
-  void setLastIndex(final long lastIndex) {
-    this.lastIndex = lastIndex;
-  }
-
-  void updateIfCurrentVersion(final ByteBuffer buffer) {
-    if (version >= CUR_VERSION) {
-      copyTo(buffer);
-    } else {
-      // Do not overwrite the descriptor for older versions. The new version has a higher length and
-      // will overwrite the first entry.
-      LOG.trace(
-          "Segment descriptor version is {}, which is lower than current version {}."
-              + "Skipping update to the descriptor.",
-          version,
-          CUR_VERSION);
-    }
-  }
-
   long lastIndex() {
     return lastIndex;
-  }
-
-  /** Segment descriptor builder. */
-  static final class Builder {
-
-    private long id;
-    private long index;
-    private int maxSegmentSize;
-
-    /**
-     * Sets the segment identifier.
-     *
-     * @param id The segment identifier.
-     * @return The segment descriptor builder.
-     */
-    Builder withId(final long id) {
-      checkArgument(id > 0, "id must be positive");
-      this.id = id;
-      return this;
-    }
-
-    /**
-     * Sets the segment index.
-     *
-     * @param index The segment starting index.
-     * @return The segment descriptor builder.
-     */
-    Builder withIndex(final long index) {
-      checkArgument(index > 0, "index must be positive");
-      this.index = index;
-      return this;
-    }
-
-    /**
-     * Sets maximum number of bytes of the segment.
-     *
-     * @param maxSegmentSize The maximum count of the segment.
-     * @return The segment descriptor builder.
-     */
-    Builder withMaxSegmentSize(final int maxSegmentSize) {
-      checkArgument(maxSegmentSize > 0, "maxSegmentSize must be positive");
-      this.maxSegmentSize = maxSegmentSize;
-      return this;
-    }
-
-    /**
-     * Builds the segment descriptor.
-     *
-     * @return The built segment descriptor.
-     */
-    SegmentDescriptor build() {
-      return new SegmentDescriptor(id, index, maxSegmentSize);
-    }
   }
 }

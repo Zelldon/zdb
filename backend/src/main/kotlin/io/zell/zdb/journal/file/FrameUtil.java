@@ -25,14 +25,6 @@ final class FrameUtil {
 
   private FrameUtil() {}
 
-  static void writeVersion(final ByteBuffer buffer, final int offset) {
-    write(buffer, offset, VERSION);
-  }
-
-  static void markAsIgnored(final ByteBuffer buffer, final int offset) {
-    write(buffer, offset, IGNORE);
-  }
-
   /**
    * Reads the version at buffer's current position. The position of the buffer will be advanced.
    */
@@ -49,10 +41,6 @@ final class FrameUtil {
       return false;
     }
     return buffer.get(buffer.position()) != IGNORE;
-  }
-
-  static int getLength() {
-    return LENGTH;
   }
 
   private static void write(final ByteBuffer buffer, final int offset, final byte value) {

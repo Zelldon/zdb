@@ -16,25 +16,19 @@
  */
 package io.zell.zdb.journal.file;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.collect.Sets;
-import io.camunda.zeebe.util.VisibleForTesting;
-import io.camunda.zeebe.util.buffer.BufferWriter;
+import io.zell.zdb.journal.JournalReader;
+import io.zell.zdb.journal.ReadOnlyJournal;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.locks.StampedLock;
 
-import io.zell.zdb.journal.JournalReader;
-import io.zell.zdb.journal.ReadOnlyJournal;
-import io.zell.zdb.journal.ReadOnlyJournalRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.base.Preconditions.checkState;
 
 /** A file based journal. The journal is split into multiple segments files. */
 public final class SegmentedReadOnlyJournal implements ReadOnlyJournal {
   public static final long ASQN_IGNORE = -1;
-  private static final Logger LOGGER = LoggerFactory.getLogger(SegmentedReadOnlyJournal.class);
   private final Collection<SegmentedJournalReader> readers = Sets.newConcurrentHashSet();
   private volatile boolean open = true;
   private final JournalIndex journalIndex;
@@ -152,20 +146,6 @@ public final class SegmentedReadOnlyJournal implements ReadOnlyJournal {
   public void closeReader(final SegmentedJournalReader segmentedJournalReader) {
     readers.remove(segmentedJournalReader);
   }
-
-  /**
-   * Resets journal readers to the given index, if they are at a larger index.
-   *
-   * @param index The index at which to reset readers.
-   */
-  void resetAdvancedReaders(final long index) {
-    for (final SegmentedJournalReader reader : readers) {
-      if (reader.getNextIndex() > index) {
-        reader.unsafeSeek(index);
-      }
-    }
-  }
-
   public JournalIndex getJournalIndex() {
     return journalIndex;
   }
@@ -176,11 +156,5 @@ public final class SegmentedReadOnlyJournal implements ReadOnlyJournal {
 
   void releaseReadlock(final long stamp) {
     rwlock.unlockRead(stamp);
-  }
-
-  @VisibleForTesting(
-      "The simplest way to guarantee certain methods acquire/release the write lock is to access directly")
-  StampedLock rwlock() {
-    return rwlock;
   }
 }

@@ -99,19 +99,6 @@ public final class SegmentFile {
     }
   }
 
-  /** Creates a segment file for the given directory, log name, segment ID, and segment version. */
-  static File createSegmentFile(final String name, final File directory, final long id) {
-    return new File(
-        directory,
-        String.format(
-            "%s%s%d%s%s",
-            checkNotNull(name, "name cannot be null"),
-            PART_SEPARATOR,
-            id,
-            EXTENSION_SEPARATOR,
-            EXTENSION));
-  }
-
   /**
    * Returns the segment file.
    *
@@ -134,16 +121,5 @@ public final class SegmentFile {
       fileMarkedForDeletion = Path.of(file.getParent(), renamedFileName);
     }
     return fileMarkedForDeletion;
-  }
-
-  public static boolean isDeletedSegmentFile(final String journalName, final String fileName) {
-    checkNotNull(journalName, "journalName cannot be null");
-    checkNotNull(fileName, "fileName cannot be null");
-
-    if (!fileName.endsWith(DELETE_EXTENSION)) {
-      return false;
-    }
-    final var deleteExtensionIndex = fileName.lastIndexOf(DELETE_EXTENSION_SEPARATOR);
-    return isSegmentFile(journalName, fileName.substring(0, deleteExtensionIndex));
   }
 }

@@ -55,11 +55,6 @@ final class SparseJournalIndex implements JournalIndex {
   }
 
   @Override
-  public Long lookupAsqn(final long asqn) {
-    return lookupAsqn(asqn, Long.MAX_VALUE);
-  }
-
-  @Override
   public Long lookupAsqn(final long asqn, final long indexUpperBound) {
     final Map.Entry<Long, Long> entry = asqnToIndex.floorEntry(asqn);
     if (entry != null) {
@@ -70,37 +65,6 @@ final class SparseJournalIndex implements JournalIndex {
       }
     }
     return null;
-  }
-
-  @Override
-  public void deleteAfter(final long index) {
-    indexToPosition.tailMap(index, false).clear();
-    final var asqnEntryToDelete = indexToAsqn.ceilingEntry(index);
-    if (asqnEntryToDelete != null) {
-      final var asqnToDelete = asqnEntryToDelete.getValue();
-      indexToAsqn.tailMap(index, false).clear();
-      final boolean include = asqnEntryToDelete.getKey() > index;
-      asqnToIndex.tailMap(asqnToDelete, include).clear();
-    }
-  }
-
-  @Override
-  public void deleteUntil(final long index) {
-    indexToPosition.headMap(index, false).clear();
-
-    final var asqnEntryToDelete = indexToAsqn.floorEntry(index);
-    if (asqnEntryToDelete != null) {
-      final var asqnToDelete = asqnEntryToDelete.getValue();
-      indexToAsqn.headMap(index, false).clear();
-      asqnToIndex.headMap(asqnToDelete, false).clear();
-    }
-  }
-
-  @Override
-  public void clear() {
-    indexToPosition.clear();
-    indexToAsqn.clear();
-    asqnToIndex.clear();
   }
 
   @Override

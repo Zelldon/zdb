@@ -36,13 +36,11 @@ class LogFactory {
         fun newReader(logPath: Path): RaftLogReader {
             val partitionName = extractPartitionNameFromPath(logPath)
 
-//            val raftLog = RaftLog.builder()
             val builder = SegmentedReadOnlyJournal.builder()
             val readOnlyJournal = builder
                 .withDirectory(logPath.toFile())
                 .withName(partitionName)
                 .withMaxSegmentSize(MAX_SEGMENT_SIZE)
-                .withMetaStore(NoopMetaStoreReadOnly)
                 .build()
 
             return RaftLogUncommittedReader(readOnlyJournal.openReader());

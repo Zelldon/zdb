@@ -41,14 +41,6 @@ interface JournalIndex {
   IndexInfo lookup(long index);
 
   /**
-   * Look up the index for the given application sequence number.
-   *
-   * @param asqn asqn to lookup
-   * @return the index of a record with asqn less than or equal to the given asqn.
-   */
-  Long lookupAsqn(long asqn);
-
-  /**
    * Look up the index for the given application sequence number. Same as {code lookupAsqn(asqn)},
    * but the returned index will be less than or equal to the given indexUpperBound.
    *
@@ -58,27 +50,6 @@ interface JournalIndex {
    *     asqn.
    */
   Long lookupAsqn(long asqn, long indexUpperBound);
-
-  /**
-   * Delete all entries after the given index.
-   *
-   * @param indexExclusive the index after which to be deleted
-   */
-  void deleteAfter(long indexExclusive);
-
-  /**
-   * Compacts the index until the next stored index (exclusively), which means everything lower then
-   * the stored index will be removed.
-   *
-   * <p>Example Index: {5 -> 10; 10 -> 20; 15 -> 30}, when compact is called with index 11. The next
-   * lower stored index is 15, everything lower then this index will be removed.
-   *
-   * @param indexExclusive the index to which to compact the index
-   */
-  void deleteUntil(long indexExclusive);
-
-  /** Delete all index mappings */
-  void clear();
 
   /**
    * Checks if the entry at this index might have been already indexed. Note that the result is

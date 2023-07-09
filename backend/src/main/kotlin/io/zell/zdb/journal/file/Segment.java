@@ -94,16 +94,6 @@ final class Segment implements AutoCloseable {
     return descriptor.index();
   }
 
-
-  /**
-   * Returns the segment file.
-   *
-   * @return The segment file.
-   */
-  SegmentFile file() {
-    return file;
-  }
-
   /**
    * Returns the segment descriptor.
    *

@@ -7,43 +7,28 @@
  */
 package io.zell.zdb.journal.file;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import io.camunda.zeebe.journal.CorruptedJournalException;
 import io.camunda.zeebe.journal.JournalException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.SortedMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-import io.zell.zdb.journal.ReadOnlyJournalMetaStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /** Create new segments. Load existing segments from the disk. Keep track of all segments. */
 final class SegmentsManager implements AutoCloseable {
 
-  private static final long FIRST_SEGMENT_ID = 1;
-  private static final long INITIAL_INDEX = 1;
   private static final long INITIAL_ASQN = SegmentedReadOnlyJournal.ASQN_IGNORE;
 
   private static final Logger LOG = LoggerFactory.getLogger(SegmentsManager.class);
@@ -53,21 +38,17 @@ final class SegmentsManager implements AutoCloseable {
   private final int maxSegmentSize;
   private final File directory;
   private final String name;
-  private final ReadOnlyJournalMetaStore metaStore;
-
   private volatile Segment currentSegment;
 
   SegmentsManager(
       final JournalIndex journalIndex,
       final int maxSegmentSize,
       final File directory,
-      final String name,
-      final ReadOnlyJournalMetaStore metaStore) {
+      final String name) {
     this.name = checkNotNull(name, "name cannot be null");
     this.journalIndex = journalIndex;
     this.maxSegmentSize = maxSegmentSize;
     this.directory = directory;
-    this.metaStore = metaStore;
   }
 
   @Override
@@ -117,12 +98,6 @@ final class SegmentsManager implements AutoCloseable {
     return getFirstSegment();
   }
 
-  private long getFirstIndex() {
-    final var firstSegment = getFirstSegment();
-    return firstSegment != null ? firstSegment.index() : 0;
-  }
-
-
   /** Loads existing segments from the disk */
   void open() {
     // Load existing log segments from disk.
@@ -138,23 +113,12 @@ final class SegmentsManager implements AutoCloseable {
     }
   }
 
-
-  Collection<Segment> getTailSegments(final long index) {
-    final var segment = getSegment(index);
-    if (segment == null) {
-      return Collections.emptySet();
-    }
-
-    return Collections.unmodifiableSortedMap(segments.tailMap(segment.index(), true)).values();
-  }
-
   /**
    * Loads all segments from disk.
    *
    * @return A collection of segments for the log.
    */
   private Collection<Segment> loadSegments() {
-    final var lastFlushedIndex = metaStore.loadLastFlushedIndex();
 
     // Ensure log directories are created.
     //noinspection ResultOfMethodCallIgnored

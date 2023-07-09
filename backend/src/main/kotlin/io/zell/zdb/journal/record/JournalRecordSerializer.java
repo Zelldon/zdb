@@ -17,54 +17,7 @@ import org.agrona.MutableDirectBuffer;
 public interface JournalRecordSerializer {
 
   /**
-   * Writes a {@link RecordData} to the buffer.
-   *
-   * @param record to write
-   * @param buffer to which the record will be written
-   * @param offset the offset in the buffer at which the data will be written
-   * @return Either an error if there is not enough space or the number of bytes that were written
-   *     to the buffer
-   */
-  default Either<BufferOverflowException, Integer> writeData(
-      final RecordData record, final MutableDirectBuffer buffer, final int offset) {
-    return writeData(
-        record.index(),
-        record.asqn(),
-        new DirectBufferWriter().wrap(record.data()),
-        buffer,
-        offset);
-  }
-
-  Either<BufferOverflowException, Integer> writeData(
-      final long index,
-      final long asqn,
-      BufferWriter recordDataWriter,
-      MutableDirectBuffer writeBuffer,
-      int offset);
-
-  Either<BufferOverflowException, Integer> writeDataAtVersion(
-      int version,
-      final long index,
-      final long asqn,
-      BufferWriter recordDataWriter,
-      MutableDirectBuffer writeBuffer,
-      int offset);
-
-  /**
-   * Writes a {@link RecordMetadata} to the buffer.
-   *
-   * @param metadata to write
-   * @param buffer to which the metadata will be written
-   * @param offset the offset in the buffer at which the metadata will be written
-   * @return the number of bytes that were written to the buffer
-   */
-  int writeMetadata(RecordMetadata metadata, MutableDirectBuffer buffer, int offset);
-
-  /**
-   * Returns the number of bytes required to write a {@link RecordMetadata} to a buffer. The length
-   * returned by this method must be equal to the length returned by {@link
-   * JournalRecordSerializer#writeMetadata(RecordMetadata, MutableDirectBuffer, int)}
-   *
+   * Returns the number of bytes required to write a {@link RecordMetadata} to a buffer.
    * @return the expected length of a serialized metadata
    */
   int getMetadataLength();

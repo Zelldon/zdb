@@ -16,12 +16,10 @@
  */
 package io.zell.zdb.journal.file;
 
-import io.zell.zdb.journal.ReadOnlyJournalMetaStore;
+import java.io.File;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.io.File;
 
 /** Raft log builder. */
 @SuppressWarnings("UnusedReturnValue")
@@ -30,23 +28,12 @@ public class SegmentedJournalBuilder {
   private static final String DEFAULT_NAME = "journal";
   private static final String DEFAULT_DIRECTORY = System.getProperty("user.dir");
   private static final int DEFAULT_MAX_SEGMENT_SIZE = 1024 * 1024 * 32;
-  private static final long DEFAULT_MIN_FREE_DISK_SPACE = 1024L * 1024 * 1024;
   private static final int DEFAULT_JOURNAL_INDEX_DENSITY = 100;
-  private static final boolean DEFAULT_PREALLOCATE_SEGMENT_FILES = true;
-
-  // impossible value to make it clear it's unset
-  private static final int DEFAULT_PARTITION_ID = -1;
-
   protected String name = DEFAULT_NAME;
   protected File directory = new File(DEFAULT_DIRECTORY);
   protected int maxSegmentSize = DEFAULT_MAX_SEGMENT_SIZE;
 
-  private long freeDiskSpace = DEFAULT_MIN_FREE_DISK_SPACE;
   private int journalIndexDensity = DEFAULT_JOURNAL_INDEX_DENSITY;
-  private boolean preallocateSegmentFiles = DEFAULT_PREALLOCATE_SEGMENT_FILES;
-  private int partitionId = DEFAULT_PARTITION_ID;
-
-  private ReadOnlyJournalMetaStore readOnlyJournalMetaStore;
 
   protected SegmentedJournalBuilder() {}
 
@@ -109,58 +96,6 @@ public class SegmentedJournalBuilder {
     return this;
   }
 
-  /**
-   * Sets the minimum free disk space to leave when allocating a new segment
-   *
-   * @param freeDiskSpace free disk space in bytes
-   * @return the storage builder
-   * @throws IllegalArgumentException if the {@code freeDiskSpace} is not positive
-   */
-  public SegmentedJournalBuilder withFreeDiskSpace(final long freeDiskSpace) {
-    checkArgument(freeDiskSpace >= 0, "minFreeDiskSpace must be positive");
-    this.freeDiskSpace = freeDiskSpace;
-    return this;
-  }
-
-  public SegmentedJournalBuilder withJournalIndexDensity(final int journalIndexDensity) {
-    this.journalIndexDensity = journalIndexDensity;
-    return this;
-  }
-
-  /**
-   * Sets whether segment files are pre-allocated at creation. If true, segment files are
-   * pre-allocated to the maximum segment size (see {@link #withMaxSegmentSize(int)}}) at creation
-   * before any writes happen.
-   *
-   * @param preallocateSegmentFiles true to preallocate files, false otherwise
-   * @return this builder for chaining
-   */
-  public SegmentedJournalBuilder withPreallocateSegmentFiles(
-      final boolean preallocateSegmentFiles) {
-    this.preallocateSegmentFiles = preallocateSegmentFiles;
-    return this;
-  }
-
-  /**
-   * The ID of the partition on which this journal resides.
-   *
-   * @param partitionId the journal's partition ID
-   * @return this builder for chaining
-   */
-  public SegmentedJournalBuilder withPartitionId(final int partitionId) {
-    this.partitionId = partitionId;
-    return this;
-  }
-
-  /**
-   * @param metaStore journal metastore to update lastFlushedIndex
-   * @return this builder for chaining
-   */
-  public SegmentedJournalBuilder withMetaStore(final ReadOnlyJournalMetaStore metaStore) {
-    readOnlyJournalMetaStore = metaStore;
-    return this;
-  }
-
   public SegmentedReadOnlyJournal build() {
     final var journalIndex = new SparseJournalIndex(journalIndexDensity);
     final var segmentsManager =
@@ -168,8 +103,7 @@ public class SegmentedJournalBuilder {
             journalIndex,
             maxSegmentSize,
             directory,
-            name,
-                readOnlyJournalMetaStore);
+            name);
 
     return new SegmentedReadOnlyJournal(journalIndex, segmentsManager);
   }
