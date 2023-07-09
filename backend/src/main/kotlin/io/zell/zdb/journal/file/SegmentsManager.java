@@ -234,8 +234,7 @@ final class SegmentsManager implements AutoCloseable {
           final SegmentDescriptor descriptor,
           final long lastWrittenAsqn,
           final JournalIndex journalIndex) {
-    final SegmentFile segmentFile = new SegmentFile(file.toFile());
-    return new Segment(segmentFile, descriptor, buffer, lastWrittenAsqn, journalIndex);
+    return new Segment(descriptor, buffer, lastWrittenAsqn, journalIndex);
   }
 
 

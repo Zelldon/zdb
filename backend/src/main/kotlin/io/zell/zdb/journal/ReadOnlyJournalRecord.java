@@ -46,11 +46,4 @@ public interface ReadOnlyJournalRecord {
    * @return data
    */
   DirectBuffer data();
-
-  /**
-   * Serialized journal record that includes index, asqn and data.
-   *
-   * @return serialized record
-   */
-  DirectBuffer serializedRecord();
 }

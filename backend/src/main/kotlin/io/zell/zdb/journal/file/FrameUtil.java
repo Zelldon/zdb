@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 
 final class FrameUtil {
 
-  private static final byte VERSION = 1;
   private static final byte IGNORE = 0;
   private static final int LENGTH = 1;
 
@@ -41,9 +40,5 @@ final class FrameUtil {
       return false;
     }
     return buffer.get(buffer.position()) != IGNORE;
-  }
-
-  private static void write(final ByteBuffer buffer, final int offset, final byte value) {
-    buffer.put(offset, value);
   }
 }

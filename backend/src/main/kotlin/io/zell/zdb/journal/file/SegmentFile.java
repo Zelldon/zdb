@@ -16,10 +16,9 @@
  */
 package io.zell.zdb.journal.file;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import java.io.File;
-import java.nio.file.Path;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Segment file utility.
@@ -27,15 +26,10 @@ import java.nio.file.Path;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public final class SegmentFile {
-
-  private static int deletedFileIndex = 0;
   private static final char PART_SEPARATOR = '-';
   private static final char EXTENSION_SEPARATOR = '.';
   private static final String EXTENSION = "log";
-  private static final String DELETE_EXTENSION = "deleted";
-  private static final char DELETE_EXTENSION_SEPARATOR = '_';
   private final File file;
-  private Path fileMarkedForDeletion;
 
   /**
    * @throws IllegalArgumentException if {@code file} is not a valid segment file
@@ -110,16 +104,5 @@ public final class SegmentFile {
 
   public String name() {
     return file.getName();
-  }
-
-  public Path getFileMarkedForDeletion() {
-    if (fileMarkedForDeletion == null) {
-      final String renamedFileName =
-          String.format(
-              "%s%c%d-%s",
-              file.getName(), DELETE_EXTENSION_SEPARATOR, deletedFileIndex++, DELETE_EXTENSION);
-      fileMarkedForDeletion = Path.of(file.getParent(), renamedFileName);
-    }
-    return fileMarkedForDeletion;
   }
 }

@@ -17,15 +17,10 @@
 package io.zell.zdb.journal.file;
 
 import com.google.common.collect.Sets;
-import io.camunda.zeebe.journal.JournalException;
 import org.agrona.IoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
-import java.nio.file.Files;
 import java.util.Set;
 
 import static com.google.common.base.MoreObjects.toStringHelper;
@@ -39,9 +34,6 @@ import static com.google.common.base.Preconditions.checkState;
 final class Segment implements AutoCloseable {
 
   private static final ByteOrder ENDIANNESS = ByteOrder.LITTLE_ENDIAN;
-  private static final Logger LOG = LoggerFactory.getLogger(Segment.class);
-
-  private final SegmentFile file;
   private final SegmentDescriptor descriptor;
   private final JournalIndex index;
   private final Set<SegmentReader> readers = Sets.newConcurrentHashSet();
@@ -51,16 +43,12 @@ final class Segment implements AutoCloseable {
 
   // This needs to be volatile in case the flushing is asynchronous
   private volatile boolean open = true;
-  // This need to be volatile because both the writer and the readers access it concurrently
-  private volatile boolean markedForDeletion = false;
 
   Segment(
-      final SegmentFile file,
       final SegmentDescriptor descriptor,
       final MappedByteBuffer buffer,
       final long lastWrittenAsqn,
       final JournalIndex index) {
-    this.file = file;
     this.descriptor = descriptor;
     this.buffer = buffer;
     this.index = index;
@@ -123,12 +111,6 @@ final class Segment implements AutoCloseable {
    */
   void onReaderClosed(final SegmentReader reader) {
     readers.remove(reader);
-    // When multiple readers are closed simultaneously, both readers might try to delete the file.
-    // This is ok, as safeDelete is idempotent. Hence we keep it simple, and doesn't add more
-    // concurrency control.
-    if (markedForDeletion && readers.isEmpty()) {
-      safeDelete();
-    }
   }
 
   /** Checks whether the segment is open. */
@@ -151,25 +133,6 @@ final class Segment implements AutoCloseable {
     open = false;
     readers.forEach(SegmentReader::close);
     IoUtil.unmap(buffer);
-  }
-
-  private void safeDelete() {
-    if (!readers.isEmpty()) {
-      throw new JournalException(
-          String.format(
-              "Cannot delete segment file. There are %d readers referring to this segment.",
-              readers.size()));
-    }
-    try {
-      IoUtil.unmap(buffer);
-      Files.deleteIfExists(file.getFileMarkedForDeletion());
-    } catch (final IOException e) {
-      LOG.warn(
-          "Could not delete segment {}. File to delete {}. This can lead to increased disk usage.",
-          this,
-          file.getFileMarkedForDeletion(),
-          e);
-    }
   }
 
   @Override

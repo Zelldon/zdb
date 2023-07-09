@@ -7,7 +7,6 @@
  */
 package io.zell.zdb.journal.record;
 
-import io.camunda.zeebe.journal.JournalRecord;
 import io.zell.zdb.journal.ReadOnlyJournalRecord;
 import org.agrona.DirectBuffer;
 
