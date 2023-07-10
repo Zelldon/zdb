@@ -30,17 +30,17 @@ import java.util.*
 class Experimental(private var rocksDb: RocksDB) {
         constructor(statePath: Path) : this(OptimisticTransactionDB.openReadOnly(statePath.toString()))
 
-
     fun interface Visitor {
-        fun visit(cf: ZbColumnFamilies, key: ByteArray, value: ByteArray)
+        fun visit(cf: ZbColumnFamilies, key: String, value: ByteArray)
     }
 
     fun interface JsonVisitor {
-        fun visit(cf: ZbColumnFamilies, key: ByteArray, valueJson: String)
+        fun visit(cf: ZbColumnFamilies, key: String, valueJson: String)
     }
 
     fun visitDB(visitor: Visitor) {
-       rocksDb.newIterator(rocksDb.defaultColumnFamily, ReadOptions()).use {
+        val columnFamilyKeyDecoder = ColumnFamilyKeyDecoder()
+        rocksDb.newIterator(rocksDb.defaultColumnFamily, ReadOptions()).use {
            it.seekToFirst()
            while (it.isValid) {
                val key: ByteArray = it.key()
@@ -48,7 +48,7 @@ class Experimental(private var rocksDb: RocksDB) {
                val unsafeBuffer = UnsafeBuffer(key)
                val enumValue = unsafeBuffer.getLong(0, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
                val cf = ZbColumnFamilies.values()[enumValue.toInt()]
-               visitor.visit(cf, key, value)
+               visitor.visit(cf, columnFamilyKeyDecoder.decodeColumnFamilyKey(cf, key), value)
                it.next()
            }
        }

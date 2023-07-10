@@ -71,7 +71,7 @@ public class StateCommand implements Callable<Integer> {
             }
             System.out.printf(
                 "\n{\"cf\":\"%s\",\"key\":\"%s\",\"value\":%s}",
-                cf, HexFormat.ofDelimiter(" ").formatHex(key), valueJson);
+                cf, key, valueJson);
           }
         }));
     System.out.print("]}");

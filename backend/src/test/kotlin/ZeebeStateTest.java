@@ -143,18 +143,36 @@ public class ZeebeStateTest {
   public void shouldVisitValuesAsJson() {
     // given
     final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-    final var incidentMap = new HashMap<String, String>();
+    HashMap<ZbColumnFamilies, HashMap<String, String>> columnFamiliesMap = new HashMap<>();
     Experimental.JsonVisitor jsonVisitor = (cf, k, v) -> {
-      if (cf == ZbColumnFamilies.INCIDENTS) {
-        incidentMap.put(new String(k), v);
-      }
+      final var cfMap = columnFamiliesMap.computeIfAbsent(cf, (columnFamily) -> new HashMap<>());
+      cfMap.put(k, v);
     };
 
     // when
     experimental.visitDBWithJsonValues(jsonVisitor);
 
     // then
-    assertThat(incidentMap).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685251,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685260,\"jobKey\":-1,\"variableScopeKey\":2251799813685260}}");
+    assertThat(columnFamiliesMap.get(ZbColumnFamilies.INCIDENTS)).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685251,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685260,\"jobKey\":-1,\"variableScopeKey\":2251799813685260}}");
+    assertThat(columnFamiliesMap.get(ZbColumnFamilies.INCIDENT_PROCESS_INSTANCES)).containsValue("{\"key\":2251799813685263}");
+  }
+
+  @Test
+  public void shouldDecodeKeyIfPossible() {
+    // given
+    final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+    HashMap<ZbColumnFamilies, HashMap<String, String>> columnFamiliesMap = new HashMap<>();
+    Experimental.JsonVisitor jsonVisitor = (cf, k, v) -> {
+      final var cfMap = columnFamiliesMap.computeIfAbsent(cf, (columnFamily) -> new HashMap<>());
+      cfMap.put(k, v);
+    };
+
+    // when
+    experimental.visitDBWithJsonValues(jsonVisitor);
+
+    // then
+    assertThat(columnFamiliesMap.get(ZbColumnFamilies.DEFAULT)).containsKey("LAST_PROCESSED_EVENT_KEY");
+    assertThat(columnFamiliesMap.get(ZbColumnFamilies.KEY)).containsKey("latestKey");
   }
 
   @Test
