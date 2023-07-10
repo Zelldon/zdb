@@ -32,16 +32,37 @@ In order to shed some more light in the dark we build a tool called zdb - Zeebe 
 
 ## Usage
 
-Log into your Zeebe broker machine/container: e.g. `docker exec -it <container_id> /bin/bash`. Then run the following commands (requires `curl` to be installed):
+> **Note:**
+> To be on the safe side make sure to copy Zeebe data to a separate location, to not mess with a running Zeebe process and mistakingly corrupt any data.
+
+### Docker
+
+If you have copied data from Zeebe to your local machine you could run the following:
+
+```
+ docker run -v <path>/<partitionId>/:/<partitionId>/ ghcr.io/zelldon/zdb log print -p "/<partitionId>"
+```
+
+### Kubernetes
+
+If have Zeebe installed in Kubernetes and want to investigate the Zeebe data you can run `zdb` as an [ephemeral container](https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/)
+
+```
+kubectl debug -it -c zdb --image=ghcr.io/zelldon/zdb:latest --attach=true --target=zeebe zeebe-0 -- /bin/bash
+```
+
+### Local CLI
+
+Alternatively to the strategies above you can download the fat-jar and script and run that locally
+
 ```bash
 cd /usr/bin
-curl -O -L https://github.com/Zelldon/zdb/releases/download/1.4.1/zdb
-curl -O -L https://github.com/Zelldon/zdb/releases/download/1.4.1/zdb.jar
+curl -O -L https://github.com/Zelldon/zdb/releases/latest/download/zdb
+curl -O -L https://github.com/Zelldon/zdb/releases/latest/download/zdb.jar
 sed -i 's/target\///' zdb
 chmod u+x zdb
 zdb --version
 ```
-Substitute `<version>` with the version you want to install. Check [releases](https://github.com/Zelldon/zdb/releases) to see all the available versions.
 
 ## How does it solve it
 
