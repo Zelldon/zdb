@@ -17,7 +17,7 @@ package io.zell.zdb.log
 
 import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
 
-class ApplicationRecord(val index: Long, val term : Long) : PersistedRecord {
+class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Long, val lowestPosition: Long) : PersistedRecord {
     val entries = mutableListOf<TypedRecordImpl>()
 
     override fun index(): Long {
@@ -29,8 +29,7 @@ class ApplicationRecord(val index: Long, val term : Long) : PersistedRecord {
     }
 
     override fun toString(): String {
-
         val entriesJson = entries.map { it.toJson() }.joinToString()
-        return "{\"index\":$index, \"term\":$term, \"entries\":[${entriesJson}]}"
+        return """{"index":$index, "term":$term,"highestPosition":$highestPosition,"lowestPosition":$lowestPosition,"entries":[${entriesJson}]}"""
     }
 }
