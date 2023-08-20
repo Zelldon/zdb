@@ -18,6 +18,7 @@ package io.zell.zdb.log
 import io.atomix.raft.storage.log.IndexedRaftLogEntry
 import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
+import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
 import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
 import io.camunda.zeebe.protocol.record.ValueType
@@ -27,40 +28,6 @@ import io.zell.zdb.journal.ReadOnlyJournalRecord
 import org.agrona.concurrent.UnsafeBuffer
 
 class LogContent {
-
-    companion object {
-        fun addEntryToContent(
-            entry: IndexedRaftLogEntry,
-            logContent: LogContent
-        ) {
-            if (entry.isApplicationEntry) {
-                val applicationRecord = ApplicationRecord(entry.index(), entry.term())
-                val applicationEntry = entry.applicationEntry as SerializedApplicationEntry
-
-                val readBuffer = UnsafeBuffer(applicationEntry.data());
-
-                var offset = 0;
-                do {
-                    val loggedEvent = LoggedEventImpl();
-                    val metadata = RecordMetadata();
-
-                    loggedEvent.wrap(readBuffer, offset)
-                    loggedEvent.readMetadata(metadata)
-
-                    val typedEvent = convertToTypedEvent(loggedEvent, metadata)
-
-                    applicationRecord.entries.add(typedEvent)
-
-                    offset += loggedEvent.getLength();
-                } while (offset < readBuffer.capacity());
-                logContent.records.add(applicationRecord)
-            } else {
-                val raftRecord = RaftRecord(entry.index(), entry.term())
-                logContent.records.add(raftRecord)
-            }
-        }
-    }
-
     val records = mutableListOf<PersistedRecord>()
 
     override fun toString(): String {

@@ -44,11 +44,20 @@ public class LogPrintCommand implements Callable<Integer> {
   public Integer call() {
     final Path partitionPath = spec.findOption("-p").getValue();
     final var logContentReader = new LogContentReader(partitionPath);
-    final var logContent = logContentReader.content();
     if (format == Format.DOT) {
+      // for backwards compatibility
+      final var logContent = logContentReader.readAll();
       System.out.println(logContent.asDotFile());
     } else {
-      System.out.println(logContent);
+      System.out.println("{");
+      for (LogContentReader it = logContentReader; it.hasNext(); ) {
+        var record = it.next();
+        System.out.println(record);
+        if (logContentReader.hasNext()) {
+          System.out.print(",");
+        }
+      }
+      System.out.println("}");
     }
 
     return 0;
