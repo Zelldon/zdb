@@ -208,7 +208,7 @@ It will print a details to the specific index, when it exists in the log.
 
 #### Print Log
 
-It is possible to print the complete log to standard out. This is can be quite helpful if you want to track down some records, which might have caused some issues. 
+It is possible to print the complete log to standard out. This can be quite helpful if you want to track down some records, which might have caused some issues. 
 
 To print the log:
 
@@ -216,13 +216,31 @@ To print the log:
 zdb log print --path=<pathToPartition>
 ```
 
-Per default the log is printed in json format.
+Per default, the log is printed in JSON format.
 To pipe it to a file:
 
 ```sh
 zdb log print --path=<pathToPartition> > output.log
 ```
-The `output.log` file will contain all records as json.
+The `output.log` file will contain all records as JSON.
+
+##### Limit
+
+You can limit the printed log via the options `--to` and `--from`.
+
+I you want to skip the first records or X positions you can use `zdb log print --path=<pathToPartition> --from X` whereas X must be a long.
+
+For defining a limit of the print (like until which position the log should be printed) you can use `--to` like this `zdb log print --path=<pathToPartition> --to X` whereas X must be a long.
+
+##### Filter
+
+An interesting use case is to print only certain records, for example for only specific process instances. 
+
+You can filter the printed log via: `--instanceKey`
+
+```sh
+ zdb log print -p <pathToPartition> --instanceKey 2251799813686738
+```
 
 ##### Format
 
