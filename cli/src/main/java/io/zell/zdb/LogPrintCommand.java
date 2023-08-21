@@ -15,6 +15,7 @@
  */
 package io.zell.zdb;
 
+import io.zell.zdb.log.ApplicationRecord;
 import io.zell.zdb.log.LogContentReader;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -40,6 +41,18 @@ public class LogPrintCommand implements Callable<Integer> {
       defaultValue = "JSON")
   private Format format;
 
+  @Option(
+      names = {"--from", "--fromPosition"},
+      description = "Print's the complete log from the given position.",
+      defaultValue = "0")
+  private long fromPosition;
+
+  @Option(
+      names = {"--to", "--toPosition"},
+      description = "Print's the complete log to the given position.",
+      defaultValue = Long.MAX_VALUE + "")
+  private long toPosition;
+
   @Override
   public Integer call() {
     final Path partitionPath = spec.findOption("-p").getValue();
@@ -50,8 +63,14 @@ public class LogPrintCommand implements Callable<Integer> {
       System.out.println(logContent.asDotFile());
     } else {
       System.out.println("[");
-      for (LogContentReader it = logContentReader; it.hasNext(); ) {
-        final var record = it.next();
+      logContentReader.seekToPosition(fromPosition);
+      while (logContentReader.hasNext()) {
+        final var record = logContentReader.next();
+        if (record instanceof ApplicationRecord engineRecord) {
+          if (engineRecord.getLowestPosition() > toPosition) {
+            break;
+          }
+        }
         System.out.println(record);
         if (logContentReader.hasNext()) {
           System.out.print(",");
