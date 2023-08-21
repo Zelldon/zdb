@@ -49,7 +49,7 @@ public class LogPrintCommand implements Callable<Integer> {
       final var logContent = logContentReader.readAll();
       System.out.println(logContent.asDotFile());
     } else {
-      System.out.println("{");
+      System.out.println("[");
       for (LogContentReader it = logContentReader; it.hasNext(); ) {
         var record = it.next();
         System.out.println(record);
@@ -57,7 +57,7 @@ public class LogPrintCommand implements Callable<Integer> {
           System.out.print(",");
         }
       }
-      System.out.println("}");
+      System.out.println("]");
     }
 
     return 0;
