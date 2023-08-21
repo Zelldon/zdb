@@ -15,10 +15,7 @@
  */
 package io.zell.zdb;
 
-import io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated;
-import io.zell.zdb.log.ApplicationRecord;
 import io.zell.zdb.log.LogContentReader;
-import io.zell.zdb.log.PersistedRecord;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -80,37 +77,17 @@ public class LogPrintCommand implements Callable<Integer> {
     System.out.println("[");
     logContentReader.seekToPosition(fromPosition);
     logContentReader.limitToPosition(toPosition);
+    if (instanceKey > 0) {
+      logContentReader.filterForProcessInstance(instanceKey);
+    }
+
     var separator = "";
     while (logContentReader.hasNext()) {
       final var record = logContentReader.next();
-     
-      if (shouldPrintRecord(record)) {
-        System.out.print(separator + record);
-        separator = ",";
-      }
+
+      System.out.print(separator + record);
+      separator = ",";
     }
     System.out.println("]");
-  }
-
-  private boolean shouldPrintRecord(PersistedRecord record) {
-    if (instanceKey == 0) {
-      return true;
-    } else {
-      if (record instanceof ApplicationRecord engineRecord) {
-        final var entries = engineRecord.getEntries();
-        boolean printRecord = false;
-        for (var entry : entries) {
-          if (entry.getValue() instanceof ProcessInstanceRelated instanceRelated) {
-            if (instanceRelated.getProcessInstanceKey() == instanceKey) {
-              printRecord = true;
-              break;
-            }
-          }
-        }
-        return printRecord;
-      } else {
-        return false;
-      }
-    }
   }
 }
