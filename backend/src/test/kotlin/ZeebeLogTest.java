@@ -197,7 +197,7 @@ public class ZeebeLogTest {
     var logContentReader = new LogContentReader(logPath);
 
     // when
-    final var content = logContentReader.content();
+    final var content = logContentReader.readAll();
 
     // then
     assertThat(content.getRecords()).hasSize(13);
@@ -212,7 +212,7 @@ public class ZeebeLogTest {
     // given
     final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
     var logContentReader = new LogContentReader(logPath);
-    final var content = logContentReader.content();
+    final var content = logContentReader.readAll();
 
     // when
     final var dotFileContent = content.asDotFile();
@@ -228,7 +228,7 @@ public class ZeebeLogTest {
     var logContentReader = new LogContentReader(logPath);
 
     // when
-    final var content = logContentReader.content();
+    final var content = logContentReader.readAll();
 
     // then
     // validate that records are not duplicated in LogContent
@@ -289,11 +289,10 @@ public class ZeebeLogTest {
     final var index = 7;
 
     // when
-    final var logContent = logSearch.searchIndex(index);
+    final var record = logSearch.searchIndex(index);
 
     // then
-    assertThat(logContent).isNotNull();
-    assertThat(logContent.getRecords()).hasSize(1);
+    assertThat(record).isNotNull();
   }
 
   @Test
@@ -304,15 +303,15 @@ public class ZeebeLogTest {
     final var index = 7;
 
     // when
-    final var logContent = logSearch.searchIndex(index);
+    final var record = logSearch.searchIndex(index);
 
     // then
     // validate that records are not duplicated in LogContent
-    assertThat(logContent.getRecords())
-        .filteredOn(ApplicationRecord.class::isInstance)
-        .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
-        .flatExtracting(ApplicationRecord::getEntries)
-        .extracting(TypedRecordImpl::getPosition)
+    assertThat(record)
+        .asInstanceOf(InstanceOfAssertFactories.type(ApplicationRecord.class))
+        .extracting(ApplicationRecord::getEntries)
+        .asInstanceOf(InstanceOfAssertFactories.list(Record.class))
+        .extracting(Record::getPosition)
         .doesNotHaveDuplicates();
   }
 

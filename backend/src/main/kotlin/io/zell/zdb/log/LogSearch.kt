@@ -23,58 +23,58 @@ import io.camunda.zeebe.protocol.record.Record
 import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 
-class LogSearch (logPath: Path) {
+class LogSearch(logPath: Path) {
 
 
-    private val reader: RaftLogReader = LogFactory.newReader(logPath)
+    private val reader: LogContentReader = LogContentReader(logPath)
 
-    fun searchPosition(position: Long) : Record<*>? {
+    fun searchPosition(position: Long): Record<*>? {
         if (position <= 0) {
             return null
         }
 
-        reader.seekToAsqn(position);
+        reader.seekToPosition(position);
 
-        if (reader.hasNext()) {
+        while (reader.hasNext()) {
             val entry = reader.next()
 
-            if (entry.isApplicationEntry) {
-                val applicationEntry = entry.applicationEntry as SerializedApplicationEntry
-
-                val readBuffer = UnsafeBuffer(applicationEntry.data());
-                val loggedEvent = LoggedEventImpl();
-                val metadata = RecordMetadata();
-
-                var offset = 0;
-                do {
-                    loggedEvent.wrap(readBuffer, offset)
-
-                    if (loggedEvent.position == position) {
-                        loggedEvent.readMetadata(metadata)
-                        return convertToTypedEvent(loggedEvent, metadata)
+            if (entry is ApplicationRecord) {
+                if (entry.lowestPosition > position) {
+                    // nothing can be found in this entry and the entries afterwards
+                    return null;
+                } else if (entry.highestPosition < position) {
+                    // nothing in this batch will match with the search position, check the next
+                    continue
+                } else {
+                    // here there might be the position
+                    entry.entries.forEach {
+                        if (it.position == position) {
+                            // found!
+                            return it;
+                        }
                     }
-                    offset += loggedEvent.getLength();
-                } while (offset < readBuffer.capacity());
+                }
             }
         }
-
+        // nothing found too bad
         return null
     }
 
-    fun searchIndex(index: Long): LogContent? {
+    fun searchIndex(index: Long): PersistedRecord? {
         if (index <= 0) {
             return null
         }
 
-        reader.seek(index);
+        reader.seekToIndex(index)
 
-        if (reader.hasNext()) {
-            val logContent = LogContent()
+        while (reader.hasNext()) {
             val entry = reader.next()
 
-            LogContent.addEntryToContent(entry, logContent)
-            return logContent
+            if (entry.index() == index) {
+                return entry
+            }
         }
+
         return null
     }
 
