@@ -51,7 +51,7 @@ public class LogPrintCommand implements Callable<Integer> {
     } else {
       System.out.println("[");
       for (LogContentReader it = logContentReader; it.hasNext(); ) {
-        var record = it.next();
+        final var record = it.next();
         System.out.println(record);
         if (logContentReader.hasNext()) {
           System.out.print(",");
