@@ -21,6 +21,8 @@ import java.nio.file.Path;
 import java.util.HexFormat;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
@@ -35,6 +37,7 @@ public class StateCommand implements Callable<Integer> {
       names = {"-p", "--path"},
       paramLabel = "PARTITION_PATH",
       description = "The path to the partition data (either runtime or snapshot in partition dir)",
+      scope = CommandLine.ScopeType.INHERIT,
       required = true)
   private Path partitionPath;
 
