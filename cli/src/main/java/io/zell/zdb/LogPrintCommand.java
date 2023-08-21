@@ -42,27 +42,29 @@ public class LogPrintCommand implements Callable<Integer> {
 
   @Option(
       names = {"--from", "--fromPosition"},
-      description = "Option to skip the begin of log and only print from the given position." +
-          " Note this is on best effort basis, since engine records are written in batches." +
-          " There might be some more records printed before the given position (part of the written batch).",
+      description =
+          "Option to skip the begin of log and only print from the given position."
+              + " Note this is on best effort basis, since engine records are written in batches."
+              + " There might be some more records printed before the given position (part of the written batch).",
       defaultValue = "0")
   private long fromPosition;
 
   @Option(
       names = {"--to", "--toPosition"},
-      description = "Option to set a limit to print the log only to the given position." +
-              " Note this is on best effort basis, since engine records are written in batches." +
-              " There might be some more records printed after the given position (part of the written batch).",
+      description =
+          "Option to set a limit to print the log only to the given position."
+              + " Note this is on best effort basis, since engine records are written in batches."
+              + " There might be some more records printed after the given position (part of the written batch).",
       defaultValue = Long.MAX_VALUE + "")
   private long toPosition;
 
   @Option(
       names = {"--instanceKey"},
-      description = "Filter to print only records which are part the specified process instance." +
-          " Note this is on best effort basis, since engine records are written in batches." +
-          " There might be some records printed which do not have an process instance key assigned." +
-          " RaftRecords are completely skipped, if this filter is applied."
-          ,
+      description =
+          "Filter to print only records which are part the specified process instance."
+              + " Note this is on best effort basis, since engine records are written in batches."
+              + " There might be some records printed which do not have an process instance key assigned."
+              + " RaftRecords are completely skipped, if this filter is applied.",
       defaultValue = "0")
   private long instanceKey;
 
