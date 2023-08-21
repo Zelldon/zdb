@@ -20,7 +20,6 @@ It was kicked off during the Camunda Summer Hackdays in 2020 and has been mainta
     * [Inspect Log](#inspect-log)
     * [Print Log](#print-log)
  * [Autocompletion](#autocompletion)
- * [Testing](#testing)
 
 ## What problem does it solve
 
@@ -344,11 +343,4 @@ zdb generate-completion >> ~/.autocompletions/zdb
 and source that file in your shell profile (i.e. `.bash_rc`, `.zsh_rc`, `.bash_profile`, etc.):
 ```sh
 source <(cat $HOME/.autocompletions/zdb)
-```
-
-## Testing
-As a hackday project, we've kept testing simple. Just execute the following in the root folder:
-
-```sh
-./test.sh
 ```
