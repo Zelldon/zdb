@@ -1,7 +1,7 @@
 # Zeebe Debug and Inspection tool
 
 This repository contains an cli tool to inspect the internal state and log of a Zeebe partition. It is a Java (17) cli application and can be build via maven.
-It was created during the Camunda Summer Hackdays in 2020.
+It was kicked off during the Camunda Summer Hackdays in 2020 and has been maintained and developed since then.
 
 ## Table Of Contents
 
