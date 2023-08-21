@@ -79,15 +79,11 @@ public class LogPrintCommand implements Callable<Integer> {
   private void printJson(LogContentReader logContentReader) {
     System.out.println("[");
     logContentReader.seekToPosition(fromPosition);
+    logContentReader.limitToPosition(toPosition);
     var separator = "";
     while (logContentReader.hasNext()) {
       final var record = logContentReader.next();
-      if (record instanceof ApplicationRecord engineRecord) {
-        if (engineRecord.getLowestPosition() > toPosition) {
-          break;
-        }
-      }
-
+     
       if (shouldPrintRecord(record)) {
         System.out.print(separator + record);
         separator = ",";

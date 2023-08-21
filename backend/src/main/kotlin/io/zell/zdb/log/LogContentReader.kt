@@ -26,14 +26,21 @@ import java.nio.file.Path
 class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
 
     private val reader: RaftLogReader = LogFactory.newReader(logPath)
+    private var isInLimit: (PersistedRecord) -> Boolean = { true }
+    private lateinit var next: PersistedRecord
 
     override fun hasNext(): Boolean {
-        return reader.hasNext();
+        val hasNext = reader.hasNext()
+
+        if (hasNext) {
+            next = convertToPersistedRecord(reader.next())
+            return isInLimit(next)
+        }
+        return false
     }
 
     override fun next(): PersistedRecord {
-        val next = reader.next()
-        return convertToPersistedRecord(next)
+        return next
     }
 
     private fun convertToPersistedRecord(
@@ -80,5 +87,11 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
 
     fun seekToIndex(index: Long) {
         reader.seek(index)
+    }
+
+    fun limitToPosition(toPosition: Long) {
+        isInLimit = { record: PersistedRecord ->
+            record is RaftRecord || (record is ApplicationRecord && record.lowestPosition < toPosition)
+        }
     }
 }
