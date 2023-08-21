@@ -23,10 +23,7 @@ import io.camunda.zeebe.stream.impl.records.TypedRecordImpl;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.log.ApplicationRecord;
-import io.zell.zdb.log.LogContentReader;
-import io.zell.zdb.log.LogSearch;
-import io.zell.zdb.log.LogStatus;
+import io.zell.zdb.log.*;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,7 +34,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.File;
+import java.sql.Array;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
@@ -200,11 +200,321 @@ public class ZeebeLogTest {
     final var content = logContentReader.readAll();
 
     // then
-    assertThat(content.getRecords()).hasSize(13);
+    verifyCompleteLog(content.getRecords());
 
     final var objectMapper = new ObjectMapper();
     final var jsonNode = objectMapper.readTree(content.toString());
     assertThat(jsonNode).isNotNull(); // is valid json
+  }
+
+  @Test
+  public void shouldReadLogContentWithIterator() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    verifyCompleteLog(records);
+  }
+
+  @Test
+  public void shouldSkipFirstPartOfLog() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.seekToPosition(10);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(9);
+    // we skip the first raft record
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(9);
+
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(13);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(5);
+
+    final var maxPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getHighestPosition)
+            .max(Long::compareTo)
+            .orElseThrow();
+    assertThat(maxPosition).isEqualTo(60);
+    final var minPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getLowestPosition)
+            .min(Long::compareTo)
+            .orElseThrow();
+    assertThat(minPosition).isEqualTo(7);
+  }
+
+  @Test
+  public void shouldNotSkipIfNegativeSeek() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.seekToPosition(-1);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    verifyCompleteLog(records);
+  }
+
+  @Test
+  public void shouldNotSkipIfZeroSeek() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.seekToPosition(0);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    verifyCompleteLog(records);
+  }
+
+  @Test
+  public void shouldSeekToEndOfLogIfNoExistingSeek() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.seekToPosition(Long.MAX_VALUE);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(1);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
+
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(13);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(13);
+
+    final var maxPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getHighestPosition)
+            .max(Long::compareTo)
+            .orElseThrow();
+    assertThat(maxPosition).isEqualTo(60);
+    final var minPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getLowestPosition)
+            .min(Long::compareTo)
+            .orElseThrow();
+    assertThat(minPosition).isEqualTo(60);
+  }
+
+  @Test
+  public void shouldLimitLogToPosition() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.limitToPosition(30);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(5);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(4);
+
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(5);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(1);
+
+    final var maxPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getHighestPosition)
+            .max(Long::compareTo)
+            .orElseThrow();
+    assertThat(maxPosition).isEqualTo(34);
+    final var minPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getLowestPosition)
+            .min(Long::compareTo)
+            .orElseThrow();
+    assertThat(minPosition).isEqualTo(1);
+  }
+
+  @Test
+  public void shouldSeekAndLimitLogWithPosition() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.seekToPosition(5);
+    logContentReader.limitToPosition(30);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(3);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(3);
+
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(5);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(3);
+
+    final var maxPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getHighestPosition)
+            .max(Long::compareTo)
+            .orElseThrow();
+    assertThat(maxPosition).isEqualTo(34);
+    final var minPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getLowestPosition)
+            .min(Long::compareTo)
+            .orElseThrow();
+    assertThat(minPosition).isEqualTo(2);
+  }
+  @Test
+  public void shouldFilterWithProcessInstanceKey() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.filterForProcessInstance(2251799813685252L);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(1);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
+
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(5);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(5);
+
+    final var maxPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getHighestPosition)
+            .max(Long::compareTo)
+            .orElseThrow();
+    assertThat(maxPosition).isEqualTo(34);
+    final var minPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getLowestPosition)
+            .min(Long::compareTo)
+            .orElseThrow();
+    assertThat(minPosition).isEqualTo(7);
+  }
+
+  @Test
+  public void shouldFilterWithNoExistingProcessInstanceKey() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.filterForProcessInstance(0xCAFE);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(0);
+  }
+
+  @Test
+  public void shouldFilterWithProcessInstanceKeyAndSetBeginAndEndOfLogPosition() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.filterForProcessInstance(2251799813685252L);
+    logContentReader.seekToPosition(5);
+    logContentReader.limitToPosition(30);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(1);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
+
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(5);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(5);
+
+    final var maxPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getHighestPosition)
+            .max(Long::compareTo)
+            .orElseThrow();
+    assertThat(maxPosition).isEqualTo(34);
+    final var minPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getLowestPosition)
+            .min(Long::compareTo)
+            .orElseThrow();
+    assertThat(minPosition).isEqualTo(7);
+  }
+
+  private static void verifyCompleteLog(List<PersistedRecord> records) {
+    assertThat(records).hasSize(13);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(12);
+
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(13);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(1);
+
+    final var maxPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getHighestPosition)
+            .max(Long::compareTo)
+            .orElseThrow();
+    assertThat(maxPosition).isEqualTo(60);
+    final var minPosition = records.stream()
+            .filter(ApplicationRecord.class::isInstance)
+            .map(ApplicationRecord.class::cast)
+            .map(ApplicationRecord::getLowestPosition)
+            .min(Long::compareTo)
+            .orElseThrow();
+    assertThat(minPosition).isEqualTo(1);
   }
 
   @Test

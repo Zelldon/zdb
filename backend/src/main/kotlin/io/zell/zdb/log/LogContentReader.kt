@@ -20,20 +20,64 @@ import io.atomix.raft.storage.log.RaftLogReader
 import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
+import io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated
 import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
+import kotlin.streams.asStream
 
 class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
 
     private val reader: RaftLogReader = LogFactory.newReader(logPath)
+    private var isInLimit: (PersistedRecord) -> Boolean = { true }
+    private var applicationRecordFilter: ((ApplicationRecord) -> Boolean)? = null
+    private lateinit var next: PersistedRecord
 
     override fun hasNext(): Boolean {
-        return reader.hasNext();
+        val hasNext = reader.hasNext()
+
+        if (!hasNext) {
+            return false
+        }
+
+        next = convertToPersistedRecord(reader.next())
+        if (!isInLimit(next)) {
+            return false
+        }
+
+        if (applicationRecordFilter == null) {
+            return true
+        }
+
+        return applyFiltering()
+    }
+
+    private fun applyFiltering(): Boolean {
+        // when application record filter is given, we don't want to see RaftLogRecords
+        // they are filtered out implicitly here as well
+        val filterMatches = next is ApplicationRecord && applicationRecordFilter!!(next as ApplicationRecord)
+
+        if (filterMatches) {
+            return true
+        }
+
+        // we want to skip this record, since it doesn't apply to our filter
+        // we need to find the next matching record
+        var foundNext = false
+        while (!foundNext && reader.hasNext()) {
+            next = convertToPersistedRecord(reader.next())
+            if (!isInLimit(next)) {
+                break
+            }
+
+            if (next is ApplicationRecord) {
+                foundNext = applicationRecordFilter!!(next as ApplicationRecord)
+            }
+        }
+        return foundNext;
     }
 
     override fun next(): PersistedRecord {
-        val next = reader.next()
-        return convertToPersistedRecord(next)
+        return next
     }
 
     private fun convertToPersistedRecord(
@@ -80,5 +124,23 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
 
     fun seekToIndex(index: Long) {
         reader.seek(index)
+    }
+
+    fun limitToPosition(toPosition: Long) {
+        isInLimit = { record: PersistedRecord ->
+            record is RaftRecord || (record is ApplicationRecord && record.lowestPosition < toPosition)
+        }
+    }
+
+    fun filterForProcessInstance(instanceKey : Long) {
+        applicationRecordFilter = {
+            record : ApplicationRecord ->
+                record.entries.asSequence()
+                    .map { it.value }
+                    .filterIsInstance<ProcessInstanceRelated>()
+                    .asStream()
+                    .map { it.processInstanceKey }
+                    .anyMatch(instanceKey::equals)
+        }
     }
 }

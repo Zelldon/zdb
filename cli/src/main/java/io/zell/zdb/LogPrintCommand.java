@@ -15,10 +15,7 @@
  */
 package io.zell.zdb;
 
-import io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated;
-import io.zell.zdb.log.ApplicationRecord;
 import io.zell.zdb.log.LogContentReader;
-import io.zell.zdb.log.PersistedRecord;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -45,19 +42,27 @@ public class LogPrintCommand implements Callable<Integer> {
 
   @Option(
       names = {"--from", "--fromPosition"},
-      description = "Print's the complete log from the given position.",
+      description = "Option to skip the begin of log and only print from the given position." +
+          " Note this is on best effort basis, since engine records are written in batches." +
+          " There might be some more records printed before the given position (part of the written batch).",
       defaultValue = "0")
   private long fromPosition;
 
   @Option(
       names = {"--to", "--toPosition"},
-      description = "Print's the complete log to the given position.",
+      description = "Option to set a limit to print the log only to the given position." +
+              " Note this is on best effort basis, since engine records are written in batches." +
+              " There might be some more records printed after the given position (part of the written batch).",
       defaultValue = Long.MAX_VALUE + "")
   private long toPosition;
 
   @Option(
       names = {"--instanceKey"},
-      description = "Print's the log only containing records with the given process instance key.",
+      description = "Filter to print only records which are part the specified process instance." +
+          " Note this is on best effort basis, since engine records are written in batches." +
+          " There might be some records printed which do not have an process instance key assigned." +
+          " RaftRecords are completely skipped, if this filter is applied."
+          ,
       defaultValue = "0")
   private long instanceKey;
 
@@ -79,42 +84,18 @@ public class LogPrintCommand implements Callable<Integer> {
   private void printJson(LogContentReader logContentReader) {
     System.out.println("[");
     logContentReader.seekToPosition(fromPosition);
+    logContentReader.limitToPosition(toPosition);
+    if (instanceKey > 0) {
+      logContentReader.filterForProcessInstance(instanceKey);
+    }
+
     var separator = "";
     while (logContentReader.hasNext()) {
       final var record = logContentReader.next();
-      if (record instanceof ApplicationRecord engineRecord) {
-        if (engineRecord.getLowestPosition() > toPosition) {
-          break;
-        }
-      }
 
-      if (shouldPrintRecord(record)) {
-        System.out.print(separator + record);
-        separator = ",";
-      }
+      System.out.print(separator + record);
+      separator = ",";
     }
     System.out.println("]");
-  }
-
-  private boolean shouldPrintRecord(PersistedRecord record) {
-    if (instanceKey == 0) {
-      return true;
-    } else {
-      if (record instanceof ApplicationRecord engineRecord) {
-        final var entries = engineRecord.getEntries();
-        boolean printRecord = false;
-        for (var entry : entries) {
-          if (entry.getValue() instanceof ProcessInstanceRelated instanceRelated) {
-            if (instanceRelated.getProcessInstanceKey() == instanceKey) {
-              printRecord = true;
-              break;
-            }
-          }
-        }
-        return printRecord;
-      } else {
-        return false;
-      }
-    }
   }
 }
