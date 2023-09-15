@@ -15,6 +15,7 @@
  */
 package io.zell.zdb.state.process
 
+import io.camunda.zeebe.engine.EngineConfiguration
 import io.camunda.zeebe.engine.state.ProcessingDbState
 import io.camunda.zeebe.engine.state.deployment.DeployedProcess
 import io.camunda.zeebe.engine.state.immutable.ProcessingState
@@ -27,7 +28,7 @@ class ProcessState(statePath: Path) {
 
     init {
         val readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
+        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 }, EngineConfiguration())
     }
 
     fun listProcesses(): List<ProcessMeta> {

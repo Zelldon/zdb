@@ -19,6 +19,7 @@ import io.camunda.zeebe.db.impl.DbCompositeKey
 import io.camunda.zeebe.db.impl.DbLong
 import io.camunda.zeebe.db.impl.DbNil
 import io.camunda.zeebe.db.impl.DbString
+import io.camunda.zeebe.engine.EngineConfiguration
 import io.camunda.zeebe.engine.state.ProcessingDbState
 import io.camunda.zeebe.engine.state.immutable.ProcessingState
 import io.camunda.zeebe.engine.state.variable.VariableInstance
@@ -36,7 +37,7 @@ class GeneralState(statePath: Path) {
 
     init {
         readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
+        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 }, EngineConfiguration())
     }
 
     fun generalDetails(): GeneralDetails {
