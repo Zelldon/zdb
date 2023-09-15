@@ -16,6 +16,7 @@
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.DeploymentEvent;
 import io.camunda.zeebe.client.api.response.ProcessInstanceResult;
+import io.camunda.zeebe.engine.EngineConfiguration;
 import io.camunda.zeebe.engine.state.ProcessingDbState;
 import io.camunda.zeebe.engine.state.deployment.DeployedProcess;
 import io.camunda.zeebe.model.bpmn.Bpmn;
@@ -103,7 +104,7 @@ public class ZeebeTest {
     // when
     final var readonlyTransactionDb = ReadonlyTransactionDb.Companion
         .openReadonlyDb(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-    var zeebeState = new ProcessingDbState(1, readonlyTransactionDb, readonlyTransactionDb.createContext(), () -> 1);
+    var zeebeState = new ProcessingDbState(1, readonlyTransactionDb, readonlyTransactionDb.createContext(), () -> 1, new EngineConfiguration());
 
     // then
     final var processState = zeebeState.getProcessState();

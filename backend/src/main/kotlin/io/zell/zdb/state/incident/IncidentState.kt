@@ -16,6 +16,7 @@
 package io.zell.zdb.state.incident
 
 import io.camunda.zeebe.db.impl.DbLong
+import io.camunda.zeebe.engine.EngineConfiguration
 import io.camunda.zeebe.engine.state.ProcessingDbState
 import io.camunda.zeebe.engine.state.immutable.ProcessingState
 import io.camunda.zeebe.engine.state.instance.Incident
@@ -30,7 +31,7 @@ class IncidentState(readonlyDb: ReadonlyTransactionDb) {
 
     init {
         this.readonlyDb = readonlyDb
-        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 })
+        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 }, EngineConfiguration())
     }
 
     constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
