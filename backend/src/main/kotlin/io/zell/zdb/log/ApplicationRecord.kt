@@ -32,4 +32,33 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
         val entriesJson = entries.map { it.toJson() }.joinToString()
         return """{"index":$index, "term":$term,"highestPosition":$highestPosition,"lowestPosition":$lowestPosition,"entries":[${entriesJson}]}"""
     }
+
+    fun entryAsColumn(record: TypedRecordImpl): String {
+        val stringBuilder = StringBuilder()
+        val separator = " "
+        stringBuilder
+            .append(record.recordType)
+            .append(separator)
+            .append(record.valueType)
+            .append(separator)
+            .append(record.intent)
+            .append(separator)
+            .append(record.position)
+            .append(separator)
+            .append(record.sourceRecordPosition)
+            .append(separator)
+            .append(record.timestamp)
+            .append(separator)
+            .append(record.key)
+        return stringBuilder.toString()
+    }
+
+    override fun asColumnString(): String {
+        val prefix = """$index $term $highestPosition $lowestPosition """
+        val stringBuilder = StringBuilder()
+        entries.forEach {
+            stringBuilder.append(prefix).append(entryAsColumn(it)).appendLine()
+        }
+        return stringBuilder.toString()
+    }
 }
