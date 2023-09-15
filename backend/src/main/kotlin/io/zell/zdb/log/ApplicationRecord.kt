@@ -54,7 +54,7 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
     }
 
     override fun asColumnString(): String {
-        val prefix = """$index $term $highestPosition $lowestPosition """
+        val prefix = """$index $term """
         val stringBuilder = StringBuilder()
         entries.forEach {
             stringBuilder.append(prefix).append(entryAsColumn(it)).appendLine()
