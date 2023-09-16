@@ -364,6 +364,47 @@ public class ZeebeLogTest {
   }
 
   @Test
+  public void shouldLimitViaPositionExclusive() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.limitToPosition(1);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(1);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(1);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(1);
+  }
+
+  @Test
+  public void shouldConvertRecordToColumn() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.limitToPosition(2);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(2);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
+
+    final var record = (ApplicationRecord) records.get(1);
+    // Index Term RecordType ValueType Intent Position SourceRecordPosition
+    assertThat(record.asColumnString().trim()).containsOnlyOnce("2 1 COMMAND DEPLOYMENT CREATE 1 -1");
+  }
+
+  @Test
   public void shouldSeekAndLimitLogWithPosition() {
     // given
     final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
