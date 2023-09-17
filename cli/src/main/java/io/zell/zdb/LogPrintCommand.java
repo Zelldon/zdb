@@ -18,6 +18,8 @@ package io.zell.zdb;
 import io.zell.zdb.log.LogContentReader;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
+
+import io.zell.zdb.log.LogWriter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -93,16 +95,7 @@ public class LogPrintCommand implements Callable<Integer> {
       logContentReader.filterForProcessInstance(instanceKey);
     }
 
-    final var columnTitle =
-        "Index Term RecordType ValueType Intent Position SourceRecordPosition Timestamp Key";
-    System.out.println(columnTitle);
-    var separator = "";
-    while (logContentReader.hasNext()) {
-      final var record = logContentReader.next();
-
-      System.out.print(separator + record.asColumnString());
-      separator = "";
-    }
+    new LogWriter(System.out, logContentReader).writeAsTable();
   }
 
   private void printJson(LogContentReader logContentReader) {
