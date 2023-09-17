@@ -20,10 +20,14 @@ import java.io.PrintWriter
 
 class LogWriter(val out: OutputStream, val reader: LogContentReader) {
 
+    companion object {
+        const val COLUMN_TITLE =
+            "Index Term Position SourceRecordPosition Timestamp Key RecordType ValueType Intent ProcessInstanceKey BPMNElementType "
+    }
+
     fun writeAsTable() {
         val printWriter = PrintWriter(out, true)
-        val columnTitle = "Index Term Position SourceRecordPosition Timestamp Key RecordType ValueType Intent ProcessInstanceKey BPMNElementType "
-        printWriter.println(columnTitle)
+        printWriter.println(COLUMN_TITLE)
         var separator = ""
         while (reader.hasNext()) {
             val record: PersistedRecord = reader.next()
