@@ -16,10 +16,9 @@
 package io.zell.zdb;
 
 import io.zell.zdb.log.LogContentReader;
+import io.zell.zdb.log.LogWriter;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
-
-import io.zell.zdb.log.LogWriter;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
