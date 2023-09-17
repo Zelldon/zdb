@@ -15,6 +15,8 @@
  */
 package io.zell.zdb.log
 
+import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
+import io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated
 import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
 
 class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Long, val lowestPosition: Long) : PersistedRecord {
@@ -37,12 +39,6 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
         val stringBuilder = StringBuilder()
         val separator = " "
         stringBuilder
-            .append(record.recordType)
-            .append(separator)
-            .append(record.valueType)
-            .append(separator)
-            .append(record.intent)
-            .append(separator)
             .append(record.position)
             .append(separator)
             .append(record.sourceRecordPosition)
@@ -50,6 +46,29 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
             .append(record.timestamp)
             .append(separator)
             .append(record.key)
+            .append(separator)
+            .append(record.recordType)
+            .append(separator)
+            .append(record.valueType)
+            .append(separator)
+            .append(record.intent)
+
+
+        if (record.value is ProcessInstanceRelated) {
+            val processInstanceRelated = record.value as ProcessInstanceRelated
+            stringBuilder
+                .append(separator)
+                .append(processInstanceRelated.processInstanceKey)
+                .append(separator)
+
+            if (record.value is ProcessInstanceRecord) {
+                val processInstanceRecord = record.value as ProcessInstanceRecord
+                stringBuilder
+                    .append(processInstanceRecord.bpmnElementType)
+                    .append(separator)
+            }
+
+        }
         return stringBuilder.toString()
     }
 
