@@ -36,5 +36,4 @@ class LogWriter(val out: OutputStream, val reader: LogContentReader) {
         }
         printWriter.flush();
     }
-
 }
