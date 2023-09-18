@@ -243,7 +243,25 @@ You can filter the printed log via: `--instanceKey`
 
 ##### Format
 
-We support different formats to print the log, like json or dot. The json format is used per default. Can be set via `-f` or `--format`
+We support different formats to print the log, like json, table or dot. The json format is used per default. Can be set via `-f` or `--format`
+
+**Table**
+
+```
+zdb log print --format TABLE --path=<pathToPartition>
+```
+
+The `table` format will print the complete log as space separated table. This can be consumed by other csv tools.
+
+Example:
+
+```sh
+Index Term Position SourceRecordPosition Timestamp Key RecordType ValueType Intent ProcessInstanceKey BPMNElementType 
+836304301 304 6888891257 6888891180 1692869671126 2251802375814765 COMMAND PROCESS_INSTANCE ACTIVATE_ELEMENT 2251802375814765 PROCESS 
+836304301 304 6888891258 6888891180 1692869671126 2251802375814770 EVENT PROCESS_INSTANCE_CREATION CREATED 2251802375814765 
+836304301 304 6888891259 6888891180 1692869671126 2251802375814765 EVENT PROCESS_INSTANCE ELEMENT_ACTIVATING 2251802375814765 PROCESS 
+836304301 304 6888891260 6888891180 1692869671126 2251802375814765 EVENT PROCESS_INSTANCE ELEMENT_ACTIVATED 2251802375814765 PROCESS 
+```
 
 **Dot**
 
