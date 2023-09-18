@@ -16,6 +16,7 @@
 package io.zell.zdb;
 
 import io.zell.zdb.log.LogContentReader;
+import io.zell.zdb.log.LogWriter;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -29,6 +30,7 @@ public class LogPrintCommand implements Callable<Integer> {
   public enum Format {
     JSON,
     DOT,
+    TABLE,
   }
 
   @Spec private CommandSpec spec;
@@ -72,15 +74,27 @@ public class LogPrintCommand implements Callable<Integer> {
   public Integer call() {
     final Path partitionPath = spec.findOption("-p").getValue();
     final var logContentReader = new LogContentReader(partitionPath);
-    if (format == Format.DOT) {
-      // for backwards compatibility
-      final var logContent = logContentReader.readAll();
-      System.out.println(logContent.asDotFile());
-    } else {
-      printJson(logContentReader);
+
+    switch (format) {
+      case DOT -> {
+        // for backwards compatibility
+        final var logContent = logContentReader.readAll();
+        System.out.println(logContent.asDotFile());
+      }
+      case TABLE -> printTable(logContentReader);
+      default -> printJson(logContentReader);
+    }
+    return 0;
+  }
+
+  private void printTable(LogContentReader logContentReader) {
+    logContentReader.seekToPosition(fromPosition);
+    logContentReader.limitToPosition(toPosition);
+    if (instanceKey > 0) {
+      logContentReader.filterForProcessInstance(instanceKey);
     }
 
-    return 0;
+    new LogWriter(System.out, logContentReader).writeAsTable();
   }
 
   private void printJson(LogContentReader logContentReader) {

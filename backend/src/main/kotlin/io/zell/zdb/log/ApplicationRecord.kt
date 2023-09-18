@@ -15,6 +15,8 @@
  */
 package io.zell.zdb.log
 
+import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
+import io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated
 import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
 
 class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Long, val lowestPosition: Long) : PersistedRecord {
@@ -31,5 +33,51 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
     override fun toString(): String {
         val entriesJson = entries.map { it.toJson() }.joinToString()
         return """{"index":$index, "term":$term,"highestPosition":$highestPosition,"lowestPosition":$lowestPosition,"entries":[${entriesJson}]}"""
+    }
+
+    fun entryAsColumn(record: TypedRecordImpl): String {
+        val stringBuilder = StringBuilder()
+        val separator = " "
+        stringBuilder
+            .append(record.position)
+            .append(separator)
+            .append(record.sourceRecordPosition)
+            .append(separator)
+            .append(record.timestamp)
+            .append(separator)
+            .append(record.key)
+            .append(separator)
+            .append(record.recordType)
+            .append(separator)
+            .append(record.valueType)
+            .append(separator)
+            .append(record.intent)
+
+
+        if (record.value is ProcessInstanceRelated) {
+            val processInstanceRelated = record.value as ProcessInstanceRelated
+            stringBuilder
+                .append(separator)
+                .append(processInstanceRelated.processInstanceKey)
+                .append(separator)
+
+            if (record.value is ProcessInstanceRecord) {
+                val processInstanceRecord = record.value as ProcessInstanceRecord
+                stringBuilder
+                    .append(processInstanceRecord.bpmnElementType)
+                    .append(separator)
+            }
+
+        }
+        return stringBuilder.toString()
+    }
+
+    override fun asColumnString(): String {
+        val prefix = """$index $term """
+        val stringBuilder = StringBuilder()
+        entries.forEach {
+            stringBuilder.append(prefix).append(entryAsColumn(it)).appendLine()
+        }
+        return stringBuilder.toString()
     }
 }

@@ -33,6 +33,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.sql.Array;
 import java.time.Duration;
@@ -42,9 +43,9 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 @Testcontainers
 public class ZeebeLogTest {
@@ -82,7 +83,7 @@ public class ZeebeLogTest {
   }
 
   @BeforeAll
-  public static void setup() throws Exception {
+  public static void setup() {
     final ZeebeClient client =
         ZeebeClient.newClientBuilder()
             .gatewayAddress(zeebeContainer.getExternalGatewayAddress())
@@ -177,7 +178,6 @@ public class ZeebeLogTest {
         .contains("avgEntrySizeBytes");
   }
 
-
   @Test
   public void shouldThrowWhenReadStatusFromNonExistingLog() {
     // given
@@ -188,7 +188,6 @@ public class ZeebeLogTest {
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Expected to read segments, but there was nothing to read");
   }
-
 
   @Test
   public void shouldBuildLogContent() throws JsonProcessingException {
@@ -361,6 +360,95 @@ public class ZeebeLogTest {
             .min(Long::compareTo)
             .orElseThrow();
     assertThat(minPosition).isEqualTo(1);
+  }
+
+  @Test
+  public void shouldLimitViaPositionExclusive() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.limitToPosition(1);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(1);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
+    final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
+    assertThat(maxIndex).isEqualTo(1);
+    final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
+    assertThat(minIndex).isEqualTo(1);
+  }
+
+  @Test
+  public void shouldConvertRecordToColumn() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    logContentReader.limitToPosition(2);
+
+    // when
+    logContentReader.forEachRemaining(records::add);
+
+    // then
+    assertThat(records).hasSize(2);
+    assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
+    assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
+
+    final var record = (ApplicationRecord) records.get(1);
+    // Index Term RecordType ValueType Intent Position SourceRecordPosition
+
+    String columnString = record.asColumnString();
+    String[] elements = columnString.trim().split(" ");
+    assertThat(elements).hasSize(9); // deployment record skips the last two columns
+    assertThat(elements).containsSubsequence("2", "1", "1", "-1");
+    // we skip timestamp since it is not reproducible
+    assertThat(elements).containsSubsequence("-1", "COMMAND", "DEPLOYMENT", "CREATE");
+  }
+
+  @Test
+  public void shouldWriteTableHeaderToStreamWhenNoDataFound() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var outputStream = new ByteArrayOutputStream();
+    logContentReader.limitToPosition(30);
+    logContentReader.seekToPosition(3);
+    logContentReader.filterForProcessInstance(2251799813685254L);
+    final var logWriter = new LogWriter(outputStream, logContentReader);
+
+    // when
+    logWriter.writeAsTable();
+
+    // then
+    assertThat(outputStream.toString().trim())
+            .isEqualTo("Index Term Position SourceRecordPosition Timestamp Key RecordType ValueType Intent ProcessInstanceKey BPMNElementType");
+  }
+
+  @Test
+  public void shouldWriteTableToStream() {
+    // given
+    final var logPath = ZeebePaths.Companion.getLogPath(tempDir, "1");
+    var logContentReader = new LogContentReader(logPath);
+    final var records = new ArrayList<PersistedRecord>();
+    final var outputStream = new ByteArrayOutputStream();
+    logContentReader.limitToPosition(600);
+    logContentReader.seekToPosition(6);
+    logContentReader.filterForProcessInstance(2251799813685252L);
+    final var logWriter = new LogWriter(outputStream, logContentReader);
+
+    // when
+    logWriter.writeAsTable();
+
+    // then
+    assertThat(outputStream.toString())
+            .startsWith("Index Term Position SourceRecordPosition Timestamp Key RecordType ValueType Intent ProcessInstanceKey BPMNElementType")
+            // EQUALs check is hard due to the timestamp
+            .contains("2251799813685253 EVENT VARIABLE CREATED 2251799813685252")
+            .contains("EVENT PROCESS_INSTANCE ELEMENT_ACTIVATING 2251799813685252 START_EVENT");
   }
 
   @Test

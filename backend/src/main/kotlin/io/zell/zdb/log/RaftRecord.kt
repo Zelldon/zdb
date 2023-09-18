@@ -32,4 +32,9 @@ class RaftRecord(val index: Long, val term : Long) : PersistedRecord {
     override fun toString(): String {
         return Json.encodeToString(this);
     }
+
+
+    override fun asColumnString(): String {
+        return """$index $term """
+    }
 }

@@ -19,4 +19,5 @@ interface PersistedRecord {
     fun index() : Long
     fun term() : Long
     override fun toString() : String
+    fun asColumnString(): String
 }
