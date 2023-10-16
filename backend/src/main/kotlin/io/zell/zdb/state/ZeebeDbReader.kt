@@ -27,7 +27,7 @@ import org.rocksdb.RocksDB
 import java.nio.file.Path
 import java.util.*
 
-class Experimental(private var rocksDb: RocksDB) {
+class ZeebeDbReader(private var rocksDb: RocksDB) {
         constructor(statePath: Path) : this(OptimisticTransactionDB.openReadOnly(statePath.toString()))
 
 

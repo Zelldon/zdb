@@ -16,7 +16,7 @@
 package io.zell.zdb;
 
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
-import io.zell.zdb.state.Experimental;
+import io.zell.zdb.state.ZeebeDbReader;
 import java.nio.file.Path;
 import java.util.HexFormat;
 import java.util.concurrent.Callable;
@@ -47,7 +47,7 @@ public class StateCommand implements Callable<Integer> {
    */
   @Override
   public Integer call() {
-    final var jsonString = new Experimental(partitionPath).stateStatisticsAsJsonString();
+    final var jsonString = new ZeebeDbReader(partitionPath).stateStatisticsAsJsonString();
     System.out.println(jsonString);
     return 0;
   }
@@ -62,7 +62,7 @@ public class StateCommand implements Callable<Integer> {
           final String columnFamilyName) {
     // we print incrementally in order to avoid to build up big state in the application
     System.out.print("{\"data\":[");
-    final var experimental = new Experimental(partitionPath);
+    final var experimental = new ZeebeDbReader(partitionPath);
     final var counter = new AtomicInteger(0);
     experimental.visitDBWithJsonValues(
         ((cf, key, valueJson) -> {

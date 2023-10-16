@@ -15,7 +15,7 @@
  */
 package io.zell.zdb;
 
-import io.zell.zdb.state.Experimental;
+import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.general.GeneralState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
@@ -49,7 +49,7 @@ public class StatusCommand implements Callable<Integer> {
    */
   @Command(name = "details", description = "Print for all column families the detailed statistics")
   public int list() {
-    final var jsonString = new Experimental(partitionPath).stateStatisticsAsJsonString();
+    final var jsonString = new ZeebeDbReader(partitionPath).stateStatisticsAsJsonString();
     System.out.println(jsonString);
     return 0;
   }

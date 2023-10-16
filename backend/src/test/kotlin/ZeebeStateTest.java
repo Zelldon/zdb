@@ -25,7 +25,7 @@ import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.state.Experimental;
+import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.banned.BannedInstanceState;
 import io.zell.zdb.state.general.GeneralState;
 import io.zell.zdb.state.incident.IncidentState;
@@ -127,7 +127,7 @@ public class ZeebeStateTest {
   @Test
   public void shouldCreateStatsForCompleteState() {
     // given
-    final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+    final var experimental = new ZeebeDbReader(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
 
     // when
     final var cfMap = experimental.stateStatistics();
@@ -142,9 +142,9 @@ public class ZeebeStateTest {
   @Test
   public void shouldVisitValuesAsJson() {
     // given
-    final var experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+    final var experimental = new ZeebeDbReader(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
     final var incidentMap = new HashMap<String, String>();
-    Experimental.JsonVisitor jsonVisitor = (cf, k, v) -> {
+    ZeebeDbReader.JsonVisitor jsonVisitor = (cf, k, v) -> {
       if (cf == ZbColumnFamilies.INCIDENTS) {
         incidentMap.put(new String(k), v);
       }
@@ -161,9 +161,9 @@ public class ZeebeStateTest {
   public void shouldListProcesses() {
     // given
 
-    Experimental experimental = new Experimental(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+    ZeebeDbReader zeebeDbReader = new ZeebeDbReader(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
 
-    experimental.visitDB(((cf, key, value) ->
+    zeebeDbReader.visitDB(((cf, key, value) ->
     {
 
       System.out.printf("\nColumnFamily?: '%s'", cf);
