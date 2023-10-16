@@ -26,7 +26,9 @@ class LogStatus(logPath: Path) {
     fun status(): LogStatusDetails {
         val logStatusDetails = LogStatusDetails()
 
-        reader.forEach {
+        reader.seekToLast()
+
+        reader.forEachRemaining {
             val persistedRaftRecord = it.persistedRaftRecord
 
             if (logStatusDetails.highestTerm < persistedRaftRecord.term()) {
