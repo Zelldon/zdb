@@ -144,7 +144,7 @@ public class ZeebeStateTest {
     // given
     final var experimental = new ZeebeDbReader(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
     final var incidentMap = new HashMap<String, String>();
-    ZeebeDbReader.JsonVisitor jsonVisitor = (cf, k, v) -> {
+    ZeebeDbReader.JsonValueVisitor jsonVisitor = (cf, k, v) -> {
       if (cf == ZbColumnFamilies.INCIDENTS) {
         incidentMap.put(new String(k), v);
       }
