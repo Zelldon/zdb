@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb;
+package io.zell.zdb.journal;
 
 import io.zell.zdb.log.LogStatus;
 import java.nio.file.Path;
