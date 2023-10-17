@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb;
+package io.zell.zdb.state;
 
+import io.camunda.zeebe.protocol.ZbColumnFamilies;
+import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.instance.InstanceState;
-import io.zell.zdb.state.process.ProcessState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -27,10 +28,10 @@ import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 @Command(
-    name = "process",
+    name = "instance",
     mixinStandardHelpOptions = true,
-    description = "Print's information about deployed processes")
-public class ProcessCommand implements Callable<Integer> {
+    description = "Print's information about running instances")
+public class InstanceCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -48,31 +49,15 @@ public class ProcessCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "list", description = "List all processes")
-  public int list() {
-    final var processMetas = new ProcessState(partitionPath).listProcesses();
-    System.out.println(processMetas);
-    return 0;
-  }
-
-  @Command(name = "entity", description = "Show details about a process")
+  @Command(name = "entity", description = "Show details about any element instance")
   public int entity(
-      @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
+      @Parameters(
+              paramLabel = "KEY",
+              description = "The key of the process or element instance",
+              arity = "1")
           final long key) {
-    final var processDetails = new ProcessState(partitionPath).processDetails(key);
-    System.out.println(processDetails);
-    return 0;
-  }
-
-  @Command(name = "instances", description = "Show all instances of a process")
-  public int instances(
-      @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
-          final long key) {
-    final var instances =
-        new InstanceState(partitionPath)
-            .listProcessInstances(
-                instanceDetails -> instanceDetails.getProcessDefinitionKey() == key);
-    System.out.println(instances);
+    final var instanceDetails = new InstanceState(partitionPath).getInstance(key);
+    System.out.println(instanceDetails);
     return 0;
   }
 }

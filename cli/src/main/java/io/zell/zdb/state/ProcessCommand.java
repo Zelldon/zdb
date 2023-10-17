@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb;
+package io.zell.zdb.state;
 
+import io.zell.zdb.JsonPrinter;
 import io.zell.zdb.state.instance.InstanceState;
+import io.zell.zdb.state.process.ProcessState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -26,10 +28,10 @@ import picocli.CommandLine.ScopeType;
 import picocli.CommandLine.Spec;
 
 @Command(
-    name = "instance",
+    name = "process",
     mixinStandardHelpOptions = true,
-    description = "Print's information about running instances")
-public class InstanceCommand implements Callable<Integer> {
+    description = "Print's information about deployed processes")
+public class ProcessCommand implements Callable<Integer> {
 
   @Spec private CommandSpec spec;
 
@@ -47,15 +49,37 @@ public class InstanceCommand implements Callable<Integer> {
     return 0;
   }
 
-  @Command(name = "entity", description = "Show details about any element instance")
+  @Command(name = "list", description = "List all processes")
+  public int list() {
+    new JsonPrinter().surround(
+            (printer) -> new ProcessState(partitionPath).listProcesses((key, valueJson) ->
+                    printer.accept(valueJson))
+    );
+    return 0;
+  }
+
+  @Command(name = "entity", description = "Show details about a process")
   public int entity(
-      @Parameters(
-              paramLabel = "KEY",
-              description = "The key of the process or element instance",
-              arity = "1")
+      @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
-    final var instanceDetails = new InstanceState(partitionPath).instanceDetails(key);
-    System.out.println(instanceDetails);
+    new JsonPrinter().surround(
+            (printer) -> new ProcessState(partitionPath).processDetails(key, (k, valueJson) ->
+                    printer.accept(valueJson))
+    );
+    return 0;
+  }
+
+  @Command(name = "instances", description = "Show all instances of a process")
+  public int instances(
+      @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
+          final long key) {
+
+    new JsonPrinter().surround((printer) ->
+            new InstanceState(partitionPath)
+                    .listProcessInstances(processInstanceRecordDetails ->
+                                    processInstanceRecordDetails.getProcessDefinitionKey() == key,
+                      (key1, valueJson) -> printer.accept(valueJson)));
+
     return 0;
   }
 }

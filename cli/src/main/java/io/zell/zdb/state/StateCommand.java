@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb;
+package io.zell.zdb.state;
 
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
+import io.zell.zdb.JsonPrinter;
 import io.zell.zdb.state.ZeebeDbReader;
 import java.nio.file.Path;
 import java.util.HexFormat;
@@ -25,13 +26,13 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
-// THIS IS IN ALPHA STATE
 @Command(
     name = "state",
     mixinStandardHelpOptions = true,
     description = "Prints general information of the internal state")
 public class StateCommand implements Callable<Integer> {
 
+  public static final String ENTRY_FORMAT = "\n{\"cf\":\"%s\",\"key\":\"%s\",\"value\":%s}";
   @Option(
       names = {"-p", "--path"},
       paramLabel = "PARTITION_PATH",
@@ -40,11 +41,6 @@ public class StateCommand implements Callable<Integer> {
       required = true)
   private Path partitionPath;
 
-  /**
-   * Alpha feature: Planned to replace old status call
-   *
-   * @return the status code of the call
-   */
   @Override
   public Integer call() {
     final var jsonString = new ZeebeDbReader(partitionPath).stateStatisticsAsJsonString();
@@ -52,7 +48,6 @@ public class StateCommand implements Callable<Integer> {
     return 0;
   }
 
-  /** Alpha feature: Planned to replace old specific status calls */
   @Command(name = "list", description = "List column families and the values as json")
   public int list(
       @Option(
@@ -60,28 +55,22 @@ public class StateCommand implements Callable<Integer> {
               paramLabel = "COLUMNFAMILY",
               description = "The column family name to filter for")
           final String columnFamilyName) {
-    // we print incrementally in order to avoid to build up big state in the application
-    System.out.print("{\"data\":[");
-    final var experimental = new ZeebeDbReader(partitionPath);
-    final var counter = new AtomicInteger(0);
-    experimental.visitDBWithJsonValues(
-        ((cf, key, valueJson) -> {
-          if (noColumnFamilyGiven(columnFamilyName)
-              || isMatchingColumnFamily(columnFamilyName, cf)) {
-            if (counter.getAndIncrement() >= 1) {
-              System.out.print(',');
-            }
-            System.out.printf(
-                "\n{\"cf\":\"%s\",\"key\":\"%s\",\"value\":%s}",
-                cf, HexFormat.ofDelimiter(" ").formatHex(key), valueJson);
-          }
-        }));
-    System.out.print("]}");
-    return 0;
-  }
 
-  private static boolean isMatchingColumnFamily(String columnFamilyName, ZbColumnFamilies cf) {
-    return cf.toString().equalsIgnoreCase(columnFamilyName);
+    new JsonPrinter().surround((printer) -> {
+      final var zeebeDbReader = new ZeebeDbReader(partitionPath);
+      // we print incrementally in order to avoid to build up big state in the application
+      if (noColumnFamilyGiven(columnFamilyName)) {
+        zeebeDbReader.visitDBWithJsonValues(
+                ((cf, key, valueJson) ->
+                        printer.accept(String.format(ENTRY_FORMAT, cf, HexFormat.ofDelimiter(" ").formatHex(key), valueJson))));
+      } else {
+        final var cf = ZbColumnFamilies.valueOf(columnFamilyName);
+        zeebeDbReader.visitDBWithPrefix(cf,
+                ((key, valueJson) -> printer.accept(String.format(ENTRY_FORMAT, cf, HexFormat.ofDelimiter(" ").formatHex(key), valueJson))));
+      }
+
+    });
+    return 0;
   }
 
   private static boolean noColumnFamilyGiven(String columnFamilyName) {
