@@ -15,16 +15,13 @@
  */
 package io.zell.zdb;
 
-import io.zell.zdb.state.banned.BannedInstanceState;
-import io.zell.zdb.state.instance.InstanceState;
+import io.camunda.zeebe.protocol.ZbColumnFamilies;
+import io.zell.zdb.state.ZeebeDbReader;
+import picocli.CommandLine.*;
+import picocli.CommandLine.Model.CommandSpec;
+
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ScopeType;
-import picocli.CommandLine.Spec;
 
 @Command(
     name = "banned",
@@ -51,8 +48,12 @@ public class BannedInstanceCommand implements Callable<Integer> {
 
   @Command(name = "list", description = "List all banned process instances")
   public int list() {
-    final var blacklistedInstances = new BannedInstanceState(partitionPath).listBannedInstances();
-    System.out.println(blacklistedInstances);
+    new JsonPrinter().surround((printer) -> {
+      ZeebeDbReader zeebeDbReader = new ZeebeDbReader(partitionPath);
+      zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.BANNED_INSTANCE, (key, valueJson) -> {
+        printer.accept(valueJson);
+      });
+    });
     return 0;
   }
 
@@ -63,8 +64,9 @@ public class BannedInstanceCommand implements Callable<Integer> {
               description = "The key of the banned process instance",
               arity = "1")
           final long key) {
-    final var instanceDetails = new InstanceState(partitionPath).instanceDetails(key);
-    System.out.println(instanceDetails);
+    ZeebeDbReader zeebeDbReader = new ZeebeDbReader(partitionPath);
+    final var valueAsJson = zeebeDbReader.getValueAsJson(ZbColumnFamilies.BANNED_INSTANCE, key);
+    System.out.println(valueAsJson);
     return 0;
   }
 }
