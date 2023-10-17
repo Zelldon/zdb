@@ -26,66 +26,34 @@ import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstan
 import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent
 import io.camunda.zeebe.protocol.record.value.BpmnElementType
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
+import io.zell.zdb.state.ZeebeDbReader
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import java.nio.file.Path
 import java.util.function.Predicate
 
-class InstanceState(readonlyTransactionDb: ReadonlyTransactionDb) {
+class InstanceState(statePath: Path) {
 
-    private var zeebeDbState: ProcessingState
-    private var readonlyDb : ReadonlyTransactionDb
+    private var zeebeDbReader: ZeebeDbReader
 
     init {
-        readonlyDb = readonlyTransactionDb
-        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 }, EngineConfiguration())
+        zeebeDbReader = ZeebeDbReader(statePath)
     }
 
-    constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
-
-    fun instanceDetails(elementInstanceKey : Long): InstanceDetails? {
-        val instance : ElementInstance? = zeebeDbState.elementInstanceState.getInstance(elementInstanceKey)
-
-        if (instance != null) {
-            val children = zeebeDbState.elementInstanceState.getChildren(elementInstanceKey)
-            return InstanceDetails(instance, children)
-        }
-        return null
+    fun listInstances( visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.ELEMENT_INSTANCE_KEY, visitor)
     }
 
-    fun listInstances(): List<InstanceDetails> {
-        val elementInstanceColumnFamily = createElementInstanceCF()
+    fun listProcessInstances(predicate: Predicate<ProcessInstanceRecordDetails>, visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.ELEMENT_INSTANCE_KEY) {
+            key: ByteArray, value: String ->
 
-        val instances = mutableListOf<InstanceDetails>()
-        elementInstanceColumnFamily
-            .forEach { key, element  -> instances.add(instanceDetails(key.value)!!) }
-
-        return instances
-    }
-
-    fun listProcessInstances(predicate: Predicate<InstanceDetails>): List<InstanceDetails> {
-        val elementInstanceColumnFamily = createElementInstanceCF()
-
-        val instances = mutableListOf<InstanceDetails>()
-        elementInstanceColumnFamily
-            .forEach { key, _  ->
-                    val instanceDetails = instanceDetails(key.value)!!
-                if (instanceDetails.elementType == BpmnElementType.PROCESS && predicate.test(instanceDetails)) {
-                    instances.add(instanceDetails)
-                }
+            val instanceDetails = Json.decodeFromString<InstanceDetails>(value)
+            val processInstanceRecord = instanceDetails.elementRecord.processInstanceRecord
+            if (processInstanceRecord.bpmnElementType == BpmnElementType.PROCESS
+                && predicate.test(processInstanceRecord)) {
+                visitor.visit(key, value)
             }
-
-        return instances
-    }
-
-    private fun createElementInstanceCF(): ColumnFamily<DbLong, ElementInstance> {
-        val elementInstanceKey = DbLong()
-        val elementInstance = ElementInstance(-1, ProcessInstanceIntent.ACTIVATE_ELEMENT, ProcessInstanceRecord())
-
-        val elementInstanceColumnFamily = readonlyDb.createColumnFamily(
-            ZbColumnFamilies.ELEMENT_INSTANCE_KEY,
-            readonlyDb.createContext(),
-            elementInstanceKey,
-            elementInstance
-        )
-        return elementInstanceColumnFamily
+        }
     }
 }
