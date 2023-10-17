@@ -31,12 +31,56 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
         constructor(statePath: Path) : this(OptimisticTransactionDB.openReadOnly(statePath.toString()))
 
 
+    /**
+     * General visitor which is used to consume key-value pairs with corresponding
+     * already parsed column family.
+     */
     fun interface Visitor {
         fun visit(cf: ZbColumnFamilies, key: ByteArray, value: ByteArray)
     }
 
-    fun interface JsonVisitor {
+    /**
+     * Visitor to consume values already marshalled as json, keys are still plain bytes and column family
+     * already parsed as enum.
+     */
+    fun interface JsonValueVisitor {
         fun visit(cf: ZbColumnFamilies, key: ByteArray, valueJson: String)
+    }
+
+    /**
+     * Visitor to consume values already marshalled as json, keys are still plain bytes. Column families are
+     * skipped, since this visitor is used for prefix iteration, where the prefix should be always the same.
+     */
+    fun interface JsonValueWithKeyPrefixVisitor {
+        fun visit(key: ByteArray, valueJson: String)
+    }
+
+    private fun convertColumnFamilyToArray(cf: ZbColumnFamilies) : ByteArray {
+        val array = ByteArray(Long.SIZE_BYTES)
+        val buffer = UnsafeBuffer(array)
+        buffer.putLong(0, cf.ordinal.toLong(), ZeebeDbConstants.ZB_DB_BYTE_ORDER);
+        return array
+    }
+
+    fun visitDBWithPrefix(cf: ZbColumnFamilies, visitor: JsonValueWithKeyPrefixVisitor) {
+        val prefixArray = convertColumnFamilyToArray(cf)
+        val prefixSameAsStart = ReadOptions().setPrefixSameAsStart(true)
+        rocksDb.newIterator(rocksDb.defaultColumnFamily, prefixSameAsStart).use {
+            it.seek(prefixArray)
+            while (it.isValid) {
+                val key: ByteArray = it.key()
+                val value: ByteArray = it.value()
+                val unsafeBuffer = UnsafeBuffer(key)
+                val enumValue = unsafeBuffer.getLong(0, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+                val kvCF = ZbColumnFamilies.values()[enumValue.toInt()]
+
+                if (cf == kvCF) {
+                    val jsonValue = MsgPackConverter.convertToJson(value)
+                    visitor.visit(key, jsonValue)
+                }
+                it.next()
+            }
+        }
     }
 
     fun visitDB(visitor: Visitor) {
@@ -54,7 +98,7 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
        }
     }
 
-    fun visitDBWithJsonValues(visitor: JsonVisitor) {
+    fun visitDBWithJsonValues(visitor: JsonValueVisitor) {
         visitDB { cf, key, value ->
             val jsonValue = MsgPackConverter.convertToJson(value)
             visitor.visit(cf, key, jsonValue)
