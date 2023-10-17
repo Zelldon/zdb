@@ -15,19 +15,10 @@
  */
 package io.zell.zdb.state.instance
 
-import io.camunda.zeebe.db.ColumnFamily
-import io.camunda.zeebe.db.impl.DbLong
-import io.camunda.zeebe.engine.EngineConfiguration
-import io.camunda.zeebe.engine.state.ProcessingDbState
-import io.camunda.zeebe.engine.state.immutable.ProcessingState
-import io.camunda.zeebe.engine.state.instance.ElementInstance
 import io.camunda.zeebe.protocol.ZbColumnFamilies
-import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
-import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent
+import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import io.camunda.zeebe.protocol.record.value.BpmnElementType
-import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
 import io.zell.zdb.state.ZeebeDbReader
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
 import java.util.function.Predicate
@@ -38,6 +29,11 @@ class InstanceState(statePath: Path) {
 
     init {
         zeebeDbReader = ZeebeDbReader(statePath)
+    }
+
+    fun getInstance(elementInstanceKey: Long): String {
+        val bytes = zeebeDbReader.getValue(ZbColumnFamilies.ELEMENT_INSTANCE_KEY, elementInstanceKey)
+        return MsgPackConverter.convertToJson(bytes)
     }
 
     fun listInstances( visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
