@@ -17,6 +17,11 @@ package io.zell.zdb;
 
 import io.zell.zdb.ZeebeDebugger.VersionProvider;
 import java.util.concurrent.Callable;
+
+import io.zell.zdb.journal.LogCommand;
+import io.zell.zdb.state.InstanceCommand;
+import io.zell.zdb.state.ProcessCommand;
+import io.zell.zdb.state.StateCommand;
 import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -30,12 +35,9 @@ import picocli.CommandLine.RunLast;
     description = "Zeebe debug and inspection tool",
     subcommands = {
       GenerateCompletion.class, // to generate auto completion
-      StatusCommand.class,
-      BannedInstanceCommand.class,
-      IncidentCommand.class,
       ProcessCommand.class,
-      LogCommand.class,
       InstanceCommand.class,
+      LogCommand.class,
       StateCommand.class
     })
 public class ZeebeDebugger implements Callable<Integer> {
