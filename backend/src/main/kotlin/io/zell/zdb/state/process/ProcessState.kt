@@ -19,28 +19,34 @@ import io.camunda.zeebe.engine.EngineConfiguration
 import io.camunda.zeebe.engine.state.ProcessingDbState
 import io.camunda.zeebe.engine.state.deployment.DeployedProcess
 import io.camunda.zeebe.engine.state.immutable.ProcessingState
+import io.camunda.zeebe.protocol.ZbColumnFamilies
+import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
+import io.zell.zdb.state.ZeebeDbReader
+import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 
 class ProcessState(statePath: Path) {
 
-    private var zeebeDbState: ProcessingState
+    private var zeebeDbReader: ZeebeDbReader
 
     init {
-        val readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 }, EngineConfiguration())
+        zeebeDbReader = ZeebeDbReader(statePath)
     }
 
-    fun listProcesses(): List<ProcessMeta> {
-        return zeebeDbState
-            .processState
-            .processes.map { ProcessMeta(it) }
+    fun listProcesses(visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE, visitor)
     }
 
-    fun processDetails(processDefinitionKey : Long): ProcessDetails? {
-        val deployedProcess : DeployedProcess? = zeebeDbState
-            .processState
-            .getProcessByKey(processDefinitionKey)
-        return if (deployedProcess != null) ProcessDetails(deployedProcess) else null
+    fun processDetails(processDefinitionKey : Long, visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE) { key, value ->
+            val keyBuffer = UnsafeBuffer(key)
+            // due to the recent multi tenancy changes, the process definition key moved to the end
+            val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES)
+
+            if (currentProcessDefinitionKey == processDefinitionKey) {
+                visitor.visit(key, value)
+            }
+        }
     }
 }
