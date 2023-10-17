@@ -16,34 +16,60 @@
 package io.zell.zdb.log;
 
 import io.atomix.raft.protocol.PersistedRaftRecord;
+import io.atomix.raft.protocol.ReplicatableJournalRecord;
 import io.atomix.raft.storage.log.IndexedRaftLogEntry;
 import io.atomix.raft.storage.log.entry.ApplicationEntry;
 import io.atomix.raft.storage.log.entry.RaftEntry;
+import io.camunda.zeebe.journal.JournalRecord;
 import io.zell.zdb.journal.ReadOnlyJournalRecord;
 
 /** Indexed journal entry. */
 record IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, ReadOnlyJournalRecord record)
-        implements IndexedRaftLogEntry {
-
+         {
     IndexedRaftLogEntryImpl(final long term, final RaftEntry entry, final ReadOnlyJournalRecord record) {
         this(record.index(), term, entry, record);
     }
 
-    @Override
+    IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, ReadOnlyJournalRecord record) {
+        this.index = index;
+        this.term = term;
+        this.entry = entry;
+        this.record = record;
+    }
+
     public boolean isApplicationEntry() {
-        return entry instanceof ApplicationEntry;
+        return this.entry instanceof ApplicationEntry;
     }
 
-    @Override
     public ApplicationEntry getApplicationEntry() {
-        return (ApplicationEntry) entry;
+        return (ApplicationEntry)this.entry;
     }
 
-    @Override
     public PersistedRaftRecord getPersistedRaftRecord() {
-        final byte[] serializedRaftLogEntry = new byte[record.data().capacity()];
-        record.data().getBytes(0, serializedRaftLogEntry);
-        return new PersistedRaftRecord(
-                term, index, record.asqn(), record.checksum(), serializedRaftLogEntry);
+        byte[] serializedRaftLogEntry = new byte[this.record.data().capacity()];
+        this.record.data().getBytes(0, serializedRaftLogEntry);
+        return new PersistedRaftRecord(this.term, this.index, this.record.asqn(), this.record.checksum(), serializedRaftLogEntry);
+    }
+
+    public ReplicatableJournalRecord getReplicatableJournalRecord() {
+        byte[] serializedRecord = new byte[this.record.data().capacity()];
+        this.record.data().getBytes(0, serializedRecord);
+        return new ReplicatableJournalRecord(this.term, this.index, this.record.checksum(), serializedRecord);
+    }
+
+    public long index() {
+        return this.index;
+    }
+
+    public long term() {
+        return this.term;
+    }
+
+    public RaftEntry entry() {
+        return this.entry;
+    }
+
+    public ReadOnlyJournalRecord record() {
+        return this.record;
     }
 }

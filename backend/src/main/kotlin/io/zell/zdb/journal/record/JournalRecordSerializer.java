@@ -15,12 +15,7 @@
  */
 package io.zell.zdb.journal.record;
 
-import io.camunda.zeebe.util.Either;
-import io.camunda.zeebe.util.buffer.BufferWriter;
-import io.camunda.zeebe.util.buffer.DirectBufferWriter;
-import java.nio.BufferOverflowException;
 import org.agrona.DirectBuffer;
-import org.agrona.MutableDirectBuffer;
 
 public interface JournalRecordSerializer {
 

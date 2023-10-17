@@ -15,7 +15,6 @@
  */
 package io.zell.zdb.log
 
-import io.atomix.raft.storage.log.RaftLogReader
 import java.nio.file.Path
 
 

@@ -16,7 +16,6 @@
 package io.zell.zdb.log;
 
 import io.atomix.raft.storage.log.IndexedRaftLogEntry;
-import io.atomix.raft.storage.log.RaftLogReader;
 import io.atomix.raft.storage.log.entry.RaftLogEntry;
 import io.atomix.raft.storage.serializer.RaftEntrySBESerializer;
 import io.atomix.raft.storage.serializer.RaftEntrySerializer;
@@ -24,6 +23,7 @@ import io.zell.zdb.journal.JournalReader;
 import io.zell.zdb.journal.ReadOnlyJournalRecord;
 
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
 
 /**
  * Raft log reader that reads both committed and uncommitted entries. This reader is supposed to be
@@ -43,7 +43,7 @@ public class RaftLogUncommittedReader implements RaftLogReader {
     }
 
     @Override
-    public IndexedRaftLogEntry next() {
+    public IndexedRaftLogEntryImpl next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }

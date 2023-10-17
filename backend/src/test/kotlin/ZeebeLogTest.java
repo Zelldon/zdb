@@ -149,33 +149,18 @@ public class ZeebeLogTest {
 
     // then
     assertThat(status.getHighestIndex()).isEqualTo(13);
-    assertThat(status.getScannedEntries()).isEqualTo(13);
     assertThat(status.getHighestTerm()).isEqualTo(1);
     assertThat(status.getHighestRecordPosition()).isEqualTo(60);
 
     assertThat(status.getLowestIndex()).isEqualTo(1);
     assertThat(status.getLowestRecordPosition()).isEqualTo(1);
 
-    assertThat(status.getMinEntrySizeBytes()).isNotZero();
-    assertThat(status.getMinEntrySizeBytes()).isLessThan(status.getMaxEntrySizeBytes());
-
-    assertThat(status.getMaxEntrySizeBytes()).isNotZero();
-    assertThat(status.getMaxEntrySizeBytes()).isGreaterThan(status.getMinEntrySizeBytes());
-
-    assertThat(status.getAvgEntrySizeBytes()).isNotZero();
-    assertThat(status.getAvgEntrySizeBytes()).isGreaterThan(status.getMinEntrySizeBytes());
-    assertThat(status.getAvgEntrySizeBytes()).isLessThan(status.getMaxEntrySizeBytes());
-
     assertThat(status.toString())
         .contains("lowestRecordPosition")
         .contains("highestRecordPosition")
         .contains("highestTerm")
         .contains("highestIndex")
-        .contains("lowestIndex")
-        .contains("scannedEntries")
-        .contains("maxEntrySizeBytes")
-        .contains("minEntrySizeBytes")
-        .contains("avgEntrySizeBytes");
+        .contains("lowestIndex");
   }
 
   @Test

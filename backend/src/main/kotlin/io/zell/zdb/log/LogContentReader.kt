@@ -16,7 +16,6 @@
 package io.zell.zdb.log
 
 import io.atomix.raft.storage.log.IndexedRaftLogEntry
-import io.atomix.raft.storage.log.RaftLogReader
 import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
@@ -81,7 +80,7 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
     }
 
     private fun convertToPersistedRecord(
-        entry: IndexedRaftLogEntry,
+        entry: IndexedRaftLogEntryImpl,
     ) : PersistedRecord {
         if (entry.isApplicationEntry) {
             val applicationEntry = entry.applicationEntry as SerializedApplicationEntry

@@ -15,17 +15,10 @@
  */
 package io.zell.zdb.log
 
-import io.atomix.raft.storage.log.IndexedRaftLogEntry
-import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
-import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
-import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
-import io.camunda.zeebe.protocol.impl.record.RecordMetadata
 import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
 import io.camunda.zeebe.protocol.record.ValueType
 import io.camunda.zeebe.stream.api.records.TypedRecord
 import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
-import io.zell.zdb.journal.ReadOnlyJournalRecord
-import org.agrona.concurrent.UnsafeBuffer
 
 class LogContent {
     val records = mutableListOf<PersistedRecord>()

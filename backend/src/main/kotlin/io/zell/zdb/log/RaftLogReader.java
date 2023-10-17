@@ -13,44 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb.journal;
+package io.zell.zdb.log;
 
-import org.agrona.DirectBuffer;
 
-public interface ReadOnlyJournalRecord {
+import java.util.Iterator;
 
-  /**
-   * Index of the record
-   *
-   * @return index
-   */
-  long index();
+public interface RaftLogReader extends Iterator<IndexedRaftLogEntryImpl>, AutoCloseable {
+    long reset();
 
-  /**
-   * Application sequence number for the record
-   *
-   * @return asqn
-   */
-  long asqn();
+    long seek(long index);
 
-  /**
-   * Checksum of the serializedRecord
-   *
-   * @return checksum
-   */
-  long checksum();
+    long seekToLast();
 
-  /**
-   * Application provided data of the record
-   *
-   * @return data
-   */
-  DirectBuffer data();
+    long seekToAsqn(final long asqn);
 
-  /**
-   * Serialized journal record that includes index, asqn and data.
-   *
-   * @return serialized record
-   */
-  DirectBuffer serializedRecord();
+    void close();
 }
