@@ -15,8 +15,6 @@
  */
 package io.zell.zdb.state;
 
-import io.camunda.zeebe.protocol.ZbColumnFamilies;
-import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.instance.InstanceState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;

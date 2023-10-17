@@ -51,10 +51,11 @@ public class ProcessCommand implements Callable<Integer> {
 
   @Command(name = "list", description = "List all processes")
   public int list() {
-    new JsonPrinter().surround(
-            (printer) -> new ProcessState(partitionPath).listProcesses((key, valueJson) ->
-                    printer.accept(valueJson))
-    );
+    new JsonPrinter()
+        .surround(
+            (printer) ->
+                new ProcessState(partitionPath)
+                    .listProcesses((key, valueJson) -> printer.accept(valueJson)));
     return 0;
   }
 
@@ -62,10 +63,11 @@ public class ProcessCommand implements Callable<Integer> {
   public int entity(
       @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
-    new JsonPrinter().surround(
-            (printer) -> new ProcessState(partitionPath).processDetails(key, (k, valueJson) ->
-                    printer.accept(valueJson))
-    );
+    new JsonPrinter()
+        .surround(
+            (printer) ->
+                new ProcessState(partitionPath)
+                    .processDetails(key, (k, valueJson) -> printer.accept(valueJson)));
     return 0;
   }
 
@@ -74,11 +76,14 @@ public class ProcessCommand implements Callable<Integer> {
       @Parameters(paramLabel = "KEY", description = "The key of the process", arity = "1")
           final long key) {
 
-    new JsonPrinter().surround((printer) ->
-            new InstanceState(partitionPath)
-                    .listProcessInstances(processInstanceRecordDetails ->
-                                    processInstanceRecordDetails.getProcessDefinitionKey() == key,
-                      (key1, valueJson) -> printer.accept(valueJson)));
+    new JsonPrinter()
+        .surround(
+            (printer) ->
+                new InstanceState(partitionPath)
+                    .listProcessInstances(
+                        processInstanceRecordDetails ->
+                            processInstanceRecordDetails.getProcessDefinitionKey() == key,
+                        (key1, valueJson) -> printer.accept(valueJson)));
 
     return 0;
   }

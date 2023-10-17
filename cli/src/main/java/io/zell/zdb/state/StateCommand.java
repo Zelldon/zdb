@@ -17,11 +17,9 @@ package io.zell.zdb.state;
 
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
 import io.zell.zdb.JsonPrinter;
-import io.zell.zdb.state.ZeebeDbReader;
 import java.nio.file.Path;
 import java.util.HexFormat;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -33,6 +31,7 @@ import picocli.CommandLine.Option;
 public class StateCommand implements Callable<Integer> {
 
   public static final String ENTRY_FORMAT = "\n{\"cf\":\"%s\",\"key\":\"%s\",\"value\":%s}";
+
   @Option(
       names = {"-p", "--path"},
       paramLabel = "PARTITION_PATH",
@@ -56,20 +55,33 @@ public class StateCommand implements Callable<Integer> {
               description = "The column family name to filter for")
           final String columnFamilyName) {
 
-    new JsonPrinter().surround((printer) -> {
-      final var zeebeDbReader = new ZeebeDbReader(partitionPath);
-      // we print incrementally in order to avoid to build up big state in the application
-      if (noColumnFamilyGiven(columnFamilyName)) {
-        zeebeDbReader.visitDBWithJsonValues(
-                ((cf, key, valueJson) ->
-                        printer.accept(String.format(ENTRY_FORMAT, cf, HexFormat.ofDelimiter(" ").formatHex(key), valueJson))));
-      } else {
-        final var cf = ZbColumnFamilies.valueOf(columnFamilyName);
-        zeebeDbReader.visitDBWithPrefix(cf,
-                ((key, valueJson) -> printer.accept(String.format(ENTRY_FORMAT, cf, HexFormat.ofDelimiter(" ").formatHex(key), valueJson))));
-      }
-
-    });
+    new JsonPrinter()
+        .surround(
+            (printer) -> {
+              final var zeebeDbReader = new ZeebeDbReader(partitionPath);
+              // we print incrementally in order to avoid to build up big state in the application
+              if (noColumnFamilyGiven(columnFamilyName)) {
+                zeebeDbReader.visitDBWithJsonValues(
+                    ((cf, key, valueJson) ->
+                        printer.accept(
+                            String.format(
+                                ENTRY_FORMAT,
+                                cf,
+                                HexFormat.ofDelimiter(" ").formatHex(key),
+                                valueJson))));
+              } else {
+                final var cf = ZbColumnFamilies.valueOf(columnFamilyName);
+                zeebeDbReader.visitDBWithPrefix(
+                    cf,
+                    ((key, valueJson) ->
+                        printer.accept(
+                            String.format(
+                                ENTRY_FORMAT,
+                                cf,
+                                HexFormat.ofDelimiter(" ").formatHex(key),
+                                valueJson))));
+              }
+            });
     return 0;
   }
 

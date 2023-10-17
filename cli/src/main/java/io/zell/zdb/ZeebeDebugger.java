@@ -16,12 +16,11 @@
 package io.zell.zdb;
 
 import io.zell.zdb.ZeebeDebugger.VersionProvider;
-import java.util.concurrent.Callable;
-
 import io.zell.zdb.journal.LogCommand;
 import io.zell.zdb.state.InstanceCommand;
 import io.zell.zdb.state.ProcessCommand;
 import io.zell.zdb.state.StateCommand;
+import java.util.concurrent.Callable;
 import picocli.AutoComplete.GenerateCompletion;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
