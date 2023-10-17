@@ -62,6 +62,9 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
         return array
     }
 
+    /**
+     * Visit key-value pairs which start with the given column family as prefix.
+     */
     fun visitDBWithPrefix(cf: ZbColumnFamilies, visitor: JsonValueWithKeyPrefixVisitor) {
         val prefixArray = convertColumnFamilyToArray(cf)
         val prefixSameAsStart = ReadOptions().setPrefixSameAsStart(true)
@@ -114,6 +117,12 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
 
         return rocksDb.get(keyArray)
     }
+
+    fun getValueAsJson(cf: ZbColumnFamilies, key: Long): String {
+        val bytes = getValue(cf, key)
+        return MsgPackConverter.convertToJson(bytes)
+    }
+
 
     fun stateStatistics() : Map<ZbColumnFamilies, Int> {
         val countMap = EnumMap<ZbColumnFamilies, Int>(ZbColumnFamilies::class.java)
