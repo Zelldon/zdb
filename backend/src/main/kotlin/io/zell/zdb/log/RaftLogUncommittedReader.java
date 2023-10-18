@@ -15,15 +15,13 @@
  */
 package io.zell.zdb.log;
 
-import io.atomix.raft.storage.log.IndexedRaftLogEntry;
 import io.atomix.raft.storage.log.entry.RaftLogEntry;
 import io.atomix.raft.storage.serializer.RaftEntrySBESerializer;
 import io.atomix.raft.storage.serializer.RaftEntrySerializer;
 import io.zell.zdb.journal.JournalReader;
-import io.zell.zdb.journal.ReadOnlyJournalRecord;
+import io.zell.zdb.journal.ReadOnlyJournal;
 
 import java.util.NoSuchElementException;
-import java.util.function.Consumer;
 
 /**
  * Raft log reader that reads both committed and uncommitted entries. This reader is supposed to be
@@ -48,25 +46,15 @@ public class RaftLogUncommittedReader implements RaftLogReader {
             throw new NoSuchElementException();
         }
 
-        final ReadOnlyJournalRecord journalRecord = journalReader.next();
+        final var journalRecord = journalReader.next();
         final RaftLogEntry entry = serializer.readRaftLogEntry(journalRecord.data());
 
         return new IndexedRaftLogEntryImpl(entry.term(), entry.entry(), journalRecord);
     }
 
     @Override
-    public long reset() {
-        return journalReader.seekToFirst();
-    }
-
-    @Override
     public long seek(final long index) {
         return journalReader.seek(index);
-    }
-
-    @Override
-    public long seekToLast() {
-        return journalReader.seekToLast();
     }
 
     @Override

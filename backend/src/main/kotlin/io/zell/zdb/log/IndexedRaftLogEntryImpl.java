@@ -17,10 +17,8 @@ package io.zell.zdb.log;
 
 import io.atomix.raft.protocol.PersistedRaftRecord;
 import io.atomix.raft.protocol.ReplicatableJournalRecord;
-import io.atomix.raft.storage.log.IndexedRaftLogEntry;
 import io.atomix.raft.storage.log.entry.ApplicationEntry;
 import io.atomix.raft.storage.log.entry.RaftEntry;
-import io.camunda.zeebe.journal.JournalRecord;
 import io.zell.zdb.journal.ReadOnlyJournalRecord;
 
 /** Indexed journal entry. */
@@ -63,13 +61,5 @@ record IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, ReadOnlyJ
 
     public long term() {
         return this.term;
-    }
-
-    public RaftEntry entry() {
-        return this.entry;
-    }
-
-    public ReadOnlyJournalRecord record() {
-        return this.record;
     }
 }
