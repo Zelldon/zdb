@@ -22,6 +22,7 @@ import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
+import io.zell.zdb.TestUtils;
 import io.zell.zdb.ZeebePaths;
 import io.zell.zdb.state.ZeebeDbReader;
 import org.junit.jupiter.api.AfterAll;

@@ -1,4 +1,4 @@
-/*
+package io.zell.zdb;/*
  * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 
-final class TestUtils {
+public final class TestUtils {
   private TestUtils() {}
 
   /**
@@ -30,7 +30,7 @@ final class TestUtils {
    *
    * @return the current uid and gid as a string
    */
-  static String getRunAsUser() {
+  public static String getRunAsUser() {
     return getUid() + ":" + getGid();
   }
 
