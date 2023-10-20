@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb.log;
+package io.zell.zdb.log.records;
 
 import io.atomix.raft.protocol.PersistedRaftRecord;
 import io.atomix.raft.protocol.ReplicatableJournalRecord;
@@ -22,13 +22,13 @@ import io.atomix.raft.storage.log.entry.RaftEntry;
 import io.zell.zdb.journal.ReadOnlyJournalRecord;
 
 /** Indexed journal entry. */
-record IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, ReadOnlyJournalRecord record)
+public record IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, ReadOnlyJournalRecord record)
          {
-    IndexedRaftLogEntryImpl(final long term, final RaftEntry entry, final ReadOnlyJournalRecord record) {
+    public IndexedRaftLogEntryImpl(final long term, final RaftEntry entry, final ReadOnlyJournalRecord record) {
         this(record.index(), term, entry, record);
     }
 
-    IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, ReadOnlyJournalRecord record) {
+    public IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, ReadOnlyJournalRecord record) {
         this.index = index;
         this.term = term;
         this.entry = entry;

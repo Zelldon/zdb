@@ -5,14 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
-import io.camunda.zeebe.protocol.record.Record;
-import io.camunda.zeebe.stream.impl.records.TypedRecordImpl;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.TestUtils;
 import io.zell.zdb.ZeebeContentCreator;
 import io.zell.zdb.ZeebePaths;
 import io.zell.zdb.log.*;
+import io.zell.zdb.log.records.ApplicationRecord;
+import io.zell.zdb.log.records.PersistedRecord;
+import io.zell.zdb.log.records.RaftRecord;
+import io.zell.zdb.log.records.Record;
+import io.zell.zdb.log.records.RecordValue;
 import io.zell.zdb.state.ZeebeDbReader;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
@@ -557,7 +560,7 @@ public class Version83Test {
                     .filteredOn(ApplicationRecord.class::isInstance)
                     .asInstanceOf(InstanceOfAssertFactories.list(ApplicationRecord.class))
                     .flatExtracting(ApplicationRecord::getEntries)
-                    .extracting(TypedRecordImpl::getPosition)
+                    .extracting(io.zell.zdb.log.records.Record::getPosition)
                     .doesNotHaveDuplicates();
         }
 
@@ -569,7 +572,7 @@ public class Version83Test {
             final var position = 1;
 
             // when
-            final Record<?> record = logSearch.searchPosition(position);
+            final var record = logSearch.searchPosition(position);
 
             // then
             assertThat(record).isNotNull();
@@ -583,7 +586,7 @@ public class Version83Test {
             var logSearch = new LogSearch(logPath);
 
             // when
-            final Record<?> record = logSearch.searchPosition(-1);
+            final var record = logSearch.searchPosition(-1);
 
             // then
             assertThat(record).isNull();
@@ -596,7 +599,7 @@ public class Version83Test {
             var logSearch = new LogSearch(logPath);
 
             // when
-            final Record<?> record = logSearch.searchPosition(Long.MAX_VALUE);
+            final var record = logSearch.searchPosition(Long.MAX_VALUE);
 
             // then
             assertThat(record).isNull();
@@ -631,7 +634,7 @@ public class Version83Test {
             assertThat(record)
                     .asInstanceOf(InstanceOfAssertFactories.type(ApplicationRecord.class))
                     .extracting(ApplicationRecord::getEntries)
-                    .asInstanceOf(InstanceOfAssertFactories.list(Record.class))
+                    .asInstanceOf(InstanceOfAssertFactories.list(io.zell.zdb.log.records.Record.class))
                     .extracting(Record::getPosition)
                     .doesNotHaveDuplicates();
         }

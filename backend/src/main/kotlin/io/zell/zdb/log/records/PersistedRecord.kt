@@ -13,28 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb.log
+package io.zell.zdb.log.records
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-
-@Serializable
-class RaftRecord(val index: Long, val term : Long) : PersistedRecord {
-    override fun index(): Long {
-        return index;
-    }
-
-    override fun term(): Long {
-        return term;
-    }
-
-    override fun toString(): String {
-        return Json.encodeToString(this);
-    }
-
-
-    override fun asColumnString(): String {
-        return """$index $term """
-    }
+interface PersistedRecord {
+    fun index() : Long
+    fun term() : Long
+    override fun toString() : String
+    fun asColumnString(): String
 }

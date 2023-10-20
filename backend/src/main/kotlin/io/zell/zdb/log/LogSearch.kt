@@ -15,12 +15,9 @@
  */
 package io.zell.zdb.log
 
-import io.atomix.raft.storage.log.RaftLogReader
-import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
-import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
-import io.camunda.zeebe.protocol.impl.record.RecordMetadata
-import io.camunda.zeebe.protocol.record.Record
-import org.agrona.concurrent.UnsafeBuffer
+import io.zell.zdb.log.records.ApplicationRecord
+import io.zell.zdb.log.records.PersistedRecord
+import io.zell.zdb.log.records.Record
 import java.nio.file.Path
 
 class LogSearch(logPath: Path) {
@@ -28,7 +25,7 @@ class LogSearch(logPath: Path) {
 
     private val reader: LogContentReader = LogContentReader(logPath)
 
-    fun searchPosition(position: Long): Record<*>? {
+    fun searchPosition(position: Long): Record? {
         if (position <= 0) {
             return null
         }

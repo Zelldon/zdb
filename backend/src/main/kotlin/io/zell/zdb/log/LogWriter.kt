@@ -15,6 +15,7 @@
  */
 package io.zell.zdb.log
 
+import io.zell.zdb.log.records.PersistedRecord
 import java.io.OutputStream
 import java.io.PrintWriter
 

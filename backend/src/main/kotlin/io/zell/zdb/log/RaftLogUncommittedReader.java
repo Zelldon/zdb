@@ -19,7 +19,7 @@ import io.atomix.raft.storage.log.entry.RaftLogEntry;
 import io.atomix.raft.storage.serializer.RaftEntrySBESerializer;
 import io.atomix.raft.storage.serializer.RaftEntrySerializer;
 import io.zell.zdb.journal.JournalReader;
-import io.zell.zdb.journal.ReadOnlyJournal;
+import io.zell.zdb.log.records.IndexedRaftLogEntryImpl;
 
 import java.util.NoSuchElementException;
 

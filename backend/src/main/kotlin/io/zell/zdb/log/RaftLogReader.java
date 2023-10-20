@@ -16,6 +16,8 @@
 package io.zell.zdb.log;
 
 
+import io.zell.zdb.log.records.IndexedRaftLogEntryImpl;
+
 import java.util.Iterator;
 
 public interface RaftLogReader extends Iterator<IndexedRaftLogEntryImpl>, AutoCloseable {

@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb.log
+package io.zell.zdb.log.records
 
-import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
-import io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated
-import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
-
-class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Long, val lowestPosition: Long) : PersistedRecord {
-    val entries = mutableListOf<TypedRecordImpl>()
+class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Long, val lowestPosition: Long) :
+    PersistedRecord {
+    val entries = mutableListOf<Record>()
 
     override fun index(): Long {
         return index;
@@ -31,11 +28,19 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
     }
 
     override fun toString(): String {
-        val entriesJson = entries.map { it.toJson() }.joinToString()
+        val entriesJson = entriesAsJson()
         return """{"index":$index, "term":$term,"highestPosition":$highestPosition,"lowestPosition":$lowestPosition,"entries":[${entriesJson}]}"""
     }
 
-    fun entryAsColumn(record: TypedRecordImpl): String {
+    fun entriesAsJson() : String {
+        return entries.map {
+            """{"key": ${it.key}, "position": ${it.position}, "sourceRecordPosition": ${it.sourceRecordPosition}, "intent": "${it.intent}", "recordType": "${it.recordType}", "valueType": "${it.valueType}", "timestamp": ${it.timestamp}, "value": ${it.recordValue.valueJson}}"""
+        }.joinToString()
+    }
+
+
+    fun entryAsColumn(record: Record): String {
+//        val record = Json{ignoreUnknownKeys = true}.decodeFromString<Record>(recordAsJson)
         val stringBuilder = StringBuilder()
         val separator = " "
         stringBuilder
@@ -53,21 +58,18 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
             .append(separator)
             .append(record.intent)
 
-
-        if (record.value is ProcessInstanceRelated) {
-            val processInstanceRelated = record.value as ProcessInstanceRelated
+        val piRelatedValue = record.recordValue.piRelatedValue
+        piRelatedValue.processInstanceKey?.let {
             stringBuilder
                 .append(separator)
-                .append(processInstanceRelated.processInstanceKey)
+                .append(it)
                 .append(separator)
+        }
 
-            if (record.value is ProcessInstanceRecord) {
-                val processInstanceRecord = record.value as ProcessInstanceRecord
-                stringBuilder
-                    .append(processInstanceRecord.bpmnElementType)
-                    .append(separator)
-            }
-
+        piRelatedValue.bpmnElementType?.let {
+            stringBuilder
+                .append(it)
+                .append(separator)
         }
         return stringBuilder.toString()
     }
