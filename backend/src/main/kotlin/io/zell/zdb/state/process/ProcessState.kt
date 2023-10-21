@@ -15,6 +15,7 @@
  */
 package io.zell.zdb.state.process
 
+import io.camunda.zeebe.db.impl.ZeebeDbConstants
 import io.camunda.zeebe.protocol.ZbColumnFamilies
 import io.zell.zdb.state.ZeebeDbReader
 import org.agrona.concurrent.UnsafeBuffer
@@ -29,14 +30,14 @@ class ProcessState(statePath: Path) {
     }
 
     fun listProcesses(visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
-        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE, visitor)
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE, visitor)
     }
 
     fun processDetails(processDefinitionKey : Long, visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
-        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE) { key, value ->
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE) { key, value ->
             val keyBuffer = UnsafeBuffer(key)
             // due to the recent multi tenancy changes, the process definition key moved to the end
-            val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES)
+            val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
 
             if (currentProcessDefinitionKey == processDefinitionKey) {
                 visitor.visit(key, value)
