@@ -91,7 +91,7 @@ public class Version81Test {
             final var status = logStatus.status();
 
             // then
-            assertThat(status.getHighestIndex()).isEqualTo(13);
+            assertThat(status.getHighestIndex()).isEqualTo(24);
             assertThat(status.getHighestTerm()).isEqualTo(1);
             assertThat(status.getHighestRecordPosition()).isEqualTo(60);
             assertThat(status.getLowestIndex()).isEqualTo(1);
@@ -159,13 +159,13 @@ public class Version81Test {
             logContentReader.forEachRemaining(records::add);
 
             // then
-            assertThat(records).hasSize(9);
+            assertThat(records).hasSize(20);
             // we skip the first raft record
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(9);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(20);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(13);
+            assertThat(maxIndex).isEqualTo(24);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(5);
 
@@ -232,9 +232,9 @@ public class Version81Test {
             assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(13);
+            assertThat(maxIndex).isEqualTo(24);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
-            assertThat(minIndex).isEqualTo(13);
+            assertThat(minIndex).isEqualTo(24);
 
             final var maxPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
@@ -264,12 +264,12 @@ public class Version81Test {
             logContentReader.forEachRemaining(records::add);
 
             // then
-            assertThat(records).hasSize(5);
+            assertThat(records).hasSize(11);
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(4);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(10);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(5);
+            assertThat(maxIndex).isEqualTo(11);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(1);
 
@@ -279,7 +279,7 @@ public class Version81Test {
                     .map(ApplicationRecord::getHighestPosition)
                     .max(Long::compareTo)
                     .orElseThrow();
-            assertThat(maxPosition).isEqualTo(34);
+            assertThat(maxPosition).isEqualTo(31);
             final var minPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
                     .map(ApplicationRecord.class::cast)
@@ -391,12 +391,12 @@ public class Version81Test {
             logContentReader.forEachRemaining(records::add);
 
             // then
-            assertThat(records).hasSize(3);
+            assertThat(records).hasSize(9);
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(3);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(9);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(5);
+            assertThat(maxIndex).isEqualTo(11);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(3);
 
@@ -406,7 +406,7 @@ public class Version81Test {
                     .map(ApplicationRecord::getHighestPosition)
                     .max(Long::compareTo)
                     .orElseThrow();
-            assertThat(maxPosition).isEqualTo(34);
+            assertThat(maxPosition).isEqualTo(31);
             final var minPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
                     .map(ApplicationRecord.class::cast)
@@ -427,12 +427,12 @@ public class Version81Test {
             logContentReader.forEachRemaining(records::add);
 
             // then
-            assertThat(records).hasSize(1);
+            assertThat(records).hasSize(7);
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(7);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(5);
+            assertThat(maxIndex).isEqualTo(14);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(5);
 
@@ -442,7 +442,7 @@ public class Version81Test {
                     .map(ApplicationRecord::getHighestPosition)
                     .max(Long::compareTo)
                     .orElseThrow();
-            assertThat(maxPosition).isEqualTo(34);
+            assertThat(maxPosition).isEqualTo(37);
             final var minPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
                     .map(ApplicationRecord.class::cast)
@@ -481,12 +481,12 @@ public class Version81Test {
             logContentReader.forEachRemaining(records::add);
 
             // then
-            assertThat(records).hasSize(1);
+            assertThat(records).hasSize(5);
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(5);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(5);
+            assertThat(maxIndex).isEqualTo(11);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(5);
 
@@ -496,7 +496,7 @@ public class Version81Test {
                     .map(ApplicationRecord::getHighestPosition)
                     .max(Long::compareTo)
                     .orElseThrow();
-            assertThat(maxPosition).isEqualTo(34);
+            assertThat(maxPosition).isEqualTo(31);
             final var minPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
                     .map(ApplicationRecord.class::cast)
@@ -507,12 +507,12 @@ public class Version81Test {
         }
 
         private static void verifyCompleteLog(List<PersistedRecord> records) {
-            assertThat(records).hasSize(13);
+            assertThat(records).hasSize(24);
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(12);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(23);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(13);
+            assertThat(maxIndex).isEqualTo(24);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(1);
 
