@@ -32,8 +32,10 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -706,7 +708,7 @@ public class Version82Test {
             experimental.visitDBWithJsonValues(jsonVisitor);
 
             // then
-            assertThat(incidentMap).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685252,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685262,\"jobKey\":-1,\"variableScopeKey\":2251799813685262}}");
+            assertThat(incidentMap).containsValue("{\"incidentRecord\":{\"errorType\":\"IO_MAPPING_ERROR\",\"errorMessage\":\"failed to evaluate expression '{bar:foo}': no variable found for name 'foo'\",\"bpmnProcessId\":\"process\",\"processDefinitionKey\":2251799813685249,\"processInstanceKey\":2251799813685252,\"elementId\":\"incidentTask\",\"elementInstanceKey\":2251799813685261,\"jobKey\":-1,\"variableScopeKey\":2251799813685261}}");
         }
 
         @Test
@@ -744,18 +746,12 @@ public class Version82Test {
             final var jsonNode = objectMapper.readTree(processes.get(0));
 
             assertThat(jsonNode.get("bpmnProcessId").asText()).isEqualTo(returnedProcess.getBpmnProcessId());
-            assertThat(jsonNode.get("processDefinitionKey").asLong())
+            assertThat(jsonNode.get("key").asLong())
                     .isEqualTo(returnedProcess.getProcessDefinitionKey());
-            assertThat(jsonNode.get("resourceName").toString()).isEqualTo(returnedProcess.getResourceName());
+            assertThat(jsonNode.get("resourceName").asText()).isEqualTo(returnedProcess.getResourceName());
             assertThat(jsonNode.get("version").asInt()).isEqualTo(returnedProcess.getVersion());
-            assertThat(jsonNode.get("resource").toString()).isEqualTo(Bpmn.convertToString(PROCESS));
-
-            assertThat(processes.get(0))
-                    .contains(returnedProcess.getBpmnProcessId())
-                    .contains(returnedProcess.getResourceName())
-                    .contains("" + returnedProcess.getVersion())
-                    .contains("" + returnedProcess.getProcessDefinitionKey())
-                    .contains("xml");
+            assertThat(jsonNode.get("resource").asText())
+                    .isEqualTo(Base64.getEncoder().encodeToString(Bpmn.convertToString(PROCESS).getBytes(StandardCharsets.UTF_8)));
         }
 
 
