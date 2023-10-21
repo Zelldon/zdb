@@ -61,6 +61,7 @@ public class Version82Test {
     public static ZeebeContainer zeebeContainer = new ZeebeContainer(DockerImageName.parse("camunda/zeebe:8.2.16"))
             /* run the container with the current user, in order to access the data and delete it later */
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
+            .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
             .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);
 
     static {
