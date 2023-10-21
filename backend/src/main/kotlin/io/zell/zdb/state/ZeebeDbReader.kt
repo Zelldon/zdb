@@ -21,14 +21,23 @@ import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.agrona.concurrent.UnsafeBuffer
-import org.rocksdb.OptimisticTransactionDB
-import org.rocksdb.ReadOptions
-import org.rocksdb.RocksDB
+import org.rocksdb.*
 import java.nio.file.Path
 import java.util.*
 
 class ZeebeDbReader(private var rocksDb: RocksDB) {
-        constructor(statePath: Path) : this(OptimisticTransactionDB.openReadOnly(statePath.toString()))
+    constructor(statePath: Path)
+            : this(
+        OptimisticTransactionDB.openReadOnly(
+            Options(
+                DBOptions(),
+                ColumnFamilyOptions()
+                    .setSstPartitionerFactory(SstPartitionerFixedPrefixFactory(Long.SIZE_BYTES.toLong()))
+                    .useFixedLengthPrefixExtractor(Long.SIZE_BYTES)
+            ),
+            statePath.toString()
+        )
+    )
 
 
     /**
@@ -55,7 +64,7 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
         fun visit(key: ByteArray, valueJson: String)
     }
 
-    private fun convertColumnFamilyToArray(cf: ZbColumnFamilies) : ByteArray {
+    private fun convertColumnFamilyToArray(cf: ZbColumnFamilies): ByteArray {
         val array = ByteArray(Long.SIZE_BYTES)
         val buffer = UnsafeBuffer(array)
         buffer.putLong(0, cf.ordinal.toLong(), ZeebeDbConstants.ZB_DB_BYTE_ORDER);
@@ -67,8 +76,10 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
      */
     fun visitDBWithPrefix(cf: ZbColumnFamilies, visitor: JsonValueWithKeyPrefixVisitor) {
         val prefixArray = convertColumnFamilyToArray(cf)
-        val prefixSameAsStart = ReadOptions().setPrefixSameAsStart(true)
-        rocksDb.newIterator(rocksDb.defaultColumnFamily, prefixSameAsStart).use {
+        val readOptions = ReadOptions()
+            .setPrefixSameAsStart(true)
+            .setTotalOrderSeek(false)
+        rocksDb.newIterator(rocksDb.defaultColumnFamily, readOptions).use {
             it.seek(prefixArray)
             while (it.isValid) {
                 val key: ByteArray = it.key()
@@ -87,18 +98,18 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
     }
 
     fun visitDB(visitor: Visitor) {
-       rocksDb.newIterator(rocksDb.defaultColumnFamily, ReadOptions()).use {
-           it.seekToFirst()
-           while (it.isValid) {
-               val key: ByteArray = it.key()
-               val value: ByteArray = it.value()
-               val unsafeBuffer = UnsafeBuffer(key)
-               val enumValue = unsafeBuffer.getLong(0, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
-               val cf = ZbColumnFamilies.values()[enumValue.toInt()]
-               visitor.visit(cf, key, value)
-               it.next()
-           }
-       }
+        rocksDb.newIterator(rocksDb.defaultColumnFamily, ReadOptions()).use {
+            it.seekToFirst()
+            while (it.isValid) {
+                val key: ByteArray = it.key()
+                val value: ByteArray = it.value()
+                val unsafeBuffer = UnsafeBuffer(key)
+                val enumValue = unsafeBuffer.getLong(0, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+                val cf = ZbColumnFamilies.values()[enumValue.toInt()]
+                visitor.visit(cf, key, value)
+                it.next()
+            }
+        }
     }
 
     fun visitDBWithJsonValues(visitor: JsonValueVisitor) {
@@ -124,7 +135,7 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
     }
 
 
-    fun stateStatistics() : Map<ZbColumnFamilies, Int> {
+    fun stateStatistics(): Map<ZbColumnFamilies, Int> {
         val countMap = EnumMap<ZbColumnFamilies, Int>(ZbColumnFamilies::class.java)
 
         visitDB { cf, _, _ ->
@@ -134,7 +145,7 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
         return countMap
     }
 
-    fun stateStatisticsAsJsonString() : String {
+    fun stateStatisticsAsJsonString(): String {
         val stateStatistics = stateStatistics()
         return Json.encodeToString(stateStatistics)
     }
