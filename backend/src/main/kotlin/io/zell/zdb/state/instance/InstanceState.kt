@@ -33,7 +33,10 @@ class InstanceState(statePath: Path) {
 
     fun getInstance(elementInstanceKey: Long): String {
         val bytes = zeebeDbReader.getValue(ZbColumnFamilies.ELEMENT_INSTANCE_KEY, elementInstanceKey)
-        return MsgPackConverter.convertToJson(bytes)
+        bytes?.let {
+            return MsgPackConverter.convertToJson(bytes)
+        }
+        return "{}"
     }
 
     fun listInstances( visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
