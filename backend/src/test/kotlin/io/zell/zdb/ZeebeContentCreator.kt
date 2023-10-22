@@ -2,6 +2,7 @@ package io.zell.zdb
 
 import io.camunda.zeebe.client.ZeebeClient
 import io.camunda.zeebe.client.api.response.DeploymentEvent
+import io.camunda.zeebe.client.api.response.ProcessInstanceEvent
 import io.camunda.zeebe.model.bpmn.Bpmn
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance
 import java.time.Duration
@@ -15,6 +16,7 @@ class ZeebeContentCreator(val gatewayAddress: String, val processModel: BpmnMode
         .done()
 
     lateinit var deploymentEvent: DeploymentEvent
+    lateinit var processInstanceEvent: ProcessInstanceEvent
 
    fun createContent() {
        val client = ZeebeClient.newClientBuilder()
@@ -28,7 +30,7 @@ class ZeebeContentCreator(val gatewayAddress: String, val processModel: BpmnMode
            .send()
            .join()
 
-       client
+       processInstanceEvent = client
            .newCreateInstanceCommand()
            .bpmnProcessId("process")
            .latestVersion()

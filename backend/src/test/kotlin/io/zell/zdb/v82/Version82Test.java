@@ -1,10 +1,15 @@
 package io.zell.zdb.v82;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
+import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent;
+import io.camunda.zeebe.protocol.record.value.BpmnElementType;
+import io.camunda.zeebe.protocol.record.value.ErrorType;
 import io.camunda.zeebe.util.FileUtil;
 import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.TestUtils;
@@ -19,6 +24,7 @@ import io.zell.zdb.log.records.PersistedRecord;
 import io.zell.zdb.log.records.RaftRecord;
 import io.zell.zdb.log.records.Record;
 import io.zell.zdb.state.ZeebeDbReader;
+import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
@@ -45,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Testcontainers
 public class Version82Test {
-
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static File tempDir = new File("/tmp/", "data-" + ThreadLocalRandom.current().nextLong());
     private static final BpmnModelInstance PROCESS =
             Bpmn.createExecutableProcess("process")
@@ -755,257 +761,215 @@ public class Version82Test {
         }
 
 
-  @Test
-  public void shouldNotFailOnNonExistingProcess() {
-    // given
-      final var processes = new ArrayList<String>();
+        @Test
+        public void shouldNotFailOnNonExistingProcess() {
+            // given
+            final var processes = new ArrayList<String>();
 
-    // when
-    final var processState = new ProcessState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-    processState.processDetails(0xCAFE, (k, v) -> processes.add(v));
+            // when
+            final var processState = new ProcessState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+            processState.processDetails(0xCAFE, (k, v) -> processes.add(v));
 
-    // then
-    assertThat(processes).isEmpty();
-  }
-//
-//  @Test
-//  public void shouldGetProcessInstanceDetails() {
-//    // given
-//
-//    // when
-//    final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-//    final var actualInstanceDetails = processState
-//        .instanceDetails(returnedProcessInstance.getProcessInstanceKey());
-//
-//    // then
-//    assertThat(actualInstanceDetails).isNotNull();
-//    assertThat(actualInstanceDetails.getKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(actualInstanceDetails.getState()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
-//    assertThat(actualInstanceDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
-//    assertThat(actualInstanceDetails.getProcessDefinitionKey())
-//        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
-//    assertThat(actualInstanceDetails.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
-//    assertThat(actualInstanceDetails.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(actualInstanceDetails.getElementId()).isEqualTo("process");
-//    assertThat(actualInstanceDetails.getElementType()).isEqualTo(BpmnElementType.PROCESS);
-//    assertThat(actualInstanceDetails.getParentProcessInstanceKey()).isEqualTo(-1);
-//    assertThat(actualInstanceDetails.getParentElementInstanceKey()).isEqualTo(-1);
-//    assertThat(actualInstanceDetails.getFlowScopeKey()).isEqualTo(-1);
-//    assertThat(actualInstanceDetails.getChildren()).hasSize(2);
-//
-//    assertThat(actualInstanceDetails.toString())
-//        .contains(returnedProcessInstance.getBpmnProcessId())
-//        .contains("" + returnedProcessInstance.getVersion())
-//        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
-//        .contains(BpmnElementType.PROCESS.toString())
-//        .contains("process");
-//  }
-//
-//
-//  @Test
-//  public void shouldGetElementInstanceDetails() {
-//    // given
-//    final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-//    final var processInstance = processState
-//        .instanceDetails(returnedProcessInstance.getProcessInstanceKey());
-//
-//    // when
-//    InstanceDetails actualElementInstance = processState
-//        .instanceDetails(processInstance.getChildren().get(1));
-//
-//    // then
-//    assertThat(actualElementInstance).isNotNull();
-//    assertThat(actualElementInstance.getState()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
-//    assertThat(actualElementInstance.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
-//    assertThat(actualElementInstance.getProcessDefinitionKey())
-//        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
-//    assertThat(actualElementInstance.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
-//    assertThat(actualElementInstance.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(actualElementInstance.getElementId()).isEqualTo("task");
-//    assertThat(actualElementInstance.getElementType()).isEqualTo(BpmnElementType.SERVICE_TASK);
-//    assertThat(actualElementInstance.getParentProcessInstanceKey()).isEqualTo(-1);
-//    assertThat(actualElementInstance.getParentElementInstanceKey()).isEqualTo(-1);
-//    assertThat(actualElementInstance.getJobKey()).isEqualTo(jobKey.get());
-//    assertThat(actualElementInstance.getFlowScopeKey()).isEqualTo(processInstance.getKey());
-//    assertThat(actualElementInstance.getChildren()).isEmpty();
-//
-//    assertThat(actualElementInstance.toString())
-//        .contains(returnedProcessInstance.getBpmnProcessId())
-//        .contains("" + returnedProcessInstance.getVersion())
-//        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
-//        .contains(BpmnElementType.SERVICE_TASK.toString())
-//        .contains("task");
-//  }
-//
-//
-//  @Test
-//  public void shouldListElementInstanceDetails() {
-//    // given
-//    final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-//
-//    // when
-//    final var detailsList = processState.listInstances();
-//
-//    // then
-//    assertThat(detailsList).hasSize(3);
-//
-//    final var actualInstanceDetails = detailsList.get(0);
-//    assertThat(actualInstanceDetails).isNotNull();
-//    assertThat(actualInstanceDetails.getKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(actualInstanceDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
-//    assertThat(actualInstanceDetails.getProcessDefinitionKey())
-//        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
-//    assertThat(actualInstanceDetails.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
-//    assertThat(actualInstanceDetails.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(actualInstanceDetails.getElementId()).isEqualTo("process");
-//    assertThat(actualInstanceDetails.getElementType()).isEqualTo(BpmnElementType.PROCESS);
-//    assertThat(actualInstanceDetails.getParentProcessInstanceKey()).isEqualTo(-1);
-//    assertThat(actualInstanceDetails.getParentElementInstanceKey()).isEqualTo(-1);
-//    assertThat(actualInstanceDetails.getFlowScopeKey()).isEqualTo(-1);
-//    assertThat(actualInstanceDetails.getChildren()).hasSize(2);
-//
-//    assertThat(actualInstanceDetails.toString())
-//        .contains(returnedProcessInstance.getBpmnProcessId())
-//        .contains("" + returnedProcessInstance.getVersion())
-//        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
-//        .contains(BpmnElementType.PROCESS.toString())
-//        .contains("process");
-//
-//    var actualElementInstance = detailsList.get(1);
-//    assertThat(actualElementInstance).isNotNull();
-//    assertThat(actualElementInstance.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
-//    assertThat(actualElementInstance.getProcessDefinitionKey())
-//        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
-//    assertThat(actualElementInstance.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
-//    assertThat(actualElementInstance.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(actualElementInstance.getElementId()).isEqualTo("incidentTask");
-//    assertThat(actualElementInstance.getElementType()).isEqualTo(BpmnElementType.SERVICE_TASK);
-//    assertThat(actualElementInstance.getParentProcessInstanceKey()).isEqualTo(-1);
-//    assertThat(actualElementInstance.getParentElementInstanceKey()).isEqualTo(-1);
-//    assertThat(actualElementInstance.getJobKey()).isZero(); // because of incident
-//    assertThat(actualElementInstance.getFlowScopeKey()).isEqualTo(actualInstanceDetails.getKey());
-//    assertThat(actualElementInstance.getChildren()).isEmpty();
-//
-//    assertThat(actualElementInstance.toString())
-//        .contains(returnedProcessInstance.getBpmnProcessId())
-//        .contains("" + returnedProcessInstance.getVersion())
-//        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
-//        .contains(BpmnElementType.SERVICE_TASK.toString())
-//        .contains("incidentTask");
-//
-//    actualElementInstance = detailsList.get(2);
-//    assertThat(actualElementInstance).isNotNull();
-//    assertThat(actualElementInstance.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
-//    assertThat(actualElementInstance.getProcessDefinitionKey())
-//        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
-//    assertThat(actualElementInstance.getVersion()).isEqualTo(returnedProcessInstance.getVersion());
-//    assertThat(actualElementInstance.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(actualElementInstance.getElementId()).isEqualTo("task");
-//    assertThat(actualElementInstance.getElementType()).isEqualTo(BpmnElementType.SERVICE_TASK);
-//    assertThat(actualElementInstance.getParentProcessInstanceKey()).isEqualTo(-1);
-//    assertThat(actualElementInstance.getParentElementInstanceKey()).isEqualTo(-1);
-//    assertThat(actualElementInstance.getJobKey()).isEqualTo(jobKey.get());
-//    assertThat(actualElementInstance.getFlowScopeKey()).isEqualTo(actualInstanceDetails.getKey());
-//    assertThat(actualElementInstance.getChildren()).isEmpty();
-//
-//    assertThat(actualElementInstance.toString())
-//        .contains(returnedProcessInstance.getBpmnProcessId())
-//        .contains("" + returnedProcessInstance.getVersion())
-//        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
-//        .contains(BpmnElementType.SERVICE_TASK.toString())
-//        .contains("task");
-//  }
-//
-//  @Test
-//  public void shouldNotFailOnNonExistingProcessInstance() {
-//    // given
-//
-//    // when
-//    final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
-//    final var actualInstanceDetails = processState
-//        .instanceDetails(0xCAFE);
-//
-//    // then
-//    assertThat(actualInstanceDetails).isNull();
-//  }
-//
-//  @Test
-//  public void shouldGetIncidentDetails() {
-//    // given
-//    final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
-//    final var processState = new InstanceState(runtimePath);
-//    final var processInstance = processState
-//        .instanceDetails(returnedProcessInstance.getProcessInstanceKey());
-//    InstanceDetails actualElementInstance = processState
-//        .instanceDetails(processInstance.getChildren().get(0));
-//    final var incidentState = new IncidentState(runtimePath);
-//    final var incidentKey = incidentState.processInstanceIncidentKey(actualElementInstance.getKey());
-//
-//    // when
-//    final var incidentDetails = incidentState.incidentDetails(incidentKey);
-//
-//    // then
-//    assertThat(incidentDetails).isNotNull();
-//    assertThat(incidentDetails.getKey()).isEqualTo(incidentKey);
-//    assertThat(incidentDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
-//    assertThat(incidentDetails.getProcessDefinitionKey())
-//        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
-//    assertThat(incidentDetails.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(incidentDetails.getElementInstanceKey()).isEqualTo(actualElementInstance.getKey());
-//    assertThat(incidentDetails.getElementId()).isEqualTo("incidentTask");
-//    assertThat(incidentDetails.getErrorMessage()).isEqualTo("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
-//    assertThat(incidentDetails.getErrorType()).isEqualTo(ErrorType.IO_MAPPING_ERROR);
-//    assertThat(incidentDetails.getVariablesScopeKey()).isEqualTo(actualElementInstance.getKey());
-//    assertThat(incidentDetails.getJobKey()).isEqualTo(-1);
-//
-//    assertThat(incidentDetails.toString())
-//        .contains(returnedProcessInstance.getBpmnProcessId())
-//        .contains("incidentTask")
-//        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
-//        .contains(ErrorType.IO_MAPPING_ERROR.toString())
-//        .contains("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
-//  }
-//
-//  @Test
-//  public void shouldListIncidentDetails() {
-//    // given
-//    final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
-//    final var processState = new InstanceState(runtimePath);
-//    final var processInstance = processState
-//        .instanceDetails(returnedProcessInstance.getProcessInstanceKey());
-//    InstanceDetails actualElementInstance = processState
-//        .instanceDetails(processInstance.getChildren().get(0));
-//    final var incidentState = new IncidentState(runtimePath);
-//    final var incidentKey = incidentState.processInstanceIncidentKey(actualElementInstance.getKey());
-//
-//    // when
-//    final var incidents = incidentState.listIncidents();
-//
-//    // then
-//    assertThat(incidents).hasSize(1);
-//
-//    final var incidentDetails = incidents.get(0);
-//    assertThat(incidentDetails).isNotNull();
-//    assertThat(incidentDetails.getKey()).isEqualTo(incidentKey);
-//    assertThat(incidentDetails.getBpmnProcessId()).isEqualTo(returnedProcessInstance.getBpmnProcessId());
-//    assertThat(incidentDetails.getProcessDefinitionKey())
-//        .isEqualTo(returnedProcessInstance.getProcessDefinitionKey());
-//    assertThat(incidentDetails.getProcessInstanceKey()).isEqualTo(returnedProcessInstance.getProcessInstanceKey());
-//    assertThat(incidentDetails.getElementInstanceKey()).isEqualTo(actualElementInstance.getKey());
-//    assertThat(incidentDetails.getElementId()).isEqualTo("incidentTask");
-//    assertThat(incidentDetails.getErrorMessage()).isEqualTo("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
-//    assertThat(incidentDetails.getErrorType()).isEqualTo(ErrorType.IO_MAPPING_ERROR);
-//    assertThat(incidentDetails.getVariablesScopeKey()).isEqualTo(actualElementInstance.getKey());
-//    assertThat(incidentDetails.getJobKey()).isEqualTo(-1);
-//
-//    assertThat(incidentDetails.toString())
-//        .contains(returnedProcessInstance.getBpmnProcessId())
-//        .contains("incidentTask")
-//        .contains("" + returnedProcessInstance.getProcessDefinitionKey())
-//        .contains(ErrorType.IO_MAPPING_ERROR.toString())
-//        .contains("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
-//  }
-//
+            // then
+            assertThat(processes).isEmpty();
+        }
 
+        @Test
+        public void shouldGetProcessInstanceDetails() throws JsonProcessingException {
+            // given
+            final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
+            final var processInstanceKey = processInstanceEvent.getProcessInstanceKey();
+
+            // when
+            final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+            final var actualInstanceDetails = processState.getInstance(processInstanceKey);
+
+            // then
+            assertThat(actualInstanceDetails).isNotNull();
+            final var instanceAsJson = OBJECT_MAPPER.readTree(actualInstanceDetails);
+            final var elementRecord = instanceAsJson.get("elementRecord");
+            assertThat(elementRecord.get("key").asLong()).isEqualTo(processInstanceKey);
+            assertThat(elementRecord.get("state").asText()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
+            final var processInstanceRecord = elementRecord.get("processInstanceRecord");
+            assertThat(processInstanceRecord.get("bpmnProcessId").asText()).isEqualTo(processInstanceEvent.getBpmnProcessId());
+            assertThat(processInstanceRecord.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(processInstanceRecord.get("version").asInt()).isEqualTo(processInstanceEvent.getVersion());
+            assertThat(processInstanceRecord.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(processInstanceRecord.get("elementId").asText()).isEqualTo("process");
+            assertThat(processInstanceRecord.get("bpmnElementType").asText()).isEqualTo(BpmnElementType.PROCESS.name());
+            assertThat(processInstanceRecord.get("parentProcessInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("parentElementInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("flowScopeKey").asLong()).isEqualTo(-1);
+            assertThat(instanceAsJson.get("childCount").asInt()).isEqualTo(2);
+        }
+
+
+        @Test
+        public void shouldGetElementInstanceDetails() throws JsonProcessingException {
+            // given
+            final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
+            final var processInstanceKey = processInstanceEvent.getProcessInstanceKey();
+            final var elementInstanceKey = 2251799813685263L;
+
+            // when
+            final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+            final var actualInstanceDetails = processState.getInstance(elementInstanceKey);
+
+            // then
+            assertThat(actualInstanceDetails).isNotNull();
+            final var instanceAsJson = OBJECT_MAPPER.readTree(actualInstanceDetails);
+            final var elementRecord = instanceAsJson.get("elementRecord");
+            assertThat(elementRecord.get("key").asLong()).isEqualTo(elementInstanceKey);
+            assertThat(elementRecord.get("state").asText()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
+            final var processInstanceRecord = elementRecord.get("processInstanceRecord");
+            assertThat(processInstanceRecord.get("bpmnProcessId").asText()).isEqualTo(processInstanceEvent.getBpmnProcessId());
+            assertThat(processInstanceRecord.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(processInstanceRecord.get("version").asInt()).isEqualTo(processInstanceEvent.getVersion());
+            assertThat(processInstanceRecord.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(processInstanceRecord.get("elementId").asText()).isEqualTo("task");
+            assertThat(processInstanceRecord.get("bpmnElementType").asText()).isEqualTo(BpmnElementType.SERVICE_TASK.name());
+            assertThat(processInstanceRecord.get("parentProcessInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("parentElementInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("flowScopeKey").asLong()).isEqualTo(processInstanceKey);
+            assertThat(instanceAsJson.get("childCount").asInt()).isEqualTo(0);
+        }
+
+        @Test
+        public void shouldListElementInstanceDetails() throws JsonProcessingException {
+            // given
+            final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
+            final var processInstanceKey = processInstanceEvent.getProcessInstanceKey();
+            final var elementInstanceKey = 2251799813685263L;
+            final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+            final var list = new ArrayList<String>();
+
+            // when
+            processState.listInstances((key, valueJson) -> list.add(valueJson));
+
+            // then
+            assertThat(list).hasSize(3);
+
+            JsonNode instanceAsJson = OBJECT_MAPPER.readTree(list.get(0));
+            JsonNode elementRecord = instanceAsJson.get("elementRecord");
+            assertThat(elementRecord.get("key").asLong()).isEqualTo(processInstanceKey);
+            assertThat(elementRecord.get("state").asText()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
+            JsonNode processInstanceRecord = elementRecord.get("processInstanceRecord");
+            assertThat(processInstanceRecord.get("bpmnProcessId").asText()).isEqualTo(processInstanceEvent.getBpmnProcessId());
+            assertThat(processInstanceRecord.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(processInstanceRecord.get("version").asInt()).isEqualTo(processInstanceEvent.getVersion());
+            assertThat(processInstanceRecord.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(processInstanceRecord.get("elementId").asText()).isEqualTo("process");
+            assertThat(processInstanceRecord.get("bpmnElementType").asText()).isEqualTo(BpmnElementType.PROCESS.name());
+            assertThat(processInstanceRecord.get("parentProcessInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("parentElementInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("flowScopeKey").asLong()).isEqualTo(-1);
+            assertThat(instanceAsJson.get("childCount").asInt()).isEqualTo(2);
+
+            String elementInstanceJson = list.get(1);
+            assertThat(elementInstanceJson).isNotNull();
+            instanceAsJson = OBJECT_MAPPER.readTree(elementInstanceJson);
+            elementRecord = instanceAsJson.get("elementRecord");
+            assertThat(elementRecord.get("key").asLong()).isEqualTo(2251799813685261L);
+            assertThat(elementRecord.get("state").asText()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATING.toString());
+            processInstanceRecord = elementRecord.get("processInstanceRecord");
+            assertThat(processInstanceRecord.get("bpmnProcessId").asText()).isEqualTo(processInstanceEvent.getBpmnProcessId());
+            assertThat(processInstanceRecord.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(processInstanceRecord.get("version").asInt()).isEqualTo(processInstanceEvent.getVersion());
+            assertThat(processInstanceRecord.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(processInstanceRecord.get("elementId").asText()).isEqualTo("incidentTask");
+            assertThat(processInstanceRecord.get("bpmnElementType").asText()).isEqualTo(BpmnElementType.SERVICE_TASK.name());
+            assertThat(processInstanceRecord.get("parentProcessInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("parentElementInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("flowScopeKey").asLong()).isEqualTo(processInstanceKey);
+            assertThat(instanceAsJson.get("childCount").asInt()).isEqualTo(0);
+
+            elementInstanceJson = list.get(2);
+            assertThat(elementInstanceJson).isNotNull();
+            instanceAsJson = OBJECT_MAPPER.readTree(elementInstanceJson);
+            elementRecord = instanceAsJson.get("elementRecord");
+            assertThat(elementRecord.get("key").asLong()).isEqualTo(elementInstanceKey);
+            assertThat(elementRecord.get("state").asText()).isEqualTo(ProcessInstanceIntent.ELEMENT_ACTIVATED.toString());
+            processInstanceRecord = elementRecord.get("processInstanceRecord");
+            assertThat(processInstanceRecord.get("bpmnProcessId").asText()).isEqualTo(processInstanceEvent.getBpmnProcessId());
+            assertThat(processInstanceRecord.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(processInstanceRecord.get("version").asInt()).isEqualTo(processInstanceEvent.getVersion());
+            assertThat(processInstanceRecord.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(processInstanceRecord.get("elementId").asText()).isEqualTo("task");
+            assertThat(processInstanceRecord.get("bpmnElementType").asText()).isEqualTo(BpmnElementType.SERVICE_TASK.name());
+            assertThat(processInstanceRecord.get("parentProcessInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("parentElementInstanceKey").asLong()).isEqualTo(-1);
+            assertThat(processInstanceRecord.get("flowScopeKey").asLong()).isEqualTo(processInstanceKey);
+            assertThat(instanceAsJson.get("childCount").asInt()).isEqualTo(0);
+        }
+
+        @Test
+        public void shouldNotFailOnNonExistingProcessInstance() {
+            // given
+
+            // when
+            final var processState = new InstanceState(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
+            final var actualInstanceDetails = processState
+                    .getInstance(0xCAFE);
+
+            // then
+            assertThat(actualInstanceDetails).isEqualTo("{}");
+        }
+
+        @Test
+        public void shouldGetIncidentDetails() throws JsonProcessingException {
+            // given
+            final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
+            final var incidentKey = 2251799813685264L;
+            final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
+
+            // when
+            final var zeebeDbReader = new ZeebeDbReader(runtimePath);
+            final var incidentAsJson = zeebeDbReader.getValueAsJson(ZbColumnFamilies.INCIDENTS, incidentKey);
+
+            // then
+            assertThat(incidentAsJson).isNotNull();
+            final var incident = OBJECT_MAPPER.readTree(incidentAsJson).get("incidentRecord");
+            assertThat(incident.get("bpmnProcessId").asText()).isEqualTo("process");
+            assertThat(incident.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(incident.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(incident.get("elementInstanceKey").asLong()).isEqualTo(2251799813685261L);
+            assertThat(incident.get("elementId").asText()).isEqualTo("incidentTask");
+            assertThat(incident.get("errorMessage").asText()).isEqualTo("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
+            assertThat(incident.get("errorType").asText()).isEqualTo(ErrorType.IO_MAPPING_ERROR.toString());
+            assertThat(incident.get("variableScopeKey").asLong()).isEqualTo(2251799813685261L);
+            assertThat(incident.get("jobKey").asLong()).isEqualTo(-1);
+
+        }
+
+        @Test
+        public void shouldListIncidentDetails() throws JsonProcessingException {
+            // given
+            final var runtimePath = ZeebePaths.Companion.getRuntimePath(tempDir, "1");
+            final var incidentKey = 2251799813685264L;
+            final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
+            final var list = new ArrayList<String>();
+
+            // when
+            final var zeebeDbReader = new ZeebeDbReader(runtimePath);
+            zeebeDbReader.visitDBWithPrefix(
+                    ZbColumnFamilies.INCIDENTS,
+                    (key, valueJson) -> list.add(valueJson));
+
+            // then
+            assertThat(list).hasSize(1);
+            final var incidentAsJson = list.get(0);
+            assertThat(incidentAsJson).isNotNull();
+            final var incident = OBJECT_MAPPER.readTree(incidentAsJson).get("incidentRecord");
+            assertThat(incident.get("bpmnProcessId").asText()).isEqualTo("process");
+            assertThat(incident.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(incident.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(incident.get("elementInstanceKey").asLong()).isEqualTo(2251799813685261L);
+            assertThat(incident.get("elementId").asText()).isEqualTo("incidentTask");
+            assertThat(incident.get("errorMessage").asText()).isEqualTo("failed to evaluate expression '{bar:foo}': no variable found for name 'foo'");
+            assertThat(incident.get("errorType").asText()).isEqualTo(ErrorType.IO_MAPPING_ERROR.toString());
+            assertThat(incident.get("variableScopeKey").asLong()).isEqualTo(2251799813685261L);
+            assertThat(incident.get("jobKey").asLong()).isEqualTo(-1);
+
+        }
     }
 }
