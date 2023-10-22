@@ -119,12 +119,12 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
         }
     }
 
-    fun getValue(cf: ZbColumnFamilies, key: Long): ByteArray {
+    fun getValue(cf: ZbColumnFamilies, key: Long): ByteArray? {
         val keyArray = ByteArray(Long.SIZE_BYTES + Long.SIZE_BYTES)
         val buffer = UnsafeBuffer(keyArray)
 
         buffer.putLong(0, cf.ordinal.toLong(), ZeebeDbConstants.ZB_DB_BYTE_ORDER)
-        buffer.putLong(0, key, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+        buffer.putLong(Long.SIZE_BYTES, key, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
 
         return rocksDb.get(keyArray)
     }
