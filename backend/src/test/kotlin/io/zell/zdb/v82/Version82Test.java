@@ -71,6 +71,8 @@ public class Version82Test {
     public static ZeebeContainer zeebeContainer = new ZeebeContainer(DockerImageName.parse("camunda/zeebe:8.2.16"))
             /* run the container with the current user, in order to access the data and delete it later */
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
+            // with 8.2 we disabled WAL per default
+            // we have to enabled it inorder to access the data from RocksDB
             .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
             .withFileSystemBind(tempDir.getPath(), CONTAINER_PATH, BindMode.READ_WRITE);
     private static ZeebeContentCreator zeebeContentCreator;
