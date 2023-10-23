@@ -22,22 +22,41 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.agrona.concurrent.UnsafeBuffer
 import org.rocksdb.*
+import java.io.FileNotFoundException
 import java.nio.file.Path
 import java.util.*
 
-class ZeebeDbReader(private var rocksDb: RocksDB) {
-    constructor(statePath: Path)
-            : this(
-        OptimisticTransactionDB.openReadOnly(
-            Options(
-                DBOptions(),
-                ColumnFamilyOptions()
-                    .setSstPartitionerFactory(SstPartitionerFixedPrefixFactory(Long.SIZE_BYTES.toLong()))
-                    .useFixedLengthPrefixExtractor(Long.SIZE_BYTES)
-            ),
-            statePath.toString()
+class ZeebeDbReader(statePath: Path) {
+
+    private var rocksDb: RocksDB
+
+    init {
+        val options = Options(
+            DBOptions(),
+            ColumnFamilyOptions()
+                .setSstPartitionerFactory(SstPartitionerFixedPrefixFactory(Long.SIZE_BYTES.toLong()))
+                .useFixedLengthPrefixExtractor(Long.SIZE_BYTES)
         )
-    )
+
+        try {
+
+            rocksDb = OptimisticTransactionDB.openReadOnly(
+                options,
+                statePath.toString()
+            )
+        } catch (rocksEx: RocksDBException) {
+            if (rocksEx.status.code == Status.Code.IOError) {
+                rocksEx.message?.let {
+                    if (it.contains("No such file or directory")) {
+                        throw FileNotFoundException("Expected to find RocksDB instance under given path $statePath, but nothing found.")
+                    }
+                }
+            }
+            throw rocksEx
+        }
+
+
+    }
 
 
     /**
