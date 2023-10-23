@@ -131,7 +131,10 @@ class ZeebeDbReader(private var rocksDb: RocksDB) {
 
     fun getValueAsJson(cf: ZbColumnFamilies, key: Long): String {
         val bytes = getValue(cf, key)
-        return MsgPackConverter.convertToJson(bytes)
+        bytes?.let {
+            return MsgPackConverter.convertToJson(bytes)
+        }
+        return "{}"
     }
 
 
