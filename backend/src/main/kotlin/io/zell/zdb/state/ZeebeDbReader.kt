@@ -64,7 +64,7 @@ class ZeebeDbReader(statePath: Path) {
      * already parsed column family.
      */
     fun interface Visitor {
-        fun visit(cf: ZbColumnFamilies, key: ByteArray, value: ByteArray)
+        fun visit(cf: String, key: ByteArray, value: ByteArray)
     }
 
     /**
@@ -72,7 +72,7 @@ class ZeebeDbReader(statePath: Path) {
      * already parsed as enum.
      */
     fun interface JsonValueVisitor {
-        fun visit(cf: ZbColumnFamilies, key: ByteArray, valueJson: String)
+        fun visit(cf: String, key: ByteArray, valueJson: String)
     }
 
     /**
@@ -124,8 +124,17 @@ class ZeebeDbReader(statePath: Path) {
                 val value: ByteArray = it.value()
                 val unsafeBuffer = UnsafeBuffer(key)
                 val enumValue = unsafeBuffer.getLong(0, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
-                val cf = ZbColumnFamilies.values()[enumValue.toInt()]
-                visitor.visit(cf, key, value)
+                val cfName: String
+
+                // column family name resolution
+                val enumOrdinal = enumValue.toInt()
+                if (enumOrdinal < ZbColumnFamilies.values().size) {
+                    cfName = ZbColumnFamilies.values()[enumOrdinal].name
+                } else {
+                    cfName = "$enumOrdinal (UNKNOWN)";
+                }
+
+                visitor.visit(cfName, key, value)
                 it.next()
             }
         }
@@ -157,8 +166,8 @@ class ZeebeDbReader(statePath: Path) {
     }
 
 
-    fun stateStatistics(): Map<ZbColumnFamilies, Int> {
-        val countMap = EnumMap<ZbColumnFamilies, Int>(ZbColumnFamilies::class.java)
+    fun stateStatistics(): Map<String, Int> {
+        val countMap = mutableMapOf<String, Int>()
 
         visitDB { cf, _, _ ->
             val count: Int = countMap.computeIfAbsent(cf) { 0 }

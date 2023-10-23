@@ -691,10 +691,10 @@ public class Version81Test {
             final var cfMap = experimental.stateStatistics();
 
             // then
-            assertThat(cfMap).containsEntry(ZbColumnFamilies.JOBS, 1)
-                    .containsEntry(ZbColumnFamilies.VARIABLES, 3)
-                    .containsEntry(ZbColumnFamilies.INCIDENTS, 1)
-                    .containsEntry(ZbColumnFamilies.ELEMENT_INSTANCE_KEY, 3);
+            assertThat(cfMap).containsEntry(ZbColumnFamilies.JOBS.name(), 1)
+                    .containsEntry(ZbColumnFamilies.VARIABLES.name(), 3)
+                    .containsEntry(ZbColumnFamilies.INCIDENTS.name(), 1)
+                    .containsEntry(ZbColumnFamilies.ELEMENT_INSTANCE_KEY.name(), 3);
         }
 
         @Test
@@ -703,7 +703,7 @@ public class Version81Test {
             final var experimental = new ZeebeDbReader(ZeebePaths.Companion.getRuntimePath(tempDir, "1"));
             final var incidentMap = new HashMap<String, String>();
             ZeebeDbReader.JsonValueVisitor jsonVisitor = (cf, k, v) -> {
-                if (cf == ZbColumnFamilies.INCIDENTS) {
+                if (cf.equals(ZbColumnFamilies.INCIDENTS.name())) {
                     incidentMap.put(new String(k), v);
                 }
             };
