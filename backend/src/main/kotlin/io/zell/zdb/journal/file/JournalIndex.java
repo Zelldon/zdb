@@ -1,4 +1,5 @@
 /*
+ * Copyright © 2020 camunda services GmbH (info@camunda.com)
  * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

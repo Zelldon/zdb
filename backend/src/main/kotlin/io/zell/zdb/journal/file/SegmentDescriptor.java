@@ -1,4 +1,6 @@
 /*
+ * Copyright 2017-present Open Networking Foundation
+ * Copyright © 2020 camunda services GmbH (info@camunda.com)
  * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,17 +17,14 @@
  */
 package io.zell.zdb.journal.file;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import io.camunda.zeebe.journal.CorruptedJournalException;
-import io.camunda.zeebe.journal.file.*;
+import io.camunda.zeebe.journal.file.DescriptorMetadataEncoder;
+import io.camunda.zeebe.journal.file.MessageHeaderEncoder;
+import io.camunda.zeebe.journal.file.SegmentDescriptorEncoder;
 import io.camunda.zeebe.journal.util.ChecksumGenerator;
-import java.nio.ByteBuffer;
-import java.util.Objects;
-import org.agrona.MutableDirectBuffer;
-import org.agrona.concurrent.UnsafeBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 /**
  * The segment descriptor stores the metadata of a single segment {@link Segment} of a {@link

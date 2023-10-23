@@ -15,7 +15,6 @@
  */
 package io.zell.zdb.log.records
 
-import io.zell.zdb.log.records.PersistedRecord
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
