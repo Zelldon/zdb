@@ -31,16 +31,34 @@ class ProcessState(statePath: Path) {
 
     fun listProcesses(visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
         zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE, visitor)
+        // for 8.3
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE, visitor)
     }
 
     fun processDetails(processDefinitionKey : Long, visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        var found = false
+
         zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE) { key, value ->
             val keyBuffer = UnsafeBuffer(key)
             // due to the recent multi tenancy changes, the process definition key moved to the end
             val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
 
             if (currentProcessDefinitionKey == processDefinitionKey) {
+                found = true
                 visitor.visit(key, value)
+            }
+        }
+
+        if (!found) {
+            // for 8.3
+            zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE) { key, value ->
+                val keyBuffer = UnsafeBuffer(key)
+                // due to the recent multi tenancy changes, the process definition key moved to the end
+                val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+
+                if (currentProcessDefinitionKey == processDefinitionKey) {
+                    visitor.visit(key, value)
+                }
             }
         }
     }
