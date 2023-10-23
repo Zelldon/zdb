@@ -39,7 +39,7 @@ public class LogSearchCommand implements Callable<Integer> {
     final String result;
     if (exclusive.index == 0) {
       final var record = new LogSearch(logPath).searchPosition(exclusive.position);
-      result = record == null ? "{}" : record.toJson();
+      result = record == null ? "{}" : record.toString();
     } else {
       final var logContent = new LogSearch(logPath).searchIndex(exclusive.index);
       result = logContent == null ? "{}" : logContent.toString();

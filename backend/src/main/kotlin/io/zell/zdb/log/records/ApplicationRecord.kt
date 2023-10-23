@@ -34,7 +34,7 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
 
     fun entriesAsJson() : String {
         return entries.map {
-            """{"key": ${it.key}, "position": ${it.position}, "sourceRecordPosition": ${it.sourceRecordPosition}, "intent": "${it.intent}", "recordType": "${it.recordType}", "valueType": "${it.valueType}", "timestamp": ${it.timestamp}, "value": ${it.recordValue.valueJson}}"""
+            it.toString()
         }.joinToString()
     }
 

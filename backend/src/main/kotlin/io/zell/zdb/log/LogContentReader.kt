@@ -111,6 +111,8 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
                     metadata.recordType,
                     metadata.valueType,
                     metadata.intent,
+                   metadata.brokerVersion.toString(),
+                   metadata.recordVersion,
                     RecordValue(valueJson,
                         json.decodeFromString<ProcessInstanceRelatedValue>(valueJson) )
                     )
