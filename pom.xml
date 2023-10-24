@@ -168,6 +168,13 @@
                         <owner>Christopher Kujawa</owner>
                         <email>zelldon91@gmail.com</email>
                     </properties>
+                    <includes>
+                        <include>**/*.java</include>
+                        <include>**/*.kt</include>
+                    </includes>
+                    <excludes>
+                        <exclude>licenses/*.txt</exclude>
+                    </excludes>
                     <licenseSets>
                         <licenseSet>
                             <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
@@ -176,6 +183,12 @@
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
+                    <!--
+                       Will only add license headers if file has none, to only add our copyright
+                       to new added files. We need to make sure that the old ONF copyrights are saved
+                       and not replaced accidentally.
+                    -->
+                    <skipExistingHeaders>true</skipExistingHeaders>
                 </configuration>
                 <executions>
                     <execution>
