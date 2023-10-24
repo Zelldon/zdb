@@ -25,12 +25,10 @@ import java.util.Map;
 
 public class ZeebeContentCreator {
 
-    private final String gatewayAddress;
     private final BpmnModelInstance processModel;
 
 
-    public ZeebeContentCreator(String gatewayAddress, BpmnModelInstance processModel) {
-        this.gatewayAddress = gatewayAddress;
+    public ZeebeContentCreator(BpmnModelInstance processModel) {
         this.processModel = processModel;
     }
 
@@ -42,7 +40,7 @@ public class ZeebeContentCreator {
     public DeploymentEvent deploymentEvent;
     public ProcessInstanceEvent processInstanceEvent;
 
-   public void createContent() {
+   public void createContent(String gatewayAddress) {
        final var client = ZeebeClient.newClientBuilder()
            .gatewayAddress(gatewayAddress)
            .usePlaintext()

@@ -13,13 +13,18 @@ package io.zell.zdb;/*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
+import java.io.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class TestUtils {
+
+  public static final String CONTAINER_PATH = "/usr/local/zeebe/data/";
+  private static final String TMP_FOLDER_FORMAT = "data-%s-%d";
   private TestUtils() {}
+
+  public static File newTmpFolder(Class<?> clazz) {
+    return new File("/tmp/", String.format(TMP_FOLDER_FORMAT, clazz.getName(), ThreadLocalRandom.current().nextLong()));
+  }
 
   /**
    * Utility to get the current UID and GID such that a container can be run as that user.
