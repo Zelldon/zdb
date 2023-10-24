@@ -168,16 +168,16 @@
                         <owner>Christopher Kujawa</owner>
                         <email>zelldon91@gmail.com</email>
                     </properties>
-                    <includes>
-                        <include>**/*.java</include>
-                        <include>**/*.kt</include>
-                    </includes>
-                    <excludes>
-                        <exclude>licenses/*.txt</exclude>
-                    </excludes>
                     <licenseSets>
                         <licenseSet>
                             <header>com/mycila/maven/plugin/license/templates/APACHE-2.txt</header>
+                            <includes>
+                                <include>**/*.java</include>
+                                <include>**/*.kt</include>
+                            </includes>
+                            <excludes>
+                                <exclude>licenses/*.txt</exclude>
+                            </excludes>
                         </licenseSet>
                     </licenseSets>
                     <mapping>
