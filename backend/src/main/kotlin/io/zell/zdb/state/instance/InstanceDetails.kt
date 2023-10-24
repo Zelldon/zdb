@@ -24,6 +24,6 @@ class InstanceDetails constructor(val parentKey : Long,
                                           val childCompletedCount: Int,
                                           val childActivatedCount: Int,
                                           val childCount: Int,
-                                          val interruptingEventKeyProp: String,
-                                          val calledChildInstanceKeyProp: Long,
+                                          val interruptingEventKeyProp: String? = null,
+                                          val calledChildInstanceKeyProp: Long? = null,
                                           val elementRecord: ElementDetails)

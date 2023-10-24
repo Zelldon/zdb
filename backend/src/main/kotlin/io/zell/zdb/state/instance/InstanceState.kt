@@ -24,6 +24,7 @@ import java.util.function.Predicate
 
 class InstanceState(statePath: Path) {
 
+    private var json: Json = Json { ignoreUnknownKeys = true}
     private var zeebeDbReader: ZeebeDbReader
 
     init {
@@ -42,7 +43,7 @@ class InstanceState(statePath: Path) {
         zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.ELEMENT_INSTANCE_KEY) {
             key: ByteArray, value: String ->
 
-            val instanceDetails = Json.decodeFromString<InstanceDetails>(value)
+            val instanceDetails = json.decodeFromString<InstanceDetails>(value)
             val processInstanceRecord = instanceDetails.elementRecord.processInstanceRecord
             if (processInstanceRecord.bpmnElementType == BpmnElementType.PROCESS
                 && predicate.test(processInstanceRecord)) {

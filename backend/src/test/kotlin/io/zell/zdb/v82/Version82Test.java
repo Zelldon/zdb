@@ -965,6 +965,22 @@ public class Version82Test {
         }
 
         @Test
+        public void shouldFindInstancesWithPredicate() {
+            // given
+            final var instanceState = new InstanceState(ZeebePaths.Companion.getRuntimePath(TEMP_DIR, "1"));
+            final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
+            final var processInstanceKey = processInstanceEvent.getProcessInstanceKey();
+            final var processes = new HashMap<Long, String>();
+
+            // when
+            instanceState.listProcessInstances(processInstanceRecordDetails -> processInstanceRecordDetails.getBpmnProcessId().equals("process"),
+                    (key, valueJson) -> processes.put(new UnsafeBuffer(key).getLong(Long.BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER), valueJson));
+
+            // then
+            assertThat(processes).containsKey(processInstanceKey);
+        }
+
+        @Test
         public void shouldGetIncidentDetails() throws JsonProcessingException {
             // given
             final var runtimePath = ZeebePaths.Companion.getRuntimePath(TEMP_DIR, "1");
