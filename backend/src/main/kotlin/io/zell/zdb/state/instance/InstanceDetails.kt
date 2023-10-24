@@ -15,15 +15,7 @@
  */
 package io.zell.zdb.state.instance
 
-import io.camunda.zeebe.engine.state.deployment.DeployedProcess
-import io.camunda.zeebe.engine.state.instance.ElementInstance
-import io.camunda.zeebe.engine.state.instance.IndexedRecord
-import io.camunda.zeebe.protocol.record.value.BpmnElementType
-import io.camunda.zeebe.util.buffer.BufferUtil
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
 
 @Serializable
 class InstanceDetails constructor(val parentKey : Long,

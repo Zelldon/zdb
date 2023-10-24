@@ -16,7 +16,6 @@
 package io.zell.zdb.state.instance
 
 import io.camunda.zeebe.protocol.ZbColumnFamilies
-import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import io.camunda.zeebe.protocol.record.value.BpmnElementType
 import io.zell.zdb.state.ZeebeDbReader
 import kotlinx.serialization.json.Json

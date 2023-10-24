@@ -24,7 +24,6 @@ import org.agrona.concurrent.UnsafeBuffer
 import org.rocksdb.*
 import java.io.FileNotFoundException
 import java.nio.file.Path
-import java.util.*
 
 class ZeebeDbReader(statePath: Path) {
 

@@ -15,8 +15,6 @@
  */
 package io.zell.zdb.state.instance
 
-import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
-import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent
 import io.camunda.zeebe.protocol.record.value.BpmnElementType
 import io.camunda.zeebe.protocol.record.value.BpmnEventType
 import kotlinx.serialization.Serializable
