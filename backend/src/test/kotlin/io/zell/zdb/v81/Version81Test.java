@@ -18,6 +18,7 @@ package io.zell.zdb.v81;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.camunda.zeebe.db.impl.ZeebeDbConstants;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
@@ -41,6 +42,7 @@ import io.zell.zdb.log.records.Record;
 import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
+import org.agrona.concurrent.UnsafeBuffer;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -64,6 +66,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import static io.zell.zdb.TestUtils.CONTAINER_PATH;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -766,18 +769,15 @@ public class Version81Test {
         @Test
         public void shouldListProcesses() {
             // given
+            final var processState = new ProcessState(ZeebePaths.Companion.getRuntimePath(TEMP_DIR, "1"));
+            final var processes = new HashMap<Long, String>();
 
-            ZeebeDbReader zeebeDbReader = new ZeebeDbReader(ZeebePaths.Companion.getRuntimePath(TEMP_DIR, "1"));
+            // when
+            processState.listProcesses((key, valueJson) -> processes.put(new UnsafeBuffer(key).getLong(Long.BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER), valueJson));
 
-            zeebeDbReader.visitDB(((cf, key, value) ->
-            {
-
-                System.out.printf("\nColumnFamily?: '%s'", cf);
-                System.out.printf("\nKey: '%s'", new String(key));
-                System.out.printf("\nValue: '%s'", new String(value));
-            }));
+            // then
+            assertThat(processes).containsKey(2251799813685249L).containsKey(2251799813685250L);
         }
-
 
         @Test
         public void shouldGetProcessDetails() throws JsonProcessingException {

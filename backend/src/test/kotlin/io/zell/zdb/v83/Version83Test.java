@@ -18,6 +18,7 @@ package io.zell.zdb.v83;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.camunda.zeebe.db.impl.ZeebeDbConstants;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
@@ -41,6 +42,7 @@ import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import io.zell.zdb.v81.Version81Test;
+import org.agrona.concurrent.UnsafeBuffer;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -773,18 +775,15 @@ public class Version83Test {
         @Test
         public void shouldListProcesses() {
             // given
+            final var processState = new ProcessState(ZeebePaths.Companion.getRuntimePath(TEMP_DIR, "1"));
+            final var processes = new HashMap<Long, String>();
 
-            ZeebeDbReader zeebeDbReader = new ZeebeDbReader(ZeebePaths.Companion.getRuntimePath(TEMP_DIR, "1"));
+            // when
+            processState.listProcesses((key, valueJson) -> processes.put(new UnsafeBuffer(key).getLong(key.length - Long.BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER), valueJson));
 
-            zeebeDbReader.visitDB(((cf, key, value) ->
-            {
-
-                System.out.printf("\nColumnFamily?: '%s'", cf);
-                System.out.printf("\nKey: '%s'", new String(key));
-                System.out.printf("\nValue: '%s'", new String(value));
-            }));
+            // then
+            assertThat(processes).containsKey(2251799813685249L).containsKey(2251799813685250L);
         }
-
 
         @Test
         public void shouldGetProcessDetails() throws JsonProcessingException {
