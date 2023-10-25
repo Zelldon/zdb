@@ -36,6 +36,7 @@ import picocli.CommandLine.RunLast;
       GenerateCompletion.class, // to generate auto completion
       ProcessCommand.class,
       InstanceCommand.class,
+      IncidentCommand.class,
       LogCommand.class,
       StateCommand.class
     })

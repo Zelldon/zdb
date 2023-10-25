@@ -39,6 +39,7 @@ import io.zell.zdb.log.records.PersistedRecord;
 import io.zell.zdb.log.records.RaftRecord;
 import io.zell.zdb.log.records.Record;
 import io.zell.zdb.state.ZeebeDbReader;
+import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
 import io.zell.zdb.v81.Version81Test;
@@ -991,8 +992,8 @@ public class Version83Test {
             final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
 
             // when
-            final var zeebeDbReader = new ZeebeDbReader(runtimePath);
-            final var incidentAsJson = zeebeDbReader.getValueAsJson(ZbColumnFamilies.INCIDENTS, incidentKey);
+            final var incidentState = new IncidentState(runtimePath);
+            final var incidentAsJson = incidentState.incidentDetails(incidentKey);
 
             // then
             assertThat(incidentAsJson).isNotNull();
@@ -1006,37 +1007,37 @@ public class Version83Test {
             assertThat(incident.get("errorType").asText()).isEqualTo(ErrorType.EXTRACT_VALUE_ERROR.toString());
             assertThat(incident.get("variableScopeKey").asLong()).isEqualTo(2251799813685261L);
             assertThat(incident.get("jobKey").asLong()).isEqualTo(-1);
-
         }
 
         @Test
         public void shouldListIncidentDetails() throws JsonProcessingException {
             // given
             final var runtimePath = ZeebePaths.Companion.getRuntimePath(TEMP_DIR, "1");
-            final var incidentKey = 2251799813685264L;
+            final var incidentKey = 2251799813685265L;
             final var processInstanceEvent = zeebeContentCreator.processInstanceEvent;
             final var list = new ArrayList<String>();
 
             // when
-            final var zeebeDbReader = new ZeebeDbReader(runtimePath);
-            zeebeDbReader.visitDBWithPrefix(
-                    ZbColumnFamilies.INCIDENTS,
-                    (key, valueJson) -> list.add(valueJson));
+            final var incidentState = new IncidentState(runtimePath);
+            incidentState.listIncidents(list::add);
 
             // then
             assertThat(list).hasSize(1);
             final var incidentAsJson = list.get(0);
             assertThat(incidentAsJson).isNotNull();
-            final var incident = OBJECT_MAPPER.readTree(incidentAsJson).get("incidentRecord");
-            assertThat(incident.get("bpmnProcessId").asText()).isEqualTo("process");
-            assertThat(incident.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
-            assertThat(incident.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
-            assertThat(incident.get("elementInstanceKey").asLong()).isEqualTo(2251799813685261L);
-            assertThat(incident.get("elementId").asText()).isEqualTo("incidentTask");
-            assertThat(incident.get("errorMessage").asText()).isEqualTo("Expected result of the expression 'foo' to be 'NUMBER', but was 'NULL'.");
-            assertThat(incident.get("errorType").asText()).isEqualTo(ErrorType.EXTRACT_VALUE_ERROR.toString());
-            assertThat(incident.get("variableScopeKey").asLong()).isEqualTo(2251799813685261L);
-            assertThat(incident.get("jobKey").asLong()).isEqualTo(-1);
+            final var incident = OBJECT_MAPPER.readTree(incidentAsJson);
+            assertThat(incident.get("key").asLong()).isEqualTo(incidentKey);
+            final var incidentRecord = incident.get("value").get("incidentRecord");
+            assertThat(incidentRecord.get("bpmnProcessId").asText()).isEqualTo("process");
+            assertThat(incidentRecord.get("processDefinitionKey").asLong()).isEqualTo(processInstanceEvent.getProcessDefinitionKey());
+            assertThat(incidentRecord.get("processInstanceKey").asLong()).isEqualTo(processInstanceEvent.getProcessInstanceKey());
+            assertThat(incidentRecord.get("elementInstanceKey").asLong()).isEqualTo(2251799813685261L);
+            assertThat(incidentRecord.get("elementId").asText()).isEqualTo("incidentTask");
+            assertThat(incidentRecord.get("errorMessage").asText()).isEqualTo("Expected result of the expression 'foo' to be 'NUMBER', but was 'NULL'.");
+            assertThat(incidentRecord.get("errorType").asText()).isEqualTo(ErrorType.EXTRACT_VALUE_ERROR.toString());
+            assertThat(incidentRecord.get("variableScopeKey").asLong()).isEqualTo(2251799813685261L);
+            assertThat(incidentRecord.get("jobKey").asLong()).isEqualTo(-1);
+            assertThat(incidentRecord.get("jobKey").asLong()).isEqualTo(-1);
         }
     }
 }

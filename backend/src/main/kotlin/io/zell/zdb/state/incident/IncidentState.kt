@@ -17,6 +17,7 @@ package io.zell.zdb.state.incident
 
 import io.camunda.zeebe.db.impl.ZeebeDbConstants
 import io.camunda.zeebe.protocol.ZbColumnFamilies
+import io.zell.zdb.state.JsonElementVisitor
 import io.zell.zdb.state.ZeebeDbReader
 import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
@@ -29,37 +30,16 @@ class IncidentState(statePath: Path) {
         zeebeDbReader = ZeebeDbReader(statePath)
     }
 
-    fun listProcesses(visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
-        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE, visitor)
-        // for 8.3
-        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE, visitor)
+    fun listIncidents(visitor: JsonElementVisitor) {
+        zeebeDbReader.visitDBWithPrefix(
+            ZbColumnFamilies.INCIDENTS
+        ) { key: ByteArray?, valueJson: String? ->
+            val incidentKey = UnsafeBuffer(key).getLong(java.lang.Long.BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER).toString()
+            visitor.visit("""{"key": $incidentKey, "value": $valueJson}""")
+        }
     }
 
-    fun processDetails(processDefinitionKey : Long, visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
-        var found = false
-
-        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE) { key, value ->
-            val keyBuffer = UnsafeBuffer(key)
-            // due to the recent multi tenancy changes, the process definition key moved to the end
-            val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
-
-            if (currentProcessDefinitionKey == processDefinitionKey) {
-                found = true
-                visitor.visit(key, value)
-            }
-        }
-
-        if (!found) {
-            // for 8.3
-            zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE) { key, value ->
-                val keyBuffer = UnsafeBuffer(key)
-                // due to the recent multi tenancy changes, the process definition key moved to the end
-                val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
-
-                if (currentProcessDefinitionKey == processDefinitionKey) {
-                    visitor.visit(key, value)
-                }
-            }
-        }
+    fun incidentDetails(incidentKey : Long): String {
+        return zeebeDbReader.getValueAsJson(ZbColumnFamilies.INCIDENTS, incidentKey)
     }
 }

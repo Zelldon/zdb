@@ -15,8 +15,7 @@
  */
 package io.zell.zdb;
 
-import io.camunda.zeebe.protocol.ZbColumnFamilies;
-import io.zell.zdb.state.ZeebeDbReader;
+import io.zell.zdb.state.incident.IncidentState;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.*;
@@ -49,12 +48,8 @@ public class IncidentCommand implements Callable<Integer> {
     new JsonPrinter()
         .surround(
             (printer) -> {
-              final var zeebeDbReader = new ZeebeDbReader(partitionPath);
-              zeebeDbReader.visitDBWithPrefix(
-                  ZbColumnFamilies.INCIDENTS,
-                  (key, valueJson) -> {
-                    printer.accept(valueJson);
-                  });
+              final var incidentState = new IncidentState(partitionPath);
+              incidentState.listIncidents(printer::accept);
             });
     return 0;
   }
@@ -63,9 +58,7 @@ public class IncidentCommand implements Callable<Integer> {
   public int entity(
       @Parameters(paramLabel = "KEY", description = "The key of the incident", arity = "1")
           final long key) {
-    final var zeebeDbReader = new ZeebeDbReader(partitionPath);
-    final var valueAsJson = zeebeDbReader.getValueAsJson(ZbColumnFamilies.INCIDENTS, key);
-    System.out.println(valueAsJson);
+    System.out.println(new IncidentState(partitionPath).incidentDetails(key));
     return 0;
   }
 }
