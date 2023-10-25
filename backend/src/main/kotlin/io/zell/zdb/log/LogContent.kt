@@ -15,17 +15,10 @@
  */
 package io.zell.zdb.log
 
-import io.atomix.raft.storage.log.IndexedRaftLogEntry
-import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
-import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
-import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
-import io.camunda.zeebe.protocol.impl.record.RecordMetadata
-import io.camunda.zeebe.protocol.impl.record.value.processinstance.ProcessInstanceRecord
 import io.camunda.zeebe.protocol.record.ValueType
-import io.camunda.zeebe.stream.api.records.TypedRecord
-import io.camunda.zeebe.stream.impl.records.TypedRecordImpl
-import io.zell.zdb.journal.ReadOnlyJournalRecord
-import org.agrona.concurrent.UnsafeBuffer
+import io.zell.zdb.log.records.ApplicationRecord
+import io.zell.zdb.log.records.PersistedRecord
+import io.zell.zdb.log.records.Record
 
 class LogContent {
     val records = mutableListOf<PersistedRecord>()
@@ -53,7 +46,7 @@ class LogContent {
     }
 
     private fun addEventAsDotNode(
-        entry: TypedRecordImpl,
+        entry: Record,
         content: java.lang.StringBuilder
     ) {
         content.append(entry.position)
@@ -63,11 +56,18 @@ class LogContent {
             .append("\\n").append(entry.intent.name())
 
         if (entry.valueType == ValueType.PROCESS_INSTANCE) {
-            val processInstanceRecord = entry as TypedRecord<ProcessInstanceRecord>
-            val processInstanceValue = processInstanceRecord.value
-            content.append("\\n").append(processInstanceValue.bpmnElementType)
-            content.append("\\nPI Key: ").append(processInstanceValue.processInstanceKey)
-            content.append("\\nPD Key: ").append(processInstanceValue.processDefinitionKey)
+            val piRelatedValue = entry.recordValue.piRelatedValue
+            piRelatedValue.bpmnElementType?.let {
+                content.append("\\n").append(it)
+            }
+
+            piRelatedValue.processInstanceKey?.let {
+                content.append("\\nPI Key: ").append(it)
+            }
+
+            piRelatedValue.processDefinitionKey?.let {
+                content.append("\\nPD Key: ").append(it)
+            }
         }
 
         content

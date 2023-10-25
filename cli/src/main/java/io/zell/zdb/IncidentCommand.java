@@ -15,15 +15,12 @@
  */
 package io.zell.zdb;
 
-import io.zell.zdb.state.incident.IncidentState;
+import io.camunda.zeebe.protocol.ZbColumnFamilies;
+import io.zell.zdb.state.ZeebeDbReader;
 import java.nio.file.Path;
 import java.util.concurrent.Callable;
-import picocli.CommandLine.Command;
+import picocli.CommandLine.*;
 import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-import picocli.CommandLine.ScopeType;
-import picocli.CommandLine.Spec;
 
 @Command(
     name = "incident",
@@ -49,8 +46,16 @@ public class IncidentCommand implements Callable<Integer> {
 
   @Command(name = "list", description = "List all incidents")
   public int list() {
-    final var incidents = new IncidentState(partitionPath).listIncidents();
-    System.out.println(incidents);
+    new JsonPrinter()
+        .surround(
+            (printer) -> {
+              final var zeebeDbReader = new ZeebeDbReader(partitionPath);
+              zeebeDbReader.visitDBWithPrefix(
+                  ZbColumnFamilies.INCIDENTS,
+                  (key, valueJson) -> {
+                    printer.accept(valueJson);
+                  });
+            });
     return 0;
   }
 
@@ -58,8 +63,9 @@ public class IncidentCommand implements Callable<Integer> {
   public int entity(
       @Parameters(paramLabel = "KEY", description = "The key of the incident", arity = "1")
           final long key) {
-    final var incidentDetails = new IncidentState(partitionPath).incidentDetails(key);
-    System.out.println(incidentDetails);
+    final var zeebeDbReader = new ZeebeDbReader(partitionPath);
+    final var valueAsJson = zeebeDbReader.getValueAsJson(ZbColumnFamilies.INCIDENTS, key);
+    System.out.println(valueAsJson);
     return 0;
   }
 }

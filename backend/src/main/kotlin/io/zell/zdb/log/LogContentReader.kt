@@ -15,18 +15,19 @@
  */
 package io.zell.zdb.log
 
-import io.atomix.raft.storage.log.IndexedRaftLogEntry
-import io.atomix.raft.storage.log.RaftLogReader
 import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
+import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
-import io.camunda.zeebe.protocol.record.value.ProcessInstanceRelated
+import io.zell.zdb.log.records.*
+import kotlinx.serialization.json.Json
 import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 import kotlin.streams.asStream
 
 class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
 
+    private val json = Json { ignoreUnknownKeys = true }
     private val reader: RaftLogReader = LogFactory.newReader(logPath)
     private var isInLimit: (PersistedRecord) -> Boolean = { true }
     private var applicationRecordFilter: ((ApplicationRecord) -> Boolean)? = null
@@ -80,8 +81,9 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
         return next
     }
 
+
     private fun convertToPersistedRecord(
-        entry: IndexedRaftLogEntry,
+        entry: IndexedRaftLogEntryImpl,
     ) : PersistedRecord {
         if (entry.isApplicationEntry) {
             val applicationEntry = entry.applicationEntry as SerializedApplicationEntry
@@ -98,9 +100,24 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
                 loggedEvent.wrap(readBuffer, offset)
                 loggedEvent.readMetadata(metadata)
 
-                val typedEvent = convertToTypedEvent(loggedEvent, metadata)
+                val valueJson = MsgPackConverter.convertToJson(
+                    UnsafeBuffer(loggedEvent.valueBuffer, loggedEvent.valueOffset, loggedEvent.valueLength))
 
-                applicationRecord.entries.add(typedEvent)
+               val parsedRecord = Record(
+                    loggedEvent.position,
+                    loggedEvent.sourceEventPosition,
+                    loggedEvent.timestamp,
+                    loggedEvent.key,
+                    metadata.recordType,
+                    metadata.valueType,
+                    metadata.intent,
+                   metadata.brokerVersion.toString(),
+                   metadata.recordVersion,
+                    RecordValue(valueJson,
+                        json.decodeFromString<ProcessInstanceRelatedValue>(valueJson) )
+                    )
+
+                applicationRecord.entries.add(parsedRecord)
 
                 offset += loggedEvent.getLength();
             } while (offset < readBuffer.capacity());
@@ -136,8 +153,8 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
         applicationRecordFilter = {
             record : ApplicationRecord ->
                 record.entries.asSequence()
-                    .map { it.value }
-                    .filterIsInstance<ProcessInstanceRelated>()
+                    .map { it.recordValue.piRelatedValue }
+                    .filter { it.processInstanceKey != null }
                     .asStream()
                     .map { it.processInstanceKey }
                     .anyMatch(instanceKey::equals)

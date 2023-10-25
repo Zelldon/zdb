@@ -1,22 +1,15 @@
 /*
- * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright Camunda Services GmbH and/or licensed to Camunda Services GmbH under
+ * one or more contributor license agreements. See the NOTICE file distributed
+ * with this work for additional information regarding copyright ownership.
+ * Licensed under the Zeebe Community License 1.1. You may not use this file
+ * except in compliance with the Zeebe Community License 1.1.
  */
 package io.zell.zdb.journal.file;
 
 import io.camunda.zeebe.journal.CorruptedJournalException;
 import io.camunda.zeebe.journal.JournalException;
+import org.agrona.IoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,39 +149,17 @@ final class SegmentsManager implements AutoCloseable {
     return segments;
   }
 
-  private SegmentDescriptor readDescriptor(final Path file) {
-    final var fileName = file.getFileName().toString();
-
-    try (final FileChannel channel = FileChannel.open(file, StandardOpenOption.READ)) {
-      final var fileSize = Files.size(file);
-      final byte version = readVersion(channel, fileName);
-      final int length = SegmentDescriptor.getEncodingLengthForVersion(version);
-      if (fileSize < length) {
-        throw new CorruptedJournalException(
-                String.format(
-                        "Expected segment '%s' with version %d to be at least %d bytes long but it only has %d.",
-                        fileName, version, length, fileSize));
-      }
-
-      final ByteBuffer buffer = ByteBuffer.allocate(length);
-      final int readBytes = channel.read(buffer, 0);
-
-      if (readBytes != -1 && readBytes < length) {
-        throw new JournalException(
-                String.format(
-                        "Expected to read %d bytes of segment '%s' with %d version but only read %d bytes.",
-                        length, fileName, version, readBytes));
-      }
-
-      buffer.flip();
-      return new SegmentDescriptor(buffer);
+  private SegmentDescriptor readDescriptor(final ByteBuffer buffer, final String fileName) {
+    try {
+      return new SegmentDescriptorReader().readFrom(buffer);
     } catch (final IndexOutOfBoundsException e) {
       throw new JournalException(
               String.format(
                       "Expected to read descriptor of segment '%s', but nothing was read.", fileName),
               e);
-    } catch (final IOException e) {
-      throw new JournalException(e);
+    } catch (final IllegalStateException e) {
+      throw new CorruptedJournalException(
+              String.format("Couldn't read or recognize version of segment '%s'.", fileName), e);
     }
   }
 
@@ -221,18 +192,25 @@ final class SegmentsManager implements AutoCloseable {
   }
   Segment loadExistingSegment(
           final Path segmentFile, final long lastWrittenAsqn, final JournalIndex journalIndex) {
-    final var descriptor = readDescriptor(segmentFile);
-    final MappedByteBuffer mappedSegment;
 
     try (final var channel =
                  FileChannel.open(segmentFile, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
-      mappedSegment = mapSegment(channel, descriptor.maxSegmentSize());
+      MappedByteBuffer mappedSegment;
+      final var initialMappedLength = Files.size(segmentFile);
+      mappedSegment = mapSegment(channel, initialMappedLength);
+      final var descriptor = readDescriptor(mappedSegment, segmentFile.getFileName().toString());
+
+      if (descriptor.maxSegmentSize() > initialMappedLength) {
+        // remap with actual size
+        IoUtil.unmap(mappedSegment);
+        mappedSegment = mapSegment(channel, descriptor.maxSegmentSize());
+      }
+
+      return loadSegment(segmentFile, mappedSegment, descriptor, lastWrittenAsqn, journalIndex);
     } catch (final IOException e) {
       throw new JournalException(
               String.format("Failed to load existing segment %s", segmentFile), e);
     }
-
-    return loadSegment(segmentFile, mappedSegment, descriptor, lastWrittenAsqn, journalIndex);
   }
 
   /* ---- Internal methods ------ */

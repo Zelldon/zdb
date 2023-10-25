@@ -1,4 +1,6 @@
 /*
+ * Copyright 2017-present Open Networking Foundation
+ * Copyright © 2020 camunda services GmbH (info@camunda.com)
  * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +17,11 @@
  */
 package io.zell.zdb.log;
 
-import io.atomix.raft.storage.log.IndexedRaftLogEntry;
-import io.atomix.raft.storage.log.RaftLogReader;
 import io.atomix.raft.storage.log.entry.RaftLogEntry;
 import io.atomix.raft.storage.serializer.RaftEntrySBESerializer;
 import io.atomix.raft.storage.serializer.RaftEntrySerializer;
 import io.zell.zdb.journal.JournalReader;
-import io.zell.zdb.journal.ReadOnlyJournalRecord;
+import io.zell.zdb.log.records.IndexedRaftLogEntryImpl;
 
 import java.util.NoSuchElementException;
 
@@ -43,30 +43,20 @@ public class RaftLogUncommittedReader implements RaftLogReader {
     }
 
     @Override
-    public IndexedRaftLogEntry next() {
+    public IndexedRaftLogEntryImpl next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
 
-        final ReadOnlyJournalRecord journalRecord = journalReader.next();
+        final var journalRecord = journalReader.next();
         final RaftLogEntry entry = serializer.readRaftLogEntry(journalRecord.data());
 
         return new IndexedRaftLogEntryImpl(entry.term(), entry.entry(), journalRecord);
     }
 
     @Override
-    public long reset() {
-        return journalReader.seekToFirst();
-    }
-
-    @Override
     public long seek(final long index) {
         return journalReader.seek(index);
-    }
-
-    @Override
-    public long seekToLast() {
-        return journalReader.seekToLast();
     }
 
     @Override

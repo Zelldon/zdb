@@ -15,32 +15,51 @@
  */
 package io.zell.zdb.state.process
 
-import io.camunda.zeebe.engine.EngineConfiguration
-import io.camunda.zeebe.engine.state.ProcessingDbState
-import io.camunda.zeebe.engine.state.deployment.DeployedProcess
-import io.camunda.zeebe.engine.state.immutable.ProcessingState
-import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
+import io.camunda.zeebe.db.impl.ZeebeDbConstants
+import io.camunda.zeebe.protocol.ZbColumnFamilies
+import io.zell.zdb.state.ZeebeDbReader
+import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 
 class ProcessState(statePath: Path) {
 
-    private var zeebeDbState: ProcessingState
+    private var zeebeDbReader: ZeebeDbReader
 
     init {
-        val readonlyDb = ReadonlyTransactionDb.openReadonlyDb(statePath)
-        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 }, EngineConfiguration())
+        zeebeDbReader = ZeebeDbReader(statePath)
     }
 
-    fun listProcesses(): List<ProcessMeta> {
-        return zeebeDbState
-            .processState
-            .processes.map { ProcessMeta(it) }
+    fun listProcesses(visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE, visitor)
+        // for 8.3
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE, visitor)
     }
 
-    fun processDetails(processDefinitionKey : Long): ProcessDetails? {
-        val deployedProcess : DeployedProcess? = zeebeDbState
-            .processState
-            .getProcessByKey(processDefinitionKey)
-        return if (deployedProcess != null) ProcessDetails(deployedProcess) else null
+    fun processDetails(processDefinitionKey : Long, visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        var found = false
+
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE) { key, value ->
+            val keyBuffer = UnsafeBuffer(key)
+            // due to the recent multi tenancy changes, the process definition key moved to the end
+            val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+
+            if (currentProcessDefinitionKey == processDefinitionKey) {
+                found = true
+                visitor.visit(key, value)
+            }
+        }
+
+        if (!found) {
+            // for 8.3
+            zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE) { key, value ->
+                val keyBuffer = UnsafeBuffer(key)
+                // due to the recent multi tenancy changes, the process definition key moved to the end
+                val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+
+                if (currentProcessDefinitionKey == processDefinitionKey) {
+                    visitor.visit(key, value)
+                }
+            }
+        }
     }
 }

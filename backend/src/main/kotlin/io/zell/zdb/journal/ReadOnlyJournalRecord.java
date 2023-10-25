@@ -1,4 +1,5 @@
 /*
+ * Copyright © 2017 camunda services GmbH (info@camunda.com)
  * Copyright © 2021 Christopher Kujawa (zelldon91@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,4 +47,11 @@ public interface ReadOnlyJournalRecord {
    * @return data
    */
   DirectBuffer data();
+
+  /**
+   * Serialized journal record that includes index, asqn and data.
+   *
+   * @return serialized record
+   */
+  DirectBuffer serializedRecord();
 }

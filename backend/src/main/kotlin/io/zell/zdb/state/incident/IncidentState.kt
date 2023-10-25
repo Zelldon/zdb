@@ -15,51 +15,51 @@
  */
 package io.zell.zdb.state.incident
 
-import io.camunda.zeebe.db.impl.DbLong
-import io.camunda.zeebe.engine.EngineConfiguration
-import io.camunda.zeebe.engine.state.ProcessingDbState
-import io.camunda.zeebe.engine.state.immutable.ProcessingState
-import io.camunda.zeebe.engine.state.instance.Incident
+import io.camunda.zeebe.db.impl.ZeebeDbConstants
 import io.camunda.zeebe.protocol.ZbColumnFamilies
-import io.zell.zdb.db.readonly.transaction.ReadonlyTransactionDb
+import io.zell.zdb.state.ZeebeDbReader
+import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 
-class IncidentState(readonlyDb: ReadonlyTransactionDb) {
+class IncidentState(statePath: Path) {
 
-    private var zeebeDbState: ProcessingState
-    private var readonlyDb: ReadonlyTransactionDb
+    private var zeebeDbReader: ZeebeDbReader
 
     init {
-        this.readonlyDb = readonlyDb
-        zeebeDbState = ProcessingDbState(1, readonlyDb, readonlyDb.createContext(), { 1 }, EngineConfiguration())
+        zeebeDbReader = ZeebeDbReader(statePath)
     }
 
-    constructor(statePath: Path) : this(ReadonlyTransactionDb.openReadonlyDb(statePath))
-
-    fun jobIncidentKey(jobKey : Long): Long {
-        return zeebeDbState.incidentState.getJobIncidentKey(jobKey)
+    fun listProcesses(visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE, visitor)
+        // for 8.3
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE, visitor)
     }
 
-    fun processInstanceIncidentKey(elementInstanceKey: Long): Long {
-        return zeebeDbState.incidentState.getProcessInstanceIncidentKey(elementInstanceKey)
+    fun processDetails(processDefinitionKey : Long, visitor: ZeebeDbReader.JsonValueWithKeyPrefixVisitor) {
+        var found = false
+
+        zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE) { key, value ->
+            val keyBuffer = UnsafeBuffer(key)
+            // due to the recent multi tenancy changes, the process definition key moved to the end
+            val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+
+            if (currentProcessDefinitionKey == processDefinitionKey) {
+                found = true
+                visitor.visit(key, value)
+            }
+        }
+
+        if (!found) {
+            // for 8.3
+            zeebeDbReader.visitDBWithPrefix(ZbColumnFamilies.PROCESS_CACHE) { key, value ->
+                val keyBuffer = UnsafeBuffer(key)
+                // due to the recent multi tenancy changes, the process definition key moved to the end
+                val currentProcessDefinitionKey = keyBuffer.getLong(keyBuffer.capacity() - Long.SIZE_BYTES, ZeebeDbConstants.ZB_DB_BYTE_ORDER)
+
+                if (currentProcessDefinitionKey == processDefinitionKey) {
+                    visitor.visit(key, value)
+                }
+            }
+        }
     }
-
-    fun incidentDetails(incidentKey : Long): IncidentDetails {
-        val incidentState = zeebeDbState.incidentState
-        val incidentRecord = incidentState.getIncidentRecord(incidentKey)
-
-        return IncidentDetails(incidentKey, incidentRecord)
-    }
-
-    fun listIncidents(): List<IncidentDetails> {
-        val incidentKey = DbLong()
-        val incident = Incident()
-        val incidentColumnFamily = readonlyDb.createColumnFamily(ZbColumnFamilies.INCIDENTS, readonlyDb.createContext(), incidentKey, incident)
-
-        val incidents = mutableListOf<IncidentDetails>()
-        incidentColumnFamily.forEach { key, _ -> incidents.add(incidentDetails(key.value))}
-
-        return incidents
-    }
-
 }

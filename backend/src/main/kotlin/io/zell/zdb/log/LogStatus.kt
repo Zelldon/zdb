@@ -15,7 +15,6 @@
  */
 package io.zell.zdb.log
 
-import io.atomix.raft.storage.log.RaftLogReader
 import java.nio.file.Path
 
 
@@ -26,9 +25,7 @@ class LogStatus(logPath: Path) {
     fun status(): LogStatusDetails {
         val logStatusDetails = LogStatusDetails()
 
-        reader.forEach {
-            logStatusDetails.scannedEntries++
-
+        reader.forEachRemaining {
             val persistedRaftRecord = it.persistedRaftRecord
 
             if (logStatusDetails.highestTerm < persistedRaftRecord.term()) {
@@ -44,16 +41,6 @@ class LogStatus(logPath: Path) {
                 logStatusDetails.lowestIndex = currentEntryIndex
             }
 
-            val approxEntrySize = persistedRaftRecord.approximateSize()
-            if (logStatusDetails.maxEntrySizeBytes < approxEntrySize) {
-                logStatusDetails.maxEntrySizeBytes = approxEntrySize
-            }
-
-            if (logStatusDetails.minEntrySizeBytes > approxEntrySize) {
-                logStatusDetails.minEntrySizeBytes = approxEntrySize
-            }
-            logStatusDetails.avgEntrySizeBytes += approxEntrySize
-
             if (it.isApplicationEntry) {
                 val applicationEntry = it.applicationEntry
                 if (logStatusDetails.highestRecordPosition < applicationEntry.highestPosition()) {
@@ -64,10 +51,6 @@ class LogStatus(logPath: Path) {
                     logStatusDetails.lowestRecordPosition = applicationEntry.lowestPosition()
                 }
             }
-        }
-
-        if (logStatusDetails.scannedEntries > 0) {
-            logStatusDetails.avgEntrySizeBytes /= logStatusDetails.scannedEntries
         }
 
         return logStatusDetails
