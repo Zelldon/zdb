@@ -1,0 +1,66 @@
+name: RELEASE
+on:
+  push:
+    tags:
+      - '*'
+jobs:
+  Pre_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+  Build_release:
+    needs: Pre_release
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-11 ] # [ ubuntu-latest, macos-11, windows-2019 ]
+    runs-on: ${{ matrix.os }}
+
+    # Required to upload release artifacts to GitHub
+    permissions:
+      contents: write
+
+    steps:
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '17.0.7'
+          distribution: 'graalvm'
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build release
+        run: mvn clean package -DskipTests -T 3
+
+      - name: Rename artifacts for MacOS
+        if: ${{ runner.os == 'macOS' }}
+        run: mv cli/target/zdb cli/target/zdb.darwin
+
+      - name: Upload artifacts for MacOS
+        uses: softprops/action-gh-release@v1
+        if: ${{startsWith(github.ref, 'refs/tags/') && runner.os == 'macOS' }}
+        with:
+          draft: false
+          files: cli/target/zdb.darwin
+
+# DISABLED FOR NOW
+#      - name: Rename artifacts for Windows
+#        if: ${{ runner.os == 'Windows' }}
+#        run: mv cli/target/zdb cli/target/zdb.bat
+
+#      - name: Upload artifacts for Windows
+#        uses: softprops/action-gh-release@v1
+#        if: ${{startsWith(github.ref, 'refs/tags/') && runner.os == 'Windows' }}
+#        with:
+#          draft: false
+#          files: cli/target/zdb.bat
+
+      - name: Upload artifacts for Linux
+        uses: softprops/action-gh-release@v1
+        if: ${{startsWith(github.ref, 'refs/tags/') && runner.os == 'Linux' }}
+        with:
+          draft: false
+          files: cli/target/zdb
