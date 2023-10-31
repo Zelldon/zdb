@@ -143,6 +143,10 @@ final class SegmentsManager implements AutoCloseable {
         previousSegment = segment;
       } catch (final CorruptedJournalException e) {
         throw e;
+      } catch (EmptySegmentException ese) {
+        // here we know the segment was empty, likely to an incomplete write or async preparation
+        // we skip the segment
+         LOG.trace("Expected to read segment {}, but failed (potential due to corruption or incompleteness) will skip segment.", file.getName(), ese);
       }
     }
 
