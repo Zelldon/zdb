@@ -42,6 +42,7 @@ import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
+import io.zell.zdb.v81.Version81Test;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
@@ -71,6 +72,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Testcontainers
 public class VersionLatestTest {
 
+    private static final DockerImageName DOCKER_IMAGE = DockerImageName.parse("camunda/zeebe:SNAPSHOT");
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final BpmnModelInstance PROCESS =
@@ -89,6 +91,62 @@ public class VersionLatestTest {
                     .done();
 
     @Nested
+    public class LargeLogTest {
+        // earlier ZDB versions failed on large logs, because of segments were async created and incomplete
+        private static final Logger LOGGER =
+                LoggerFactory.getLogger(LargeLogTest.class);
+        private static final File TEMP_DIR = TestUtils.newTmpFolder(LargeLogTest.class);
+        private static final ZeebeContentCreator zeebeContentCreator = new ZeebeContentCreator(PROCESS);
+        @Container
+        public static ZeebeContainer zeebeContainer = new ZeebeContainer(DOCKER_IMAGE)
+                /* run the container with the current user, in order to access the data and delete it later */
+                .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
+                // with 8.2 we disabled WAL per default
+                // we have to enabled it inorder to access the data from RocksDB
+                .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
+                .withLogConsumer(new Slf4jLogConsumer(LOGGER))
+                .withFileSystemBind(TEMP_DIR.getPath(), TestUtils.CONTAINER_PATH, BindMode.READ_WRITE);
+
+        static {
+            TEMP_DIR.mkdirs();
+        }
+
+        @BeforeAll
+        public static void setup() {
+            zeebeContentCreator
+                    .createLargeContent(zeebeContainer.getExternalGatewayAddress());
+        }
+
+        @AfterAll
+        public static void cleanup() throws Exception {
+            FileUtil.deleteFolderIfExists(TEMP_DIR.toPath());
+        }
+
+        @Test
+        public void shouldReadStatusFromLog() {
+            // given
+            final var logPath = ZeebePaths.Companion.getLogPath(TEMP_DIR, "1");
+            var logStatus = new LogStatus(logPath);
+
+            // when
+            final var status = logStatus.status();
+
+            // then
+            assertThat(status.getHighestIndex()).isEqualTo(211);
+            assertThat(status.getHighestTerm()).isEqualTo(1);
+            assertThat(status.getHighestRecordPosition()).isEqualTo(258);
+            assertThat(status.getLowestIndex()).isEqualTo(1);
+            assertThat(status.getLowestRecordPosition()).isEqualTo(1);
+
+            assertThat(status.toString())
+                    .contains("lowestRecordPosition")
+                    .contains("highestRecordPosition")
+                    .contains("highestTerm")
+                    .contains("highestIndex")
+                    .contains("lowestIndex");
+        }
+    }
+    @Nested
     public class ZeebeLogTest {
 
         private static final Logger LOGGER =
@@ -96,7 +154,7 @@ public class VersionLatestTest {
         private static final File TEMP_DIR = TestUtils.newTmpFolder(ZeebeLogTest.class);
         private static final ZeebeContentCreator zeebeContentCreator = new ZeebeContentCreator(PROCESS);
         @Container
-        public static ZeebeContainer zeebeContainer = new ZeebeContainer(DockerImageName.parse("camunda/zeebe:SNAPSHOT"))
+        public static ZeebeContainer zeebeContainer = new ZeebeContainer(DOCKER_IMAGE)
                 /* run the container with the current user, in order to access the data and delete it later */
                 .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
                 // with 8.2 we disabled WAL per default

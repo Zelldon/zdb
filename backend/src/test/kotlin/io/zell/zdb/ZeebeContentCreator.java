@@ -41,52 +41,65 @@ public class ZeebeContentCreator {
     public ProcessInstanceEvent processInstanceEvent;
 
    public void createContent(String gatewayAddress) {
-       final var client = ZeebeClient.newClientBuilder()
-           .gatewayAddress(gatewayAddress)
-           .usePlaintext()
-           .build();
+       createContent(gatewayAddress, 1);
+    }
 
-       deploymentEvent = client.newDeployResourceCommand()
-           .addProcessModel(processModel, "process.bpmn")
-           .addProcessModel(SIMPLE_PROCESS, "simple.bpmn")
-           .send()
-           .join();
+    public void createLargeContent(String gatewayAddress) {
+        createContent(gatewayAddress, 100);
+    }
 
-       processInstanceEvent = client
-           .newCreateInstanceCommand()
-           .bpmnProcessId("process")
-           .latestVersion()
-           .variables(Map.of("var1", "1", "var2", "12", "var3", "123"))
-           .send()
-           .join();
+    public void createContent(String gatewayAddress, final int amountOfMessages) {
+        final var client = ZeebeClient.newClientBuilder()
+                .gatewayAddress(gatewayAddress)
+                .usePlaintext()
+                .build();
 
-       client.newPublishMessageCommand().messageName("msg").correlationKey("123")
-           .timeToLive(Duration.ofSeconds(1)).send().join();
-       client.newPublishMessageCommand().messageName("msg12").correlationKey("123")
-           .timeToLive(Duration.ofHours(1)).send().join();
+        deploymentEvent = client.newDeployResourceCommand()
+                .addProcessModel(processModel, "process.bpmn")
+                .addProcessModel(SIMPLE_PROCESS, "simple.bpmn")
+                .send()
+                .join();
 
-       // Small hack to ensure we reached the task and job of the previous PI
-       // If the process instance we start after, ended we can be sure that
-       // we reached also the wait-state in the other PI.
-       client
-           .newCreateInstanceCommand()
-           .bpmnProcessId("simple")
-           .latestVersion()
-           .withResult()
-           .send()
-           .join();
+        processInstanceEvent = client
+                .newCreateInstanceCommand()
+                .bpmnProcessId("process")
+                .latestVersion()
+                .variables(Map.of("var1", "1", "var2", "12", "var3", "123"))
+                .send()
+                .join();
 
-       var responseJobKey = 0L;
-       do {
-           final var activateJobsResponse = client.newActivateJobsCommand().jobType("type")
-               .maxJobsToActivate(1).send()
-               .join();
-           if (activateJobsResponse != null && !activateJobsResponse.getJobs().isEmpty()) {
-               responseJobKey = activateJobsResponse.getJobs().get(0).getKey();
-           }
-       } while (responseJobKey <= 0);
+        final String value = "A".repeat(1_000_000);
 
-       client.close();
+        for (int i = 0; i < amountOfMessages; i++) {
+            client.newPublishMessageCommand().messageName("msg").correlationKey("123")
+                    .variable("foo", value)
+                    .timeToLive(Duration.ofSeconds(1)).send().join();
+        }
+        client.newPublishMessageCommand().messageName("msg12").correlationKey("123")
+                .timeToLive(Duration.ofHours(1)).send().join();
+
+        // Small hack to ensure we reached the task and job of the previous PI
+        // If the process instance we start after, ended we can be sure that
+        // we reached also the wait-state in the other PI.
+        client
+                .newCreateInstanceCommand()
+                .bpmnProcessId("simple")
+                .latestVersion()
+                .withResult()
+                .send()
+                .join();
+
+        var responseJobKey = 0L;
+        do {
+            final var activateJobsResponse = client.newActivateJobsCommand().jobType("type")
+                    .maxJobsToActivate(1).send()
+                    .join();
+            if (activateJobsResponse != null && !activateJobsResponse.getJobs().isEmpty()) {
+                responseJobKey = activateJobsResponse.getJobs().get(0).getKey();
+            }
+        } while (responseJobKey <= 0);
+
+        client.close();
     }
 
 }
