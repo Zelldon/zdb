@@ -52,3 +52,6 @@ cp cli/target/cli-*-jar-with-dependencies.jar zdb.jar
 
 git push origin main
 git push origin "$version"
+
+gh release create "$version" --generate-notes zdb*
+
