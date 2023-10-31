@@ -32,7 +32,6 @@ import io.zeebe.containers.ZeebeContainer;
 import io.zell.zdb.TestUtils;
 import io.zell.zdb.ZeebeContentCreator;
 import io.zell.zdb.ZeebePaths;
-import io.zell.zdb.latest.VersionLatestTest;
 import io.zell.zdb.log.LogContentReader;
 import io.zell.zdb.log.LogSearch;
 import io.zell.zdb.log.LogStatus;
@@ -95,8 +94,8 @@ public class Version83Test {
     public class LargeLogTest {
         // earlier ZDB versions failed on large logs, because of segments were async created and incomplete
         private static final Logger LOGGER =
-                LoggerFactory.getLogger(VersionLatestTest.LargeLogTest.class);
-        private static final File TEMP_DIR = TestUtils.newTmpFolder(VersionLatestTest.LargeLogTest.class);
+                LoggerFactory.getLogger(LargeLogTest.class);
+        private static final File TEMP_DIR = TestUtils.newTmpFolder(LargeLogTest.class);
         private static final ZeebeContentCreator zeebeContentCreator = new ZeebeContentCreator(PROCESS);
         @Container
         public static ZeebeContainer zeebeContainer = new ZeebeContainer(DOCKER_IMAGE)
@@ -151,8 +150,8 @@ public class Version83Test {
     public class ZeebeLogTest {
 
         private static final Logger LOGGER =
-                LoggerFactory.getLogger(VersionLatestTest.ZeebeLogTest.class);
-        private static final File TEMP_DIR = TestUtils.newTmpFolder(VersionLatestTest.ZeebeLogTest.class);
+                LoggerFactory.getLogger(ZeebeLogTest.class);
+        private static final File TEMP_DIR = TestUtils.newTmpFolder(ZeebeLogTest.class);
         private static final ZeebeContentCreator zeebeContentCreator = new ZeebeContentCreator(PROCESS);
         @Container
         public static ZeebeContainer zeebeContainer = new ZeebeContainer(DOCKER_IMAGE)
