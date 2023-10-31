@@ -42,6 +42,24 @@ final class SegmentDescriptorReader {
       if (version >= SegmentDescriptor.META_VERSION && version <= SegmentDescriptor.CUR_VERSION) {
         readV2Descriptor(directBuffer);
       } else {
+        if (version == 0) {
+          final var bytes = new byte[SegmentDescriptor.getEncodingLength()];
+          directBuffer.getBytes(0, bytes);
+
+          boolean allZero = true;
+          // check whether the descriptor is all zero than it is likely that the rest is zero as well
+          // this is used to differentiate an empty created segment between a corrupted or different version
+          for (int i = 0; i < SegmentDescriptor.getEncodingLength(); i++) {
+            if (bytes[i] > 0) {
+              allZero = false;
+              break;
+            }
+          }
+          if (allZero) {
+            throw new EmptySegmentException();
+          }
+        }
+
         throw new IllegalStateException(
             String.format(
                 "Expected version to be one (%d %d] but read %d instead.",
