@@ -58,18 +58,20 @@ class ApplicationRecord(val index: Long, val term: Long, val highestPosition: Lo
             .append(separator)
             .append(record.intent)
 
-        val piRelatedValue = record.recordValue.piRelatedValue
-        piRelatedValue.processInstanceKey?.let {
-            stringBuilder
-                .append(separator)
-                .append(it)
-                .append(separator)
-        }
+        val piRelatedValue = record.piRelatedValue
+        piRelatedValue?.let {
+            piRelatedValue.processInstanceKey?.let {
+                stringBuilder
+                    .append(separator)
+                    .append(it)
+                    .append(separator)
+            }
 
-        piRelatedValue.bpmnElementType?.let {
-            stringBuilder
-                .append(it)
-                .append(separator)
+            piRelatedValue.bpmnElementType?.let {
+                stringBuilder
+                    .append(it)
+                    .append(separator)
+            }
         }
         return stringBuilder.toString()
     }

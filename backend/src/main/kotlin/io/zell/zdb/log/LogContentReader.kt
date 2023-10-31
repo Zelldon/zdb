@@ -19,6 +19,8 @@ import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
+import io.camunda.zeebe.protocol.record.RecordType
+import io.camunda.zeebe.protocol.record.RejectionType
 import io.zell.zdb.log.records.*
 import kotlinx.serialization.json.Json
 import org.agrona.concurrent.UnsafeBuffer
@@ -111,11 +113,17 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
                     metadata.recordType,
                     metadata.valueType,
                     metadata.intent,
+                   metadata.rejectionType,
+                   metadata.rejectionReason,
+                   metadata.requestId,
+                   metadata.requestStreamId,
+                   metadata.protocolVersion,
                    metadata.brokerVersion.toString(),
                    metadata.recordVersion,
-                    RecordValue(valueJson,
-                        json.decodeFromString<ProcessInstanceRelatedValue>(valueJson) )
-                    )
+                   metadata.authorization.authData.toString(),
+                    Json.decodeFromString(valueJson),
+                    json.decodeFromString<ProcessInstanceRelatedValue>(valueJson) )
+
 
                 applicationRecord.entries.add(parsedRecord)
 
@@ -153,11 +161,23 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
         applicationRecordFilter = {
             record : ApplicationRecord ->
                 record.entries.asSequence()
-                    .map { it.recordValue.piRelatedValue }
+                    .map { it.piRelatedValue }
+                    .filter { it != null }
+                    .map { it!! }
                     .filter { it.processInstanceKey != null }
                     .asStream()
                     .map { it.processInstanceKey }
                     .anyMatch(instanceKey::equals)
         }
     }
+
+    fun filterForRejections() {
+        applicationRecordFilter = {
+                record : ApplicationRecord ->
+            record.entries.asSequence()
+                .map { it.recordType }
+                .any { it == RecordType.COMMAND_REJECTION }
+        }
+    }
+
 }
