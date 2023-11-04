@@ -273,7 +273,7 @@ public class Version83Test {
                     "valueType":"PROCESS_INSTANCE_CREATION","intent":"CREATE","rejectionType":"NOT_FOUND",
                     "rejectionReason":"Expected to find process definition with process ID 'nonExisting', but none found",
                     "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.3.0",
-                    "recordVersion":1,"authData":"",
+                    "recordVersion":1,
                     "recordValue":{"bpmnProcessId":"nonExisting","processDefinitionKey":0,"processInstanceKey":-1,
                     "version":-1,"variables":"gA==","fetchVariables":[],
                     "startInstructions":[],"tenantId":"<default>"}}
@@ -311,7 +311,6 @@ public class Version83Test {
                     {"position":12,"sourceRecordPosition":5,"key":2251799813685252,"recordType":"EVENT",
                     "valueType":"PROCESS_INSTANCE","intent":"ELEMENT_ACTIVATED","requestId":-1,
                     "requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.3.0","recordVersion":1,
-                    "authData":"",
                     "recordValue":{"bpmnElementType":"PROCESS","elementId":"process","bpmnProcessId":"process",
                     "version":1,"processDefinitionKey":2251799813685249,"processInstanceKey":2251799813685252,
                     "flowScopeKey":-1,"bpmnEventType":"UNSPECIFIED","parentProcessInstanceKey":-1,

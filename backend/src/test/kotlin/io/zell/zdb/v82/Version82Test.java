@@ -258,7 +258,7 @@ public class Version82Test {
                     .findFirst();
 
             assertThat(rejection).isPresent();
-            assertThat(rejection.get().component8()).isEqualTo(RejectionType.INVALID_ARGUMENT);
+            assertThat(rejection.get().component8()).isEqualTo(RejectionType.NOT_FOUND);
             assertThat(rejection.get().component9()).isEqualTo("Expected to find process definition with process ID 'nonExisting', but none found");
         }
 
@@ -267,10 +267,9 @@ public class Version82Test {
             // given
             final var expectedJson = OBJECT_MAPPER.readTree("""
                     {"position":62,"sourceRecordPosition":61,"key":-1,"recordType":"COMMAND_REJECTION",
-                    "valueType":"PROCESS_INSTANCE_CREATION","intent":"CREATE","rejectionType":"INVALID_ARGUMENT",
+                    "valueType":"PROCESS_INSTANCE_CREATION","intent":"CREATE","rejectionType":"NOT_FOUND",
                     "rejectionReason":"Expected to find process definition with process ID 'nonExisting', but none found",
-                    "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":3,"brokerVersion":"2049.512.4096",
-                    "recordVersion":20736,"authData":"",
+                    "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":3,"brokerVersion":"8.2.16",
                     "recordValue":{"bpmnProcessId":"nonExisting","processDefinitionKey":0,"processInstanceKey":-1,
                     "version":-1,"variables":"gA==","fetchVariables":[],
                     "startInstructions":[]}}
@@ -287,11 +286,11 @@ public class Version82Test {
                     .filter(persistedRecord -> persistedRecord instanceof ApplicationRecord)
                     .map(persistedRecord -> (ApplicationRecord) persistedRecord)
                     .flatMap(applicationRecord -> applicationRecord.getEntries().stream())
-                    .filter(record -> !record.component8().equals(RejectionType.NULL_VAL.name()))
+                    .filter(record -> record.component8() != RejectionType.NULL_VAL)
                     .findFirst();
 
             assertThat(rejection).isPresent();
-            assertThat(rejection.get().component8()).isEqualTo(RejectionType.INVALID_ARGUMENT);
+            assertThat(rejection.get().component8()).isEqualTo(RejectionType.NOT_FOUND);
             assertThat(rejection.get().component9()).isEqualTo("Expected to find process definition with process ID 'nonExisting', but none found");
 
             final var recordJson = rejection.get().toString()
@@ -306,9 +305,8 @@ public class Version82Test {
             // given
             final var expectedJson = OBJECT_MAPPER.readTree("""
                     {"position":13,"sourceRecordPosition":6,"key":2251799813685252,"recordType":"EVENT",
-                    "valueType":"PROCESS_INSTANCE","intent":"ELEMENT_ACTIVATED","rejectionType":"INVALID_ARGUMENT",
-                    "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":3,"brokerVersion":"2303.512.4096",
-                    "recordVersion":1,"authData":"",
+                    "valueType":"PROCESS_INSTANCE","intent":"ELEMENT_ACTIVATED",
+                    "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":3,"brokerVersion":"8.2.16",
                     "recordValue":{"bpmnElementType":"PROCESS","elementId":"process","bpmnProcessId":"process",
                     "version":1,"processDefinitionKey":2251799813685249,"processInstanceKey":2251799813685252,
                     "flowScopeKey":-1,"bpmnEventType":"UNSPECIFIED","parentProcessInstanceKey":-1,
