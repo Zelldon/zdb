@@ -28,6 +28,8 @@ import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 import kotlin.streams.asStream
 
+private const val PROTOCOL_VERSION_83 = 4
+
 class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -128,7 +130,7 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
             json.decodeFromString<ProcessInstanceRelatedValue>(valueJson)
 
         val parsedRecord: Record;
-        if (metadata.protocolVersion >= 4) {
+        if (metadata.protocolVersion >= PROTOCOL_VERSION_83) {
             parsedRecord = Record(
                 loggedEvent.position,
                 loggedEvent.sourceEventPosition,
