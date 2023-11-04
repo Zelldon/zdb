@@ -40,8 +40,8 @@ data class Record(val position: Long,
                   val requestStreamId: Int = 0,
                   val protocolVersion: Int,
                   val brokerVersion: String,
-                  val recordVersion: Int,
-                  val authData: String,
+                  val recordVersion: Int ? = 0,
+                  val authData: String ? = "",
                   val recordValue: JsonElement,
                   /*Transient marks to ignore the property during serialization */
                   @Transient val piRelatedValue: ProcessInstanceRelatedValue? = null

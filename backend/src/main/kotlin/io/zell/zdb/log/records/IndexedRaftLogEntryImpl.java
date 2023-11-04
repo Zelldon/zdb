@@ -18,7 +18,6 @@
 package io.zell.zdb.log.records;
 
 import io.atomix.raft.protocol.PersistedRaftRecord;
-import io.atomix.raft.protocol.ReplicatableJournalRecord;
 import io.atomix.raft.storage.log.entry.ApplicationEntry;
 import io.atomix.raft.storage.log.entry.RaftEntry;
 import io.zell.zdb.journal.ReadOnlyJournalRecord;
@@ -49,12 +48,6 @@ public record IndexedRaftLogEntryImpl(long index, long term, RaftEntry entry, Re
         byte[] serializedRaftLogEntry = new byte[this.record.data().capacity()];
         this.record.data().getBytes(0, serializedRaftLogEntry);
         return new PersistedRaftRecord(this.term, this.index, this.record.asqn(), this.record.checksum(), serializedRaftLogEntry);
-    }
-
-    public ReplicatableJournalRecord getReplicatableJournalRecord() {
-        byte[] serializedRecord = new byte[this.record.data().capacity()];
-        this.record.data().getBytes(0, serializedRecord);
-        return new ReplicatableJournalRecord(this.term, this.index, this.record.checksum(), serializedRecord);
     }
 
     public long index() {
