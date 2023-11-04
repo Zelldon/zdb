@@ -16,22 +16,37 @@
 package io.zell.zdb.log.records
 
 import io.camunda.zeebe.protocol.record.RecordType
+import io.camunda.zeebe.protocol.record.RejectionType
 import io.camunda.zeebe.protocol.record.ValueType
 import io.camunda.zeebe.protocol.record.intent.Intent
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 
+@Serializable
 data class Record(val position: Long,
                   val sourceRecordPosition: Long,
                   val timestamp: Long,
                   val key: Long,
                   val recordType: RecordType,
                   val valueType: ValueType,
+                  @Serializable(with = IntentSerializer::class)
                   val intent: Intent,
+                  val rejectionType: RejectionType? = RejectionType.NULL_VAL,
+                  val rejectionReason: String? = "",
+                  val requestId: Long? = 0,
+                  val requestStreamId: Int = 0,
+                  val protocolVersion: Int,
                   val brokerVersion: String,
-                  val recordVersion: Int,
-                  val recordValue: RecordValue
-
+                  val recordVersion: Int ? = 0,
+                  val authData: String ? = "",
+                  val recordValue: JsonElement,
+                  /*Transient marks to ignore the property during serialization */
+                  @Transient val piRelatedValue: ProcessInstanceRelatedValue? = null
 ) {
     override fun toString(): String {
-        return """{"key": $key, "position": $position, "sourceRecordPosition": $sourceRecordPosition, "intent": "$intent", "recordType": "$recordType", "valueType": "$valueType", "timestamp": $timestamp, "recordVersion": $recordVersion, "brokerVersion": "$brokerVersion", "value": ${recordValue.valueJson}}"""
+        return Json.encodeToString(this)
     }
 }

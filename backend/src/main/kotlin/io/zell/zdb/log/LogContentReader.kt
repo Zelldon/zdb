@@ -19,11 +19,16 @@ import io.atomix.raft.storage.log.entry.SerializedApplicationEntry
 import io.camunda.zeebe.logstreams.impl.log.LoggedEventImpl
 import io.camunda.zeebe.protocol.impl.encoding.MsgPackConverter
 import io.camunda.zeebe.protocol.impl.record.RecordMetadata
+import io.camunda.zeebe.protocol.record.RecordType
 import io.zell.zdb.log.records.*
+import io.zell.zdb.log.records.old.RecordMetadataBefore83
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import org.agrona.concurrent.UnsafeBuffer
 import java.nio.file.Path
 import kotlin.streams.asStream
+
+private const val PROTOCOL_VERSION_83 = 4
 
 class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
 
@@ -96,27 +101,12 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
             do {
                 val loggedEvent = LoggedEventImpl();
                 val metadata = RecordMetadata();
+                metadata.reset()
 
                 loggedEvent.wrap(readBuffer, offset)
                 loggedEvent.readMetadata(metadata)
 
-                val valueJson = MsgPackConverter.convertToJson(
-                    UnsafeBuffer(loggedEvent.valueBuffer, loggedEvent.valueOffset, loggedEvent.valueLength))
-
-               val parsedRecord = Record(
-                    loggedEvent.position,
-                    loggedEvent.sourceEventPosition,
-                    loggedEvent.timestamp,
-                    loggedEvent.key,
-                    metadata.recordType,
-                    metadata.valueType,
-                    metadata.intent,
-                   metadata.brokerVersion.toString(),
-                   metadata.recordVersion,
-                    RecordValue(valueJson,
-                        json.decodeFromString<ProcessInstanceRelatedValue>(valueJson) )
-                    )
-
+                val parsedRecord: Record = readRecord(loggedEvent, metadata)
                 applicationRecord.entries.add(parsedRecord)
 
                 offset += loggedEvent.getLength();
@@ -125,6 +115,66 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
         } else {
             return RaftRecord(entry.index(), entry.term())
         }
+    }
+
+    private fun readRecord(
+        loggedEvent: LoggedEventImpl,
+        metadata: RecordMetadata
+    ): Record {
+        val valueJson = MsgPackConverter.convertToJson(
+            UnsafeBuffer(loggedEvent.valueBuffer, loggedEvent.valueOffset, loggedEvent.valueLength)
+        )
+        val recordValue: JsonElement =
+            Json.decodeFromString(valueJson)
+        val pInstanceRelatedValue =
+            json.decodeFromString<ProcessInstanceRelatedValue>(valueJson)
+
+        val parsedRecord: Record;
+        if (metadata.protocolVersion >= PROTOCOL_VERSION_83) {
+            parsedRecord = Record(
+                loggedEvent.position,
+                loggedEvent.sourceEventPosition,
+                loggedEvent.timestamp,
+                loggedEvent.key,
+                metadata.recordType,
+                metadata.valueType,
+                metadata.intent,
+                metadata.rejectionType,
+                metadata.rejectionReason,
+                metadata.requestId,
+                metadata.requestStreamId,
+                metadata.protocolVersion,
+                metadata.brokerVersion.toString(),
+                metadata.recordVersion,
+                metadata.authorization.authData.toString(),
+                recordValue,
+                pInstanceRelatedValue
+            )
+        } else {
+            val recordMetadataBefore83 = RecordMetadataBefore83()
+            loggedEvent.readMetadata(recordMetadataBefore83)
+
+            parsedRecord = Record(
+                loggedEvent.position,
+                loggedEvent.sourceEventPosition,
+                loggedEvent.timestamp,
+                loggedEvent.key,
+                recordMetadataBefore83.recordType,
+                recordMetadataBefore83.valueType,
+                recordMetadataBefore83.intent,
+                recordMetadataBefore83.rejectionType,
+                recordMetadataBefore83.rejectionReason,
+                recordMetadataBefore83.requestId,
+                recordMetadataBefore83.requestStreamId,
+                recordMetadataBefore83.protocolVersion,
+                recordMetadataBefore83.brokerVersion.toString(),
+                0,
+                "",
+                recordValue,
+                pInstanceRelatedValue
+            )
+        }
+        return parsedRecord
     }
 
     fun readAll(): LogContent {
@@ -153,11 +203,23 @@ class LogContentReader(logPath: Path) : Iterator<PersistedRecord> {
         applicationRecordFilter = {
             record : ApplicationRecord ->
                 record.entries.asSequence()
-                    .map { it.recordValue.piRelatedValue }
+                    .map { it.piRelatedValue }
+                    .filter { it != null }
+                    .map { it!! }
                     .filter { it.processInstanceKey != null }
                     .asStream()
                     .map { it.processInstanceKey }
                     .anyMatch(instanceKey::equals)
         }
     }
+
+    fun filterForRejections() {
+        applicationRecordFilter = {
+                record : ApplicationRecord ->
+            record.entries.asSequence()
+                .map { it.recordType }
+                .any { it == RecordType.COMMAND_REJECTION }
+        }
+    }
+
 }

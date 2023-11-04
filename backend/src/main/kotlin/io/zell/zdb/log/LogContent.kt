@@ -56,17 +56,19 @@ class LogContent {
             .append("\\n").append(entry.intent.name())
 
         if (entry.valueType == ValueType.PROCESS_INSTANCE) {
-            val piRelatedValue = entry.recordValue.piRelatedValue
-            piRelatedValue.bpmnElementType?.let {
-                content.append("\\n").append(it)
-            }
+            val piRelatedValue = entry.piRelatedValue
+            piRelatedValue?.let {
+                piRelatedValue.bpmnElementType?.let {
+                    content.append("\\n").append(it)
+                }
 
-            piRelatedValue.processInstanceKey?.let {
-                content.append("\\nPI Key: ").append(it)
-            }
+                piRelatedValue.processInstanceKey?.let {
+                    content.append("\\nPI Key: ").append(it)
+                }
 
-            piRelatedValue.processDefinitionKey?.let {
-                content.append("\\nPD Key: ").append(it)
+                piRelatedValue.processDefinitionKey?.let {
+                    content.append("\\nPD Key: ").append(it)
+                }
             }
         }
 

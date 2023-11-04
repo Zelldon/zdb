@@ -22,6 +22,8 @@ import io.camunda.zeebe.db.impl.ZeebeDbConstants;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
+import io.camunda.zeebe.protocol.record.RejectionType;
+import io.camunda.zeebe.protocol.record.ValueType;
 import io.camunda.zeebe.protocol.record.intent.ProcessInstanceIntent;
 import io.camunda.zeebe.protocol.record.value.BpmnElementType;
 import io.camunda.zeebe.protocol.record.value.ErrorType;
@@ -42,7 +44,6 @@ import io.zell.zdb.state.ZeebeDbReader;
 import io.zell.zdb.state.incident.IncidentState;
 import io.zell.zdb.state.instance.InstanceState;
 import io.zell.zdb.state.process.ProcessState;
-import io.zell.zdb.v82.Version82Test;
 import org.agrona.concurrent.UnsafeBuffer;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterAll;
@@ -61,11 +62,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.StreamSupport;
 
+import static io.zell.zdb.TestUtils.TIMESTAMP_REGEX;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -132,9 +132,9 @@ public class Version83Test {
             final var status = logStatus.status();
 
             // then
-            assertThat(status.getHighestIndex()).isEqualTo(211);
+            assertThat(status.getHighestIndex()).isEqualTo(213);
             assertThat(status.getHighestTerm()).isEqualTo(1);
-            assertThat(status.getHighestRecordPosition()).isEqualTo(258);
+            assertThat(status.getHighestRecordPosition()).isEqualTo(260);
             assertThat(status.getLowestIndex()).isEqualTo(1);
             assertThat(status.getLowestRecordPosition()).isEqualTo(1);
 
@@ -146,7 +146,6 @@ public class Version83Test {
                     .contains("lowestIndex");
         }
     }
-
     @Nested
     public class ZeebeLogTest {
 
@@ -188,9 +187,9 @@ public class Version83Test {
             final var status = logStatus.status();
 
             // then
-            assertThat(status.getHighestIndex()).isEqualTo(13);
+            assertThat(status.getHighestIndex()).isEqualTo(15);
             assertThat(status.getHighestTerm()).isEqualTo(1);
-            assertThat(status.getHighestRecordPosition()).isEqualTo(60);
+            assertThat(status.getHighestRecordPosition()).isEqualTo(62);
             assertThat(status.getLowestIndex()).isEqualTo(1);
             assertThat(status.getLowestRecordPosition()).isEqualTo(1);
 
@@ -245,6 +244,103 @@ public class Version83Test {
         }
 
         @Test
+        public void shouldReadRejection() {
+            // given
+            final var logPath = ZeebePaths.Companion.getLogPath(TEMP_DIR, "1");
+            var logContentReader = new LogContentReader(logPath);
+
+            // when
+            logContentReader.filterForRejections();
+
+            // then
+            final var rejection = StreamSupport.stream(Spliterators.spliteratorUnknownSize(logContentReader, Spliterator.ORDERED), false)
+                    .filter(persistedRecord -> persistedRecord instanceof ApplicationRecord)
+                    .map(persistedRecord -> (ApplicationRecord) persistedRecord)
+                    .flatMap(applicationRecord -> applicationRecord.getEntries().stream())
+                    .filter(record -> record.component8() != RejectionType.NULL_VAL)
+                    .findFirst();
+
+            assertThat(rejection).isPresent();
+            assertThat(rejection.get().component8()).isEqualTo(RejectionType.NOT_FOUND);
+            assertThat(rejection.get().component9()).isEqualTo("Expected to find process definition with process ID 'nonExisting', but none found");
+        }
+
+        @Test
+        public void shouldSerializeRejectionToJson() throws JsonProcessingException {
+            // given
+            final var expectedJson = OBJECT_MAPPER.readTree("""
+                    {"position":62,"sourceRecordPosition":61,"key":-1,"recordType":"COMMAND_REJECTION",
+                    "valueType":"PROCESS_INSTANCE_CREATION","intent":"CREATE","rejectionType":"NOT_FOUND",
+                    "rejectionReason":"Expected to find process definition with process ID 'nonExisting', but none found",
+                    "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.3.0",
+                    "recordVersion":1,
+                    "recordValue":{"bpmnProcessId":"nonExisting","processDefinitionKey":0,"processInstanceKey":-1,
+                    "version":-1,"variables":"gA==","fetchVariables":[],
+                    "startInstructions":[],"tenantId":"<default>"}}
+                    }
+""");
+            final var logPath = ZeebePaths.Companion.getLogPath(TEMP_DIR, "1");
+            var logContentReader = new LogContentReader(logPath);
+
+            // when
+            logContentReader.filterForRejections();
+
+            // then
+            final var rejection = StreamSupport.stream(Spliterators.spliteratorUnknownSize(logContentReader, Spliterator.ORDERED), false)
+                    .filter(persistedRecord -> persistedRecord instanceof ApplicationRecord)
+                    .map(persistedRecord -> (ApplicationRecord) persistedRecord)
+                    .flatMap(applicationRecord -> applicationRecord.getEntries().stream())
+                    .filter(record -> !record.component8().equals(RejectionType.NULL_VAL.name()))
+                    .findFirst();
+
+            assertThat(rejection).isPresent();
+            assertThat(rejection.get().component8()).isEqualTo(RejectionType.NOT_FOUND);
+            assertThat(rejection.get().component9()).isEqualTo("Expected to find process definition with process ID 'nonExisting', but none found");
+
+            final var recordJson = rejection.get().toString()
+                    .replaceFirst(TIMESTAMP_REGEX, "");
+            final var actualJson = OBJECT_MAPPER.readTree(recordJson);
+            assertThat(actualJson).isNotNull(); // is valid json
+            assertThat(actualJson).isEqualTo(expectedJson);
+        }
+
+        @Test
+        public void shouldSerializeRecordToJson() throws JsonProcessingException {
+            // given
+            final var expectedJson = OBJECT_MAPPER.readTree("""
+                    {"position":12,"sourceRecordPosition":5,"key":2251799813685252,"recordType":"EVENT",
+                    "valueType":"PROCESS_INSTANCE","intent":"ELEMENT_ACTIVATED","requestId":-1,
+                    "requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.3.0","recordVersion":1,
+                    "recordValue":{"bpmnElementType":"PROCESS","elementId":"process","bpmnProcessId":"process",
+                    "version":1,"processDefinitionKey":2251799813685249,"processInstanceKey":2251799813685252,
+                    "flowScopeKey":-1,"bpmnEventType":"UNSPECIFIED","parentProcessInstanceKey":-1,
+                    "parentElementInstanceKey":-1,"tenantId":"<default>"}}
+""");
+            final var logPath = ZeebePaths.Companion.getLogPath(TEMP_DIR, "1");
+            var logContentReader = new LogContentReader(logPath);
+            logContentReader.filterForProcessInstance(zeebeContentCreator.processInstanceEvent.getProcessInstanceKey());
+
+            // when
+            final var piActivated = StreamSupport.stream(Spliterators.spliteratorUnknownSize(logContentReader, Spliterator.ORDERED), false)
+                    .filter(persistedRecord -> persistedRecord instanceof ApplicationRecord)
+                    .map(persistedRecord -> (ApplicationRecord) persistedRecord)
+                    .flatMap(applicationRecord -> applicationRecord.getEntries().stream())
+                    .filter(record -> record.component6() == ValueType.PROCESS_INSTANCE)
+                    .filter(record -> record.component7() == ProcessInstanceIntent.ELEMENT_ACTIVATED)
+                    .filter(record -> record.getPiRelatedValue() != null)
+                    .filter(record -> record.getPiRelatedValue().getBpmnElementType() == BpmnElementType.PROCESS)
+                    .findFirst();
+
+            // then
+            assertThat(piActivated).isPresent();
+            final var recordJson = piActivated.get().toString()
+                    .replaceFirst(TIMESTAMP_REGEX, "");
+            final var actualJson = OBJECT_MAPPER.readTree(recordJson);
+            assertThat(actualJson).isNotNull(); // is valid json
+            assertThat(actualJson).isEqualTo(expectedJson);
+        }
+
+        @Test
         public void shouldSkipFirstPartOfLog() {
             // given
             final var logPath = ZeebePaths.Companion.getLogPath(TEMP_DIR, "1");
@@ -256,13 +352,13 @@ public class Version83Test {
             logContentReader.forEachRemaining(records::add);
 
             // then
-            assertThat(records).hasSize(9);
+            assertThat(records).hasSize(11);
             // we skip the first raft record
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(0);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(9);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(11);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(13);
+            assertThat(maxIndex).isEqualTo(15);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(5);
 
@@ -272,7 +368,7 @@ public class Version83Test {
                     .map(ApplicationRecord::getHighestPosition)
                     .max(Long::compareTo)
                     .orElseThrow();
-            assertThat(maxPosition).isEqualTo(60);
+            assertThat(maxPosition).isEqualTo(62);
             final var minPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
                     .map(ApplicationRecord.class::cast)
@@ -329,9 +425,9 @@ public class Version83Test {
             assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(1);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(13);
+            assertThat(maxIndex).isEqualTo(15);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
-            assertThat(minIndex).isEqualTo(13);
+            assertThat(minIndex).isEqualTo(15);
 
             final var maxPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
@@ -339,14 +435,14 @@ public class Version83Test {
                     .map(ApplicationRecord::getHighestPosition)
                     .max(Long::compareTo)
                     .orElseThrow();
-            assertThat(maxPosition).isEqualTo(60);
+            assertThat(maxPosition).isEqualTo(62);
             final var minPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
                     .map(ApplicationRecord.class::cast)
                     .map(ApplicationRecord::getLowestPosition)
                     .min(Long::compareTo)
                     .orElseThrow();
-            assertThat(minPosition).isEqualTo(60);
+            assertThat(minPosition).isEqualTo(62);
         }
 
         @Test
@@ -605,12 +701,12 @@ public class Version83Test {
         }
 
         private static void verifyCompleteLog(List<PersistedRecord> records) {
-            assertThat(records).hasSize(13);
+            assertThat(records).hasSize(15);
             assertThat(records.stream().filter(RaftRecord.class::isInstance).count()).isEqualTo(1);
-            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(12);
+            assertThat(records.stream().filter(ApplicationRecord.class::isInstance).count()).isEqualTo(14);
 
             final var maxIndex = records.stream().map(PersistedRecord::index).max(Long::compareTo).get();
-            assertThat(maxIndex).isEqualTo(13);
+            assertThat(maxIndex).isEqualTo(15);
             final var minIndex = records.stream().map(PersistedRecord::index).min(Long::compareTo).get();
             assertThat(minIndex).isEqualTo(1);
 
@@ -620,7 +716,7 @@ public class Version83Test {
                     .map(ApplicationRecord::getHighestPosition)
                     .max(Long::compareTo)
                     .orElseThrow();
-            assertThat(maxPosition).isEqualTo(60);
+            assertThat(maxPosition).isEqualTo(62);
             final var minPosition = records.stream()
                     .filter(ApplicationRecord.class::isInstance)
                     .map(ApplicationRecord.class::cast)
@@ -671,7 +767,7 @@ public class Version83Test {
             final var position = 1;
 
             // when
-            final io.zell.zdb.log.records.Record record = logSearch.searchPosition(position);
+            final Record record = logSearch.searchPosition(position);
 
             // then
             assertThat(record).isNotNull();
@@ -685,7 +781,7 @@ public class Version83Test {
             var logSearch = new LogSearch(logPath);
 
             // when
-            final io.zell.zdb.log.records.Record record = logSearch.searchPosition(-1);
+            final Record record = logSearch.searchPosition(-1);
 
             // then
             assertThat(record).isNull();
@@ -698,7 +794,7 @@ public class Version83Test {
             var logSearch = new LogSearch(logPath);
 
             // when
-            final io.zell.zdb.log.records.Record record = logSearch.searchPosition(Long.MAX_VALUE);
+            final Record record = logSearch.searchPosition(Long.MAX_VALUE);
 
             // then
             assertThat(record).isNull();
@@ -733,7 +829,7 @@ public class Version83Test {
             assertThat(record)
                     .asInstanceOf(InstanceOfAssertFactories.type(ApplicationRecord.class))
                     .extracting(ApplicationRecord::getEntries)
-                    .asInstanceOf(InstanceOfAssertFactories.list(io.zell.zdb.log.records.Record.class))
+                    .asInstanceOf(InstanceOfAssertFactories.list(Record.class))
                     .extracting(Record::getPosition)
                     .doesNotHaveDuplicates();
         }
