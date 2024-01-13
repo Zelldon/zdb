@@ -49,11 +49,11 @@
         <kotlin-stdlib-jdk8.version>1.4.10</kotlin-stdlib-jdk8.version>
         <kotlin-test-junit5.version>1.4.10</kotlin-test-junit5.version>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.compiler.jvmTarget>17</kotlin.compiler.jvmTarget>
+        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
         <kotlin.serialization.version>1.2.1</kotlin.serialization.version>
         <kotlin.version>1.7.10</kotlin.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
         <plugin.version.checkstyle>3.3.1</plugin.version.checkstyle>
         <plugin.version.fmt>2.21.1</plugin.version.fmt>
         <plugin.version.license>4.3</plugin.version.license>
@@ -68,7 +68,7 @@
         <zeebe-test-container.version>3.0.0</zeebe-test-container.version>
         <zeebe-test-util.version>1.0.0</zeebe-test-util.version>
         <zeebe-util.version>1.0.0</zeebe-util.version>
-        <zeebe.version>8.3.4</zeebe.version>
+        <zeebe.version>8.4.0</zeebe.version>
         <sonar.organization>zelldon-github</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <version.jib>3.4.0</version.jib>
@@ -133,7 +133,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <release>17</release>
+                    <release>${maven.compiler.release}</release>
                 </configuration>
             </plugin>
 
