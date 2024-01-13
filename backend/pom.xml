@@ -35,14 +35,14 @@
     <properties>
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.serialization.version>1.6.0</kotlin.serialization.version>
-        <kotlin.version>1.9.20</kotlin.version>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <kotlin.serialization.version>1.6.2</kotlin.serialization.version>
+        <kotlin.version>1.9.22</kotlin.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <zeebe-test-container.version>3.6.0</zeebe-test-container.version>
-        <version.slf4j>2.0.9</version.slf4j>
+        <zeebe-test-container.version>3.6.2</zeebe-test-container.version>
+        <version.slf4j>2.0.11</version.slf4j>
         <version.awaitility>4.2.0</version.awaitility>
         <version.jackson>2.13.0</version.jackson>
         <jackson-databind.version>2.13.0</jackson-databind.version>
@@ -97,7 +97,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.2.5</version>
                 <configuration>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
