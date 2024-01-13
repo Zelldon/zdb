@@ -272,7 +272,7 @@ public class VersionLatestTest {
                     {"position":62,"sourceRecordPosition":61,"key":-1,"recordType":"COMMAND_REJECTION",
                     "valueType":"PROCESS_INSTANCE_CREATION","intent":"CREATE","rejectionType":"NOT_FOUND",
                     "rejectionReason":"Expected to find process definition with process ID 'nonExisting', but none found",
-                    "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.4.0",
+                    "requestId":-1,"requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.5.0",
                     "recordVersion":1,
                     "recordValue":{"bpmnProcessId":"nonExisting","processDefinitionKey":0,"processInstanceKey":-1,
                     "version":-1,"variables":"gA==","fetchVariables":[],
@@ -310,7 +310,7 @@ public class VersionLatestTest {
             final var expectedJson = OBJECT_MAPPER.readTree("""
                     {"position":12,"sourceRecordPosition":5,"key":2251799813685252,"recordType":"EVENT",
                     "valueType":"PROCESS_INSTANCE","intent":"ELEMENT_ACTIVATED","requestId":-1,
-                    "requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.4.0","recordVersion":1,
+                    "requestStreamId":-2147483648,"protocolVersion":4,"brokerVersion":"8.5.0","recordVersion":1,
                     "recordValue":{"bpmnElementType":"PROCESS","elementId":"process","bpmnProcessId":"process",
                     "version":1,"processDefinitionKey":2251799813685249,"processInstanceKey":2251799813685252,
                     "flowScopeKey":-1,"bpmnEventType":"UNSPECIFIED","parentProcessInstanceKey":-1,
