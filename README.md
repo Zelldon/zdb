@@ -45,6 +45,10 @@ If you have copied data from Zeebe to your local machine you could run the follo
 
 ### Kubernetes
 
+> [!Important]
+>
+> This approach doesn't work anymore with 8.3+ and non-root containers. See related issue https://github.com/Zelldon/zdb/issues/332
+
 If have Zeebe installed in Kubernetes and want to investigate the Zeebe data you can run `zdb` as an [ephemeral container](https://kubernetes.io/docs/concepts/workloads/pods/ephemeral-containers/)
 
 ```
