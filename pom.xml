@@ -40,7 +40,7 @@
         <url>https://github.com/zelldon</url>
     </organization>
     <properties>
-        <assertj-core.version>3.25.2</assertj-core.version>
+        <assertj-core.version>3.25.3</assertj-core.version>
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         <junit-jupiter-api.version>5.10.1</junit-jupiter-api.version>
         <junit-jupiter-engine.version>5.10.1</junit-jupiter-engine.version>
