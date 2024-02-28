@@ -71,7 +71,7 @@
         <zeebe.version>8.4.3</zeebe.version>
         <sonar.organization>zelldon-github</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <version.jib>3.4.0</version.jib>
+        <version.jib>3.4.1</version.jib>
     </properties>
 
     <dependencyManagement>
