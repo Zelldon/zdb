@@ -25,7 +25,12 @@ import java.util.Map;
 
 public interface KeyFormatters {
   KeyFormatter HEX_FORMATTER = new KeyFormatter.HexFormatter();
-  Map<ZbColumnFamilies, KeyFormatter> FORMATTERS = Map.of();
+  Map<ZbColumnFamilies, KeyFormatter> FORMATTERS = Map.of(
+          ZbColumnFamilies.DEFAULT, KeyFormatter.DbValueFormatter.of("s"),
+          ZbColumnFamilies.KEY, KeyFormatter.DbValueFormatter.of("s"),
+          ZbColumnFamilies.BANNED_INSTANCE, KeyFormatter.DbValueFormatter.of("l"),
+          ZbColumnFamilies.MESSAGE_SUBSCRIPTION_BY_KEY, KeyFormatter.DbValueFormatter.of("ls")
+  );
 
   KeyFormatter forColumnFamily(ZbColumnFamilies columnFamily);
 

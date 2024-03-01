@@ -70,4 +70,27 @@ final class KeyFormattersTest {
     assertThat(partialFormatter.formatKey(key)).isEqualTo("5:987:hello");
   }
 
+  @Test
+  void shouldUseRegisteredFormatter() {
+    // given
+    final var cf = new DbLong();
+    final var dbString = new DbString();
+    cf.wrapLong(ZbColumnFamilies.DEFAULT.getValue());
+    dbString.wrapString("hello");
+
+    final var keyBuffer = new ExpandableArrayBuffer();
+    final var offset = new MutableInteger(0);
+    cf.write(keyBuffer, offset.getAndAdd(cf.getLength()));
+    dbString.write(keyBuffer, offset.getAndAdd(dbString.getLength()));
+
+    final var key = new byte[offset.get()];
+    keyBuffer.getBytes(0, key, 0, key.length);
+
+    // when
+    final var formatter = KeyFormatters.ofDefault().forColumnFamily(ZbColumnFamilies.DEFAULT);
+
+    // then
+    assertThat(formatter.formatKey(key)).isEqualTo("hello");
+  }
+
 }
