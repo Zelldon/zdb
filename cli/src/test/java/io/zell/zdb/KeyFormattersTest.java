@@ -16,7 +16,7 @@ final class KeyFormattersTest {
     final var key = new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
     // when -- using a column family that is not registered with a specific formatter
-    final var formatter = KeyFormatters.ofDefault().forColumnFamily(ZbColumnFamilies.DEFAULT);
+    final var formatter = KeyFormatters.ofDefault().forColumnFamily(ZbColumnFamilies.MIGRATIONS_STATE);
 
     // then
     assertThat(formatter.formatKey(key)).isEqualTo("01 02 03 04 05 06 07 08 09 0a");
