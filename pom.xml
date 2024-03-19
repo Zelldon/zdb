@@ -52,7 +52,7 @@
         <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
         <kotlin.serialization.version>1.2.1</kotlin.serialization.version>
         <kotlin.version>1.7.10</kotlin.version>
-        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven.compiler.release>21</maven.compiler.release>
         <plugin.version.checkstyle>3.3.1</plugin.version.checkstyle>
         <plugin.version.fmt>2.23</plugin.version.fmt>
