@@ -18,7 +18,6 @@ package io.zell.zdb.state;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
 import io.zell.zdb.JsonPrinter;
 import java.nio.file.Path;
-import java.util.HexFormat;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -53,7 +52,14 @@ public class StateCommand implements Callable<Integer> {
               names = {"-cf", "--columnFamily"},
               paramLabel = "COLUMNFAMILY",
               description = "The column family name to filter for")
-          final String columnFamilyName) {
+          final String columnFamilyName,
+      @Option(
+              names = {"-kf", "--keyFormat"},
+              paramLabel = "KEY_FORMAT",
+              description =
+                  "The format of the key (default, hex, or a format string like 'silbB' for 'string, int, long, byte, byte[])")
+          final String keyFormat) {
+    final var keyFormatters = chooseKeyFormatters(keyFormat);
 
     new JsonPrinter()
         .surround(
@@ -62,13 +68,15 @@ public class StateCommand implements Callable<Integer> {
               // we print incrementally in order to avoid to build up big state in the application
               if (noColumnFamilyGiven(columnFamilyName)) {
                 zeebeDbReader.visitDBWithJsonValues(
-                    ((cf, key, valueJson) ->
-                        printer.accept(
-                            String.format(
-                                ENTRY_FORMAT,
-                                cf,
-                                HexFormat.ofDelimiter(" ").formatHex(key),
-                                valueJson))));
+                    ((cfName, key, valueJson) -> {
+                      final var cf = ZbColumnFamilies.valueOf(cfName);
+                      printer.accept(
+                          String.format(
+                              ENTRY_FORMAT,
+                              cf,
+                              keyFormatters.forColumnFamily(cf).formatKey(key),
+                              valueJson));
+                    }));
               } else {
                 final var cf = ZbColumnFamilies.valueOf(columnFamilyName);
                 zeebeDbReader.visitDBWithPrefix(
@@ -78,11 +86,20 @@ public class StateCommand implements Callable<Integer> {
                             String.format(
                                 ENTRY_FORMAT,
                                 cf,
-                                HexFormat.ofDelimiter(" ").formatHex(key),
+                                keyFormatters.forColumnFamily(cf).formatKey(key),
                                 valueJson))));
               }
             });
     return 0;
+  }
+
+  private KeyFormatters chooseKeyFormatters(String keyFormat) {
+    return switch (keyFormat) {
+      case "default", "" -> KeyFormatters.ofDefault();
+      case null -> KeyFormatters.ofDefault();
+      case "hex" -> KeyFormatters.ofHex();
+      default -> KeyFormatters.ofFormat(keyFormat);
+    };
   }
 
   private static boolean noColumnFamilyGiven(String columnFamilyName) {
