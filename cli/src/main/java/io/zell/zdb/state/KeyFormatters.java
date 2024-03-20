@@ -18,19 +18,18 @@ package io.zell.zdb.state;
 import io.camunda.zeebe.db.DbValue;
 import io.camunda.zeebe.db.impl.*;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
-import org.agrona.concurrent.UnsafeBuffer;
-
 import java.util.HexFormat;
 import java.util.Map;
+import org.agrona.concurrent.UnsafeBuffer;
 
 public interface KeyFormatters {
   KeyFormatter HEX_FORMATTER = new KeyFormatter.HexFormatter();
-  Map<ZbColumnFamilies, KeyFormatter> FORMATTERS = Map.of(
+  Map<ZbColumnFamilies, KeyFormatter> FORMATTERS =
+      Map.of(
           ZbColumnFamilies.DEFAULT, KeyFormatter.DbValueFormatter.of("s"),
           ZbColumnFamilies.KEY, KeyFormatter.DbValueFormatter.of("s"),
           ZbColumnFamilies.BANNED_INSTANCE, KeyFormatter.DbValueFormatter.of("l"),
-          ZbColumnFamilies.MESSAGE_SUBSCRIPTION_BY_KEY, KeyFormatter.DbValueFormatter.of("ls")
-  );
+          ZbColumnFamilies.MESSAGE_SUBSCRIPTION_BY_KEY, KeyFormatter.DbValueFormatter.of("ls"));
 
   KeyFormatter forColumnFamily(ZbColumnFamilies columnFamily);
 
@@ -106,7 +105,8 @@ public interface KeyFormatters {
               final var buf = dbBytes.getDirectBuffer();
               final var bytes = new byte[dbBytes.getLength()];
               buf.getBytes(0, bytes);
-              formatted.append(HEX_FORMATTER.formatKey(bytes)); }
+              formatted.append(HEX_FORMATTER.formatKey(bytes));
+            }
             default -> formatted.append(dbValue);
           }
         }
