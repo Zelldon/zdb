@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.VBox?>
+<VBox spacing="20.0" xmlns:fx="http://javafx.com/fxml">
+    <TabPane>
+        <Tab fx:id="logTab" text="Log">
+            <fx:include source="log-view.fxml"/>
+        </Tab>
+        <Tab fx:id="stateTab" text="State">
+            <fx:include source="state-view.fxml"/>
+        </Tab>
+    </TabPane>
+</VBox>
