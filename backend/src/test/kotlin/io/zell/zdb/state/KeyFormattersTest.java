@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.zell.zdb;
+package io.zell.zdb.state;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.camunda.zeebe.db.impl.*;
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
-import io.zell.zdb.state.KeyFormatters;
 import org.agrona.ExpandableArrayBuffer;
 import org.agrona.collections.MutableInteger;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ final class KeyFormattersTest {
 
     // when -- using a column family that is not registered with a specific formatter
     final var formatter =
-        KeyFormatters.ofDefault().forColumnFamily(ZbColumnFamilies.MIGRATIONS_STATE);
+        KeyFormatters.ofDefault().forColumnFamily(ZbColumnFamilies.DEPRECATED_PROCESS_CACHE);
 
     // then
     assertThat(formatter.formatKey(key)).isEqualTo("01 02 03 04 05 06 07 08 09 0a");
