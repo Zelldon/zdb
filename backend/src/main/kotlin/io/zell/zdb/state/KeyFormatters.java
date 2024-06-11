@@ -16,12 +16,13 @@
 package io.zell.zdb.state;
 
 import io.camunda.zeebe.protocol.ZbColumnFamilies;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 public abstract class KeyFormatters {
   public static final KeyFormatter HEX_FORMATTER = new KeyFormatter.HexFormatter();
-  public static final Map<ZbColumnFamilies, KeyFormatter> FORMATTERS = new HashMap<>();
+  public static final Map<ZbColumnFamilies, KeyFormatter> FORMATTERS =
+      new EnumMap<>(ZbColumnFamilies.class);
 
   static {
     FORMATTERS.put(ZbColumnFamilies.DEFAULT, KeyFormatter.DbValueFormatter.of("s"));
