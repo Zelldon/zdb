@@ -32,6 +32,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.*;
 import javafx.stage.DirectoryChooser;
 
 public class StateViewController implements Initializable {
@@ -52,6 +53,7 @@ public class StateViewController implements Initializable {
     // time to initialize fields
     final var userHome = System.getProperty("user.home");
     this.dataPath.setText(userHome);
+    this.dataPath.setEditable(false);
 
     this.columnFamily.setItems(
         FXCollections.observableList(
@@ -68,6 +70,11 @@ public class StateViewController implements Initializable {
         .setAll(
             StateViewController.<String>createTableColumn("Key", "key"),
             StateViewController.<String>createTableColumn("Value", "value"));
+
+    // enable multi-selection
+    this.zeebeData.getSelectionModel().setCellSelectionEnabled(true);
+    this.zeebeData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    this.zeebeData.setOnKeyPressed(new TableViewKeyEventClipboardCopier<>(this.zeebeData));
   }
 
   private static <T> TableColumn<StateDataKV, T> createTableColumn(

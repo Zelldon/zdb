@@ -26,11 +26,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.*;
 import javafx.stage.DirectoryChooser;
 
 public class LogViewController implements Initializable {
@@ -74,6 +72,11 @@ public class LogViewController implements Initializable {
             LogViewController.<Integer>createTableColumn("Record\nversion", "recordVersion"),
             LogViewController.<String>createTableColumn("Auth\ndata", "authData"),
             LogViewController.<String>createTableColumn("Record\nvalue", "recordValue"));
+
+    // enable multi-selection
+    this.zeebeData.getSelectionModel().setCellSelectionEnabled(true);
+    this.zeebeData.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    this.zeebeData.setOnKeyPressed(new TableViewKeyEventClipboardCopier<>(this.zeebeData));
   }
 
   private static <T> TableColumn<ZeebeRecord, T> createTableColumn(
