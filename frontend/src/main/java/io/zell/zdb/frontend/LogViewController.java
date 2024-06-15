@@ -38,6 +38,10 @@ public class LogViewController implements Initializable {
   @FXML private Button findDataPath;
 
   @FXML private TextField dataPath;
+
+  @FXML private Button findInstanceKey;
+
+  @FXML private TextField instanceKey;
   private final DirectoryChooser directoryChooser = new DirectoryChooser();
   private ObservableList<ZeebeRecord> dataObservableList;
 
@@ -87,41 +91,68 @@ public class LogViewController implements Initializable {
   }
 
   @FXML
+  protected void onFindInstanceKey() {
+    findLog();
+  }
+
+  @FXML
   protected void onFindFile() {
     this.directoryChooser.setTitle("Zeebe data path");
     this.directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
     final File file = this.directoryChooser.showDialog(this.findDataPath.getScene().getWindow());
-
     if (file != null) {
       this.dataPath.setText(file.getAbsolutePath());
+      findLog();
+    }
+  }
 
-      final var logContentReader = new LogContentReader(new File(this.dataPath.getText()).toPath());
-      while (logContentReader.hasNext()) {
-        final PersistedRecord next = logContentReader.next();
+  private void findLog() {
+    if (this.dataPath.getText() == null || this.dataPath.getText().isBlank()) {
+      return;
+    }
+    final var logContentReader = new LogContentReader(new File(this.dataPath.getText()).toPath());
 
-        if (next instanceof final ApplicationRecord applicationRecord) {
-          for (final var r : applicationRecord.getEntries()) {
-            final var zeebeRecord =
-                new ZeebeRecord(
-                    r.getPosition(),
-                    r.getSourceRecordPosition(),
-                    r.getTimestamp(),
-                    r.getKey(),
-                    r.getRecordType().name(),
-                    r.getValueType().name(),
-                    r.getIntent().name(),
-                    r.getRejectionType().name(),
-                    r.getRejectionReason(),
-                    r.getRequestId(),
-                    r.getRequestStreamId(),
-                    r.getProtocolVersion(),
-                    r.getBrokerVersion(),
-                    r.getRecordVersion(),
-                    r.getAuthData(),
-                    r.getRecordValue().toString());
-            this.dataObservableList.add(zeebeRecord);
-          }
+    if (this.instanceKey.getText() != null && !this.instanceKey.getText().isBlank()) {
+      try {
+        final long instanceKeyLong = Long.parseLong(this.instanceKey.getText());
+        logContentReader.filterForProcessInstance(instanceKeyLong);
+      } catch (final NumberFormatException nfe) {
+        System.out.printf(
+            "Expected to retrieve a number as instance key, but '%s' wasn't%n",
+            this.instanceKey.getText());
+      }
+    }
+
+    fillTableWithData(logContentReader);
+  }
+
+  private void fillTableWithData(final LogContentReader logContentReader) {
+    this.dataObservableList.clear();
+    while (logContentReader.hasNext()) {
+      final PersistedRecord next = logContentReader.next();
+
+      if (next instanceof final ApplicationRecord applicationRecord) {
+        for (final var r : applicationRecord.getEntries()) {
+          final var zeebeRecord =
+              new ZeebeRecord(
+                  r.getPosition(),
+                  r.getSourceRecordPosition(),
+                  r.getTimestamp(),
+                  r.getKey(),
+                  r.getRecordType().name(),
+                  r.getValueType().name(),
+                  r.getIntent().name(),
+                  r.getRejectionType().name(),
+                  r.getRejectionReason(),
+                  r.getRequestId(),
+                  r.getRequestStreamId(),
+                  r.getProtocolVersion(),
+                  r.getBrokerVersion(),
+                  r.getRecordVersion(),
+                  r.getAuthData(),
+                  r.getRecordValue().toString());
+          this.dataObservableList.add(zeebeRecord);
         }
       }
     }

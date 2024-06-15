@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="io.zell.zdb.frontend.LogViewController">
     <padding>
@@ -17,5 +16,10 @@
         <Button fx:id="findDataPath" text="Find Data path" onAction="#onFindFile"/>
     </HBox>
 
+    <HBox>
+        <Text text="Instance key: "/>
+        <TextField fx:id="instanceKey"/>
+        <Button fx:id="findInstanceKey" text="Find" onAction="#onFindInstanceKey"/>
+    </HBox>
     <TableView fx:id="zeebeData"/>
 </VBox>
