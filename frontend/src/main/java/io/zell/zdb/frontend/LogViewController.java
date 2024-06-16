@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -39,9 +40,9 @@ public class LogViewController implements Initializable {
 
   @FXML private TextField dataPath;
 
-  @FXML private Button findInstanceKey;
-
   @FXML private TextField instanceKey;
+  @FXML private TextField fromPosition;
+  @FXML private TextField toPosition;
   private final DirectoryChooser directoryChooser = new DirectoryChooser();
   private ObservableList<ZeebeRecord> dataObservableList;
 
@@ -91,11 +92,6 @@ public class LogViewController implements Initializable {
   }
 
   @FXML
-  protected void onFindInstanceKey() {
-    findLog();
-  }
-
-  @FXML
   protected void onFindFile() {
     this.directoryChooser.setTitle("Zeebe data path");
     this.directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
@@ -107,24 +103,31 @@ public class LogViewController implements Initializable {
     }
   }
 
+  @FXML
   private void findLog() {
     if (this.dataPath.getText() == null || this.dataPath.getText().isBlank()) {
       return;
     }
     final var logContentReader = new LogContentReader(new File(this.dataPath.getText()).toPath());
 
-    if (this.instanceKey.getText() != null && !this.instanceKey.getText().isBlank()) {
+    consumeValueFromTextField(this.instanceKey, logContentReader::filterForProcessInstance);
+    consumeValueFromTextField(this.fromPosition, logContentReader::seekToPosition);
+    consumeValueFromTextField(this.toPosition, logContentReader::limitToPosition);
+
+    fillTableWithData(logContentReader);
+  }
+
+  private void consumeValueFromTextField(final TextField textField, final Consumer<Long> consumer) {
+    if (textField.getText() != null && !textField.getText().isBlank()) {
       try {
-        final long instanceKeyLong = Long.parseLong(this.instanceKey.getText());
-        logContentReader.filterForProcessInstance(instanceKeyLong);
+        final long instanceKeyLong = Long.parseLong(textField.getText());
+        consumer.accept(instanceKeyLong);
       } catch (final NumberFormatException nfe) {
         System.out.printf(
             "Expected to retrieve a number as instance key, but '%s' wasn't%n",
-            this.instanceKey.getText());
+            textField.getText());
       }
     }
-
-    fillTableWithData(logContentReader);
   }
 
   private void fillTableWithData(final LogContentReader logContentReader) {

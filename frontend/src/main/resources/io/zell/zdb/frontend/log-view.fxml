@@ -16,10 +16,13 @@
         <Button fx:id="findDataPath" text="Find Data path" onAction="#onFindFile"/>
     </HBox>
 
-    <HBox>
+    <HBox alignment="CENTER" spacing="20.0">
         <Text text="Instance key: "/>
-        <TextField fx:id="instanceKey"/>
-        <Button fx:id="findInstanceKey" text="Find" onAction="#onFindInstanceKey"/>
+        <TextField fx:id="instanceKey" onAction="#findLog"/>
+        <Text text="From: "/>
+        <TextField fx:id="fromPosition" onKeyPressed="#findLog"/>
+        <Text text="To: "/>
+        <TextField fx:id="toPosition" onKeyPressed="#findLog"/>
     </HBox>
     <TableView fx:id="zeebeData"/>
 </VBox>
