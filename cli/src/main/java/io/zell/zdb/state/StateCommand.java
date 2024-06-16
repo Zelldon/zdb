@@ -78,7 +78,7 @@ public class StateCommand implements Callable<Integer> {
                               valueJson));
                     }));
               } else {
-                final var cf = ZbColumnFamilies.valueOf(columnFamilyName);
+                final var cf = ZbColumnFamilies.valueOf(columnFamilyName.toUpperCase());
                 zeebeDbReader.visitDBWithPrefix(
                     cf,
                     ((key, valueJson) ->
