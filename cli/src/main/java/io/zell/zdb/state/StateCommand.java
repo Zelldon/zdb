@@ -41,7 +41,7 @@ public class StateCommand implements Callable<Integer> {
 
   @Override
   public Integer call() {
-    final var jsonString = new ZeebeDbReader(partitionPath).stateStatisticsAsJsonString();
+    final var jsonString = new ZeebeDbReader(this.partitionPath).stateStatisticsAsJsonString();
     System.out.println(jsonString);
     return 0;
   }
@@ -64,7 +64,7 @@ public class StateCommand implements Callable<Integer> {
     new JsonPrinter()
         .surround(
             (printer) -> {
-              final var zeebeDbReader = new ZeebeDbReader(partitionPath);
+              final var zeebeDbReader = new ZeebeDbReader(this.partitionPath);
               // we print incrementally in order to avoid to build up big state in the application
               if (noColumnFamilyGiven(columnFamilyName)) {
                 zeebeDbReader.visitDBWithJsonValues(
@@ -78,7 +78,7 @@ public class StateCommand implements Callable<Integer> {
                               valueJson));
                     }));
               } else {
-                final var cf = ZbColumnFamilies.valueOf(columnFamilyName);
+                final var cf = ZbColumnFamilies.valueOf(columnFamilyName.toUpperCase());
                 zeebeDbReader.visitDBWithPrefix(
                     cf,
                     ((key, valueJson) ->
@@ -93,7 +93,7 @@ public class StateCommand implements Callable<Integer> {
     return 0;
   }
 
-  private KeyFormatters chooseKeyFormatters(String keyFormat) {
+  private KeyFormatters chooseKeyFormatters(final String keyFormat) {
     return switch (keyFormat) {
       case "default", "" -> KeyFormatters.ofDefault();
       case null -> KeyFormatters.ofDefault();
@@ -102,7 +102,7 @@ public class StateCommand implements Callable<Integer> {
     };
   }
 
-  private static boolean noColumnFamilyGiven(String columnFamilyName) {
+  private static boolean noColumnFamilyGiven(final String columnFamilyName) {
     return columnFamilyName == null || columnFamilyName.isEmpty();
   }
 }
