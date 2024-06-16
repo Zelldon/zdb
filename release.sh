@@ -49,6 +49,7 @@ mvn versions:set "-DnewVersion=$nextVersion-SNAPSHOT" -DgenerateBackupPoms=false
 git commit -am "build: prepare for next version"
 
 cp cli/target/cli-*-jar-with-dependencies.jar zdb.jar
+cp frontend/target/frontend-*-jar-with-dependencies.jar zdb-frontend.jar
 
 git push origin main
 git push origin "$version"
