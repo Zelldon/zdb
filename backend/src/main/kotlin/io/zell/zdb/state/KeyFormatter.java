@@ -65,25 +65,29 @@ public interface KeyFormatter {
       final var formatted = new StringBuilder();
       final var keyBuffer = new UnsafeBuffer(key);
       int offset = 8;
-      for (final var dbValue : this.values) {
-        dbValue.wrap(keyBuffer, offset, key.length - offset);
-        offset += dbValue.getLength();
-        if (!formatted.isEmpty()) {
-          formatted.append(":");
-        }
-        switch (dbValue) {
-          case final DbString dbString -> formatted.append(dbString);
-          case final DbLong dbLong -> formatted.append(dbLong.getValue());
-          case final DbInt dbInt -> formatted.append(dbInt.getValue());
-          case final DbByte dbByte -> formatted.append(dbByte.getValue());
-          case final DbBytes dbBytes -> {
-            final var buf = dbBytes.getDirectBuffer();
-            final var bytes = new byte[dbBytes.getLength()];
-            buf.getBytes(0, bytes);
-            formatted.append(KeyFormatters.HEX_FORMATTER.formatKey(bytes));
+      try {
+        for (final var dbValue : this.values) {
+          dbValue.wrap(keyBuffer, offset, key.length - offset);
+          offset += dbValue.getLength();
+          if (!formatted.isEmpty()) {
+            formatted.append(":");
           }
-          default -> formatted.append(dbValue);
+          switch (dbValue) {
+            case final DbString dbString -> formatted.append(dbString);
+            case final DbLong dbLong -> formatted.append(dbLong.getValue());
+            case final DbInt dbInt -> formatted.append(dbInt.getValue());
+            case final DbByte dbByte -> formatted.append(dbByte.getValue());
+            case final DbBytes dbBytes -> {
+              final var buf = dbBytes.getDirectBuffer();
+              final var bytes = new byte[dbBytes.getLength()];
+              buf.getBytes(0, bytes);
+              formatted.append(KeyFormatters.HEX_FORMATTER.formatKey(bytes));
+            }
+            default -> formatted.append(dbValue);
+          }
         }
+      } catch (final IndexOutOfBoundsException indexOutOfBoundsException) {
+        return KeyFormatters.HEX_FORMATTER.formatKey(key);
       }
       return formatted.toString();
     }
