@@ -1,2 +1,3 @@
 backend/src/test/resources/zeebe-states/*.zip binary linguist-generated=true
 backend/src/test/resources/golden/**/log-print.json linguist-generated=true
+backend/src/test/resources/golden/**/log-print.table -whitespace linguist-generated=true
