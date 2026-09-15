@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - 'backend/src/test/**/SnapshotGenerator*.java'
+      - 'backend/src/test/**/SnapshotGeneratorV*Test.java'
 
 jobs:
   regenerate:
@@ -29,11 +29,11 @@ jobs:
         id: detect
         run: |
           GENERATORS=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
-            -- 'backend/src/test/**/SnapshotGenerator*.java' \
+            -- 'backend/src/test/**/SnapshotGeneratorV*Test.java' \
             | xargs -r -I{} basename {} .java \
             | paste -sd ',')
           GOLDENS=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
-            -- 'backend/src/test/**/SnapshotGenerator*.java' \
+            -- 'backend/src/test/**/SnapshotGeneratorV*Test.java' \
             | xargs -r -I{} basename {} .java \
             | sed 's/SnapshotGenerator/Version/' \
             | sed 's/Test$/GoldenTest/' \
@@ -46,6 +46,7 @@ jobs:
       - name: Run snapshot generator
         run: |
           mvn -B test -pl backend \
+            -Dsurefire.excludedGroups= \
             -Dgroups=snapshot-generator \
             -DskipTests=false \
             -Dtest=${{ steps.detect.outputs.generators }} \

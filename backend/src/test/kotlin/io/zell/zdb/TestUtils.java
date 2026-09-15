@@ -104,9 +104,11 @@ public final class TestUtils {
         new ZeebeContainer(dockerImageName)
             /* run the container with the current user, in order to access the data and delete it later */
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
-            // with 8.2 we disabled WAL per default
-            // we have to enabled it inorder to access the data from RocksDB
+            // Enable WAL so RocksDB data remains accessible after the container stops.
             .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
+            // Use loopback as the advertised host so Zeebe's internal cluster messaging can always
+            // resolve itself, regardless of how Testcontainers sets the container hostname.
+            .withEnv("ZEEBE_BROKER_NETWORK_ADVERTISEDHOST", "127.0.0.1")
             .withLogConsumer(new Slf4jLogConsumer(logger))
             .withFileSystemBind(tempDir, CONTAINER_PATH, BindMode.READ_WRITE);
 
@@ -118,6 +120,45 @@ public final class TestUtils {
             ZeebePort.MONITORING.getPort()));
 
     return container;
+  }
+
+  /**
+   * Creates a ZeebeContainer with the given docker image name. The container will mount the given
+   * tempDir to /usr/local/zeebe/data in order to access the RocksDB data.
+   *
+   * <p>The container will be started with the current user (see {@link #getRunAsUser()}) in order
+   * to access the data and delete it later.
+   *
+   * <p>This method is for Zeebe versions 8.5 through 8.7 (inclusive). Unlike
+   * {@link #createZeebeContainerBefore85}, it does not override exposed ports, as newer versions of
+   * the zeebe-testcontainers library already handle port exposure correctly.
+   *
+   * @param dockerImageName the docker image name of the Zeebe version to use
+   * @param tempDir the temporary directory to mount to /usr/local/zeebe/data
+   * @param logger the logger to use for the container logs
+   * @return the ZeebeContainer
+   */
+  public static ZeebeContainer createZeebeContainerBetween85And87(
+      final DockerImageName dockerImageName, final String tempDir, final Logger logger) {
+    return new ZeebeContainer(dockerImageName)
+        /* run the container with the current user, in order to access the data and delete it later */
+        .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
+        // Enable WAL so RocksDB data remains accessible after the container stops.
+        .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
+        // Use loopback as the advertised host so Zeebe's internal cluster messaging can always
+        // resolve itself, regardless of how Testcontainers sets the container hostname.
+        .withEnv("ZEEBE_BROKER_NETWORK_ADVERTISEDHOST", "127.0.0.1")
+        .withLogConsumer(new Slf4jLogConsumer(logger))
+        .withFileSystemBind(tempDir, CONTAINER_PATH, BindMode.READ_WRITE);
+  }
+
+  /**
+   * @deprecated Use {@link #createZeebeContainerBetween85And87(DockerImageName, String, Logger)}.
+   */
+  @Deprecated
+  public static ZeebeContainer createZeebeContainerBetween85And88(
+      final DockerImageName dockerImageName, final String tempDir, final Logger logger) {
+    return createZeebeContainerBetween85And87(dockerImageName, tempDir, logger);
   }
 
   /**
@@ -144,9 +185,11 @@ public final class TestUtils {
         new ZeebeContainer(dockerImageName)
             /* run the container with the current user, in order to access the data and delete it later */
             .withCreateContainerCmdModifier(cmd -> cmd.withUser(TestUtils.getRunAsUser()))
-            // with 8.2 we disabled WAL per default
-            // we have to enabled it inorder to access the data from RocksDB
+            // Enable WAL so RocksDB data remains accessible after the container stops.
             .withEnv("ZEEBE_BROKER_EXPERIMENTAL_ROCKSDB_DISABLEWAL", "false")
+            // Use loopback as the advertised host so Zeebe's internal cluster messaging can always
+            // resolve itself, regardless of how Testcontainers sets the container hostname.
+            .withEnv("ZEEBE_BROKER_NETWORK_ADVERTISEDHOST", "127.0.0.1")
             // with 8.8 we have the OC with all component together
             // to run Zeebe only we need to disable the secondary storage
             // and set the active profiles to broker only
