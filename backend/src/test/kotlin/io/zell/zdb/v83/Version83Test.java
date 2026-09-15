@@ -72,7 +72,7 @@ class Version83Test {
   static final Path SNAPSHOT_ZIP = Path.of("src/test/resources/zeebe-states/v8.3.zip");
   static final String PARTITION = "1";
   static final int MAX_POSITION = 62;
-   static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   static SnapshotFixture fixture;
   static Path snapshotDir;
